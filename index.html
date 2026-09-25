@@ -344,15 +344,6 @@
 
         window.addEventListener('load', () => { 
             fetchData(); 
-            setTimeout(() => { 
-                let splash = document.getElementById('splashScreen'); 
-                splash.style.opacity = '0'; 
-                setTimeout(() => { 
-                    splash.style.display = 'none'; 
-                    document.getElementById('loginOverlay').style.display = 'flex'; 
-                    if(document.getElementById('loginPass')) document.getElementById('loginPass').focus();
-                }, 800); 
-            }, 2000); 
             let today = new Date().toISOString().split('T')[0];
             document.getElementById('repStart').value = today; document.getElementById('repEnd').value = today;
         });
@@ -391,6 +382,18 @@
 
                 setStatus('🟢 متصل ومُحدث'); 
                 setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect); 
+                
+                // Hide splash and show login
+                let splash = document.getElementById('splashScreen');
+                if (splash.style.display !== 'none') {
+                    splash.style.opacity = '0';
+                    setTimeout(() => {
+                        splash.style.display = 'none';
+                        document.getElementById('loginOverlay').style.display = 'flex';
+                        document.getElementById('loginPass').focus();
+                    }, 500);
+                }
+
                 if(document.getElementById('stockTab').classList.contains('active')) renderStock(); if(document.getElementById('usersTab').classList.contains('active')) renderUsers(); 
             } else { showToast('خطأ في جلب البيانات', 'error'); } 
         }
@@ -405,12 +408,13 @@
                 let val = inp.value.trim().toLowerCase(); wrapper.innerHTML = ""; if(!val) { wrapper.style.display = "none"; return; }
                 let count = 0; let hasItems = false;
                 for (let i = 0; i < dataArr.length; i++) {
-                    let nEn = dataArr[i].name_en ? dataArr[i].name_en.toLowerCase() : ""; let nAr = dataArr[i].name_ar ? dataArr[i].name_ar.toLowerCase() : ""; let pBarcode = dataArr[i].barcode ? dataArr[i].barcode.toString() : "";
+                    let p = dataArr[i];
+                    let nEn = (p.name_en || p.n || "").toLowerCase(); let nAr = (p.name_ar || "").toLowerCase(); let pBarcode = (p.barcode || "").toString();
                     if (nEn.includes(val) || nAr.includes(val) || pBarcode === val) {
                         count++; hasItems = true; let b = document.createElement("DIV");
-                        b.innerHTML = '<strong>' + (dataArr[i].name_en || '') + '</strong> <br> <small style="color:#0984e3;">' + (dataArr[i].name_ar || '') + '</small> <small style="color:#7f8c8d; display:block;">(' + (dataArr[i].barcode || '') + ')</small>';
-                        b.addEventListener("click", function() { inp.value = dataArr[i].name_en || dataArr[i].name_ar; wrapper.style.display = "none"; if(callback) callback(dataArr[i]); });
-                        wrapper.appendChild(b); if(count > 15) break; 
+                        b.innerHTML = '<strong>' + (p.name_en || p.n || '') + '</strong> <br> <small style="color:#0984e3;">' + (p.name_ar || '') + '</small> <small style="color:#7f8c8d; display:block;">(' + pBarcode + ')</small>';
+                        b.addEventListener("click", function() { inp.value = p.name_en || p.name_ar || p.n; wrapper.style.display = "none"; if(callback) callback(p); });
+                        wrapper.appendChild(b); if(count >= 15) break; 
                     }
                 }
                 wrapper.style.display = hasItems ? "block" : "none";
@@ -440,8 +444,8 @@
 
         function onPosProductSelect(p) {
             selP = p; document.getElementById('posSearch').value = ''; document.getElementById('posAddBox').style.display='block';
-            document.getElementById('posPNameEn').innerText = selP.name_en || ''; document.getElementById('posPNameAr').innerText = selP.name_ar || '';
-            document.getElementById('posPStock').innerText = "المتاح: " + formatStockDisplay(selP.q, selP.spb, selP.hasStrips);
+            document.getElementById('posPNameEn').innerText = selP.name_en || selP.n || ''; document.getElementById('posPNameAr').innerText = selP.name_ar || '';
+            document.getElementById('posPStock').innerText = "المتاح: " + formatStockDisplay(selP.q || 0, selP.spb || 1, selP.hasStrips);
             document.getElementById('optStrip').style.display = selP.hasStrips ? 'block' : 'none'; document.getElementById('posUnit').value='box'; document.getElementById('posQty').value=1; calcTotal();
         }
 
@@ -449,9 +453,9 @@
         
         function addPosItem() {
             if(!selP) return; let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale'; let isBox = document.getElementById('posUnit').value === 'box'; let qty = parseInt(document.getElementById('posQty').value); let strips = isBox ? (qty*(selP.spb||1)) : qty;
-            if(isSale && strips > selP.q) return showToast('الكمية المطلوبة غير متوفرة بالمخزن!', 'error');
+            if(isSale && strips > (selP.q||0)) return showToast('الكمية المطلوبة غير متوفرة بالمخزن!', 'error');
             let price = isBox ? selP.spBox : selP.spStrip; let cost = isBox ? selP.pBox : selP.pStrip;
-            posItems.push({ id: selP.id, n: (selP.name_en || selP.name_ar), unit: isBox?'علبة':'شريط', qty: qty, strQty: strips, price: price, total: price * qty, costTotal: cost * qty });
+            posItems.push({ id: selP.id, n: (selP.name_en || selP.n || selP.name_ar), unit: isBox?'علبة':'شريط', qty: qty, strQty: strips, price: price, total: price * qty, costTotal: cost * qty });
             document.getElementById('posAddBox').style.display='none'; selP=null; showToast(isSale ? 'تمت الإضافة' : 'تم إضافة المرتجع'); renderPos();
         }
 
@@ -537,11 +541,11 @@
         }
 
         function onAddProductSelect(p) {
-            document.getElementById('nId').value = p.id; document.getElementById('nNameEn').value = p.name_en || ''; document.getElementById('nNameAr').value = p.name_ar || '';
+            document.getElementById('nId').value = p.id; document.getElementById('nNameEn').value = p.name_en || p.n || ''; document.getElementById('nNameAr').value = p.name_ar || '';
             document.getElementById('nBarcode').value = p.barcode || ''; document.getElementById('nCat').value = p.category || ''; document.getElementById('nExpiry').value = p.expiry || '';
             let hs = p.hasStrips === true || p.hasStrips === 'true'; document.getElementById('nHasStrips').checked = hs; document.getElementById('stripArea').style.display = hs ? 'flex' : 'none';
             document.getElementById('nSpb').value = p.spb || 1; document.getElementById('nCostStrip').value = p.pStrip || 0; document.getElementById('nSpStrip').value = p.spStrip || 0; document.getElementById('nCostBox').value = p.pBox || 0; document.getElementById('nSpBox').value = p.spBox || 0;
-            document.getElementById('lblQty').innerHTML = 'إضافة كمية <span style="color:#e74c3c;">(المتاح حالياً: ' + formatStockDisplay(p.q, p.spb, hs) + ')</span>'; document.getElementById('nQty').value = 0; showToast('تم جلب بيانات الدواء للتعديل', 'warn');
+            document.getElementById('lblQty').innerHTML = 'إضافة كمية <span style="color:#e74c3c;">(المتاح حالياً: ' + formatStockDisplay(p.q||0, p.spb||1, hs) + ')</span>'; document.getElementById('nQty').value = 0; showToast('تم جلب بيانات الدواء للتعديل', 'warn');
         }
 
         function saveProduct() {
@@ -572,17 +576,20 @@
 
         function renderStock(q="") {
             let tbody = document.getElementById('stockTable'); let html = '';
-            products.filter(p=>{ let matchEn = p.name_en ? p.name_en.toLowerCase().includes(q.toLowerCase()) : false; let matchAr = p.name_ar ? p.name_ar.toLowerCase().includes(q.toLowerCase()) : false; let matchBar = p.barcode ? p.barcode.toString().includes(q) : false; return matchEn || matchAr || matchBar; }).forEach((p, idx)=>{
-                html += '<tr><td>' + (idx+1) + '</td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || '') + ' <br> <small style="color:#0984e3">' + (p.name_ar || '') + '</small></td><td style="direction:ltr;">' + (p.barcode||'-') + '</td><td style="color:#0984e3; font-weight:bold;">' + formatStockDisplay(p.q, p.spb, p.hasStrips) + '</td><td>' + p.spBox + ' ج.م' + (p.hasStrips?' / '+p.spStrip+' ج.م':'') + '</td><td><button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock(\'' + p.id + '\')">✏️</button><button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="printBarcode(\'' + p.barcode + '\', \'' + (p.name_en||p.name_ar) + '\')">🖨️</button><button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm(\'متأكد من الحذف؟\')){ products = products.filter(x=>x.id!=\'' + p.id + '\'); sendData(\'deleteProduct\',{id:\'' + p.id + '\'}); renderStock(); showToast(\'تم الحذف\'); }">🗑️</button></td></tr>';
+            products.filter(p=>{ 
+                if(!q) return true;
+                let matchEn = (p.name_en||p.n||'').toLowerCase().includes(q.toLowerCase()); let matchAr = (p.name_ar||'').toLowerCase().includes(q.toLowerCase()); let matchBar = (p.barcode||'').toString().includes(q); return matchEn || matchAr || matchBar; 
+            }).forEach((p, idx)=>{
+                html += '<tr><td>' + (idx+1) + '</td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.n || '') + ' <br> <small style="color:#0984e3">' + (p.name_ar || '') + '</small></td><td style="direction:ltr;">' + (p.barcode||'-') + '</td><td style="color:#0984e3; font-weight:bold;">' + formatStockDisplay(p.q||0, p.spb||1, p.hasStrips) + '</td><td>' + (p.spBox||0) + ' ج.م' + (p.hasStrips?' / '+(p.spStrip||0)+' ج.م':'') + '</td><td><button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock(\'' + p.id + '\')">✏️</button><button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="printBarcode(\'' + (p.barcode||'') + '\', \'' + (p.name_en||p.n||p.name_ar||'') + '\')">🖨️</button><button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm(\'متأكد من الحذف؟\')){ products = products.filter(x=>x.id!=\'' + p.id + '\'); sendData(\'deleteProduct\',{id:\'' + p.id + '\'}); renderStock(); showToast(\'تم الحذف\'); }">🗑️</button></td></tr>';
             });
             tbody.innerHTML = html;
         }
 
         function renderShortages() {
             let tbody = document.getElementById('shortagesTable'); let html = '';
-            let shortages = products.filter(p => { let boxes = p.hasStrips ? Math.floor(p.q / (p.spb||1)) : p.q; return boxes < 5; });
+            let shortages = products.filter(p => { let boxes = p.hasStrips ? Math.floor((p.q||0) / (p.spb||1)) : (p.q||0); return boxes < 5; });
             if(shortages.length === 0) { tbody.innerHTML = '<tr><td colspan="3">لا توجد نواقص بالمخزن</td></tr>'; return; }
-            shortages.forEach(p => { html += '<tr><td class="no-print"><input type="checkbox" class="short-chk" checked></td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.name_ar) + '</td><td style="color:#e74c3c; font-weight:bold;">' + formatStockDisplay(p.q, p.spb, p.hasStrips) + '</td></tr>'; });
+            shortages.forEach(p => { html += '<tr><td class="no-print"><input type="checkbox" class="short-chk" checked></td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.n || p.name_ar) + '</td><td style="color:#e74c3c; font-weight:bold;">' + formatStockDisplay(p.q||0, p.spb||1, p.hasStrips) + '</td></tr>'; });
             tbody.innerHTML = html;
         }
 
