@@ -9,25 +9,40 @@
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
         body { background: #f4f7f6; color: #333; overflow-x: hidden; }
-        #splashScreen { position: fixed; inset: 0; background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: opacity 0.8s ease, visibility 0.8s ease; }
-        .pharmacy-logo-container { position: relative; width: 120px; height: 120px; margin-bottom: 25px; display: flex; justify-content: center; align-items: center; }
-        .cup-icon { font-size: 80px; position: absolute; z-index: 1; filter: drop-shadow(0 0 15px #27ae60); }
-        .snake-icon { font-size: 70px; position: absolute; z-index: 2; animation: rotateSnake 2.5s linear infinite; filter: drop-shadow(0 0 10px #f1c40f); }
-        @keyframes rotateSnake { 0% { transform: rotate(0deg) translateX(15px); } 50% { transform: rotate(180deg) translateX(15px) scale(1.1); } 100% { transform: rotate(360deg) translateX(15px); } }
+
+        /* Splash Screen Animation */
+        #splashScreen {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #0a192f, #112240, #233554);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10000; transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .pharmacy-logo-container { position: relative; width: 150px; height: 150px; margin-bottom: 20px; }
+        .logo-svg { width: 100%; height: 100%; }
+        .animated-snake {
+            stroke-dasharray: 200; stroke-dashoffset: 200;
+            animation: slitherUp 2s ease-out forwards; animation-delay: 0.2s;
+        }
+        .snake-eye { opacity: 0; animation: showEye 0.1s 2s forwards; }
+        @keyframes slitherUp { to { stroke-dashoffset: 0; } }
+        @keyframes showEye { to { opacity: 1; } }
+
         .splash-title { color: #fff; font-size: 2.2rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
-        .splash-subtitle { color: #27ae60; font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
+        .splash-subtitle { color: #0984e3; font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
         .loader-bar { width: 200px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; position: relative; }
-        .loader-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #27ae60, #f1c40f); border-radius: 10px; animation: fillBar 2s ease-in-out forwards; }
+        .loader-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #0984e3, #f1c40f); border-radius: 10px; animation: fillBar 2.5s ease-in-out forwards; }
         @keyframes fillBar { 0% { width: 0%; } 100% { width: 100%; } }
+
+        /* Main UI Styles (Blue Theme) */
         .app-container { max-width: 1200px; margin: 20px auto; padding: 15px; }
         .card { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .btn { border: none; padding: 10px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; color: white; width: 100%; margin-top: 10px; transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
-        .btn-green { background: #27ae60; } .btn-red { background: #e74c3c; } .btn-blue { background: #1e3c72; } .btn-purple { background: #8e44ad; }
+        .btn-blue { background: #0984e3; } .btn-red { background: #e74c3c; } .btn-dark { background: #1e3c72; } .btn-purple { background: #8e44ad; }
         .form-group { margin-bottom: 15px; width: 100%; position: relative; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #1e3c72; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: 'Cairo'; outline: none; }
-        .form-group input:focus { border-color: #27ae60; }
+        .form-group input:focus { border-color: #0984e3; }
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
         .tab-btn { background: #fff; border: 1px solid #ccc; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; white-space: nowrap; color: #7f8c8d; }
         .tab-btn.active { background: #1e3c72; color: #fff; border-color: #1e3c72; }
@@ -36,47 +51,62 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: center; font-size: 0.95rem; }
         th, td { padding: 12px 10px; border-bottom: 1px solid #eee; }
         th { background: #1e3c72; color: #fff; }
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; color: white; padding: 15px; border-radius: 8px; display: none; z-index: 99999; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #0984e3; color: white; padding: 15px; border-radius: 8px; display: none; z-index: 99999; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .radio-switch { display: flex; gap: 10px; margin-bottom: 15px; background: #f8f9fa; padding: 5px; border-radius: 10px; border: 1px solid #ddd; }
         .radio-switch label { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #7f8c8d; transition: 0.3s; }
         .radio-switch input { display: none; }
-        .radio-switch input[value="sale"]:checked + label { background: #eafaf1; color: #27ae60; border: 1px solid #27ae60; }
+        .radio-switch input[value="sale"]:checked + label { background: #e6f2ff; color: #0984e3; border: 1px solid #0984e3; }
         .radio-switch input[value="return"]:checked + label { background: #fdedec; color: #e74c3c; border: 1px solid #e74c3c; }
         #scannerContainer { display: none; background: #000; padding: 10px; border-radius: 12px; margin-bottom: 15px; text-align: center; }
         #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 8px; overflow: hidden; }
-        .autocomplete-items { position: absolute; border: 1px solid #27ae60; z-index: 99; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .autocomplete-items { position: absolute; border: 1px solid #0984e3; z-index: 99; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .autocomplete-items div { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; color: #1e3c72; font-weight: bold; }
-        .autocomplete-items div:hover { background: #eafaf1; }
+        .autocomplete-items div:hover { background: #e6f2ff; }
         .badge { padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; color: white; }
-        .badge-safe { background: #27ae60; } .badge-warn { background: #e67e22; }
+        .badge-safe { background: #0984e3; } .badge-warn { background: #e67e22; }
     </style>
 </head>
 <body>
     <div id="toast"></div>
+
+    <!-- Splash Screen -->
     <div id="splashScreen">
         <div class="pharmacy-logo-container">
-            <div class="cup-icon">🍸</div>
-            <div class="snake-icon">🐍</div>
+            <svg viewBox="0 0 100 100" class="logo-svg">
+                <defs>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                </defs>
+                <path d="M20 40 Q 50 80 80 40 Z" fill="#0984e3" filter="url(#glow)"/>
+                <rect x="46" y="55" width="8" height="30" fill="#0984e3" filter="url(#glow)"/>
+                <rect x="30" y="85" width="40" height="6" rx="3" fill="#0984e3" filter="url(#glow)"/>
+                <path class="animated-snake" d="M 50 90 C 15 80, 15 50, 50 45 C 85 40, 85 10, 50 15 C 35 17, 35 30, 45 30" fill="none" stroke="#f1c40f" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+                <circle cx="43" cy="28" r="1.5" fill="#000" class="snake-eye"/>
+            </svg>
         </div>
         <div class="splash-title">Pharmacy Pro 01</div>
         <div class="splash-subtitle">نظام الصيدلية الذكي والمتكامل</div>
         <div class="loader-bar"><div class="loader-fill"></div></div>
     </div>
 
-    <div id="loginOverlay" style="position:fixed; inset:0; background:linear-gradient(135deg, rgba(30,60,114,0.95), rgba(39,174,96,0.95)); display:none; justify-content:center; align-items:center; z-index:999;">
+    <!-- Login Overlay -->
+    <div id="loginOverlay" style="position:fixed; inset:0; background:linear-gradient(135deg, rgba(10,25,47,0.95), rgba(9,132,227,0.95)); display:none; justify-content:center; align-items:center; z-index:999;">
         <div class="card" style="width:90%; max-width:400px; text-align:center;">
-            <h2 style="color:#27ae60; margin-bottom:10px; font-size: 2rem;">Pharmacy Pro 01</h2>
+            <h2 style="color:#0984e3; margin-bottom:10px; font-size: 2rem;">Pharmacy Pro 01</h2>
             <p style="margin-bottom: 20px; font-weight: bold; color: #7f8c8d;">تسجيل الدخول للنظام</p>
             <div class="form-group"><label style="text-align: right;">اسم المستخدم:</label><input type="text" id="loginUser" value="admin" style="text-align: center;"></div>
             <div class="form-group"><label style="text-align: right;">كلمة المرور:</label><input type="password" id="loginPass" placeholder="كلمة المرور (852)" style="text-align: center; letter-spacing: 2px;" onkeypress="if(event.key === 'Enter') login()"></div>
-            <button class="btn btn-green" onclick="login()" style="font-size: 1.1rem;">تسجيل الدخول 🚀</button>
+            <button class="btn btn-blue" onclick="login()" style="font-size: 1.1rem;">تسجيل الدخول 🚀</button>
         </div>
     </div>
 
+    <!-- Main Application -->
     <div class="app-container" id="mainApp" style="display:none;">
-        <div class="card" style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #27ae60; padding: 15px 20px;">
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #0984e3; padding: 15px 20px;">
             <div><h3 style="color:#1e3c72; direction: ltr; display: inline-block;">👤 Pharmacy Pro 01</h3><span id="currentUserRole" style="font-size:0.85rem; background:#1e3c72; color:white; padding:3px 8px; border-radius:10px; margin-right:10px;">Admin</span></div>
-            <div style="display:flex; gap:10px; align-items:center;"><span id="syncStatus" style="background:#eafaf1; color:#27ae60; padding:5px 10px; border-radius:20px; font-weight:bold; border:1px solid #27ae60; cursor:pointer;" onclick="fetchData()">🟢 متصل ومُحدث</span><button class="btn btn-red" style="width:auto; margin:0; padding:5px 15px;" onclick="location.reload()">خروج 🚪</button></div>
+            <div style="display:flex; gap:10px; align-items:center;"><span id="syncStatus" style="background:#e6f2ff; color:#0984e3; padding:5px 10px; border-radius:20px; font-weight:bold; border:1px solid #0984e3; cursor:pointer;" onclick="fetchData()">🟢 متصل ومُحدث</span><button class="btn btn-red" style="width:auto; margin:0; padding:5px 15px;" onclick="location.reload()">خروج 🚪</button></div>
         </div>
 
         <div class="nav-tabs">
@@ -91,7 +121,7 @@
         <div id="posTab" class="tab-content active">
             <div class="card">
                 <div class="radio-switch">
-                    <input type="radio" name="invType" id="tSale" value="sale" checked onchange="updatePosColors()"><label for="tSale">🟢 بيع جديد</label>
+                    <input type="radio" name="invType" id="tSale" value="sale" checked onchange="updatePosColors()"><label for="tSale">🔵 بيع جديد</label>
                     <input type="radio" name="invType" id="tRet" value="return" onchange="updatePosColors()"><label for="tRet">🔴 مرتجع مريض</label>
                 </div>
                 <div style="display:flex; gap:10px; align-items: flex-end; position: relative;">
@@ -103,16 +133,16 @@
                 </div>
                 <div id="scannerContainer"><div id="reader"></div><button class="btn btn-red" style="width: 90%; margin-top: 10px;" onclick="toggleScanner()">إغلاق الكاميرا ❌</button></div>
                 
-                <div id="posAddBox" style="display:none; background:#eafaf1; padding:15px; border-radius:8px; margin-top:15px; border:2px solid #27ae60;">
+                <div id="posAddBox" style="display:none; background:#e6f2ff; padding:15px; border-radius:8px; margin-top:15px; border:2px solid #0984e3;">
                     <h3 id="posPNameEn" style="color:#1e3c72; margin-bottom: 2px;"></h3>
-                    <p id="posPNameAr" style="color:#27ae60; font-weight:bold; margin-bottom: 10px;"></p>
+                    <p id="posPNameAr" style="color:#0984e3; font-weight:bold; margin-bottom: 10px;"></p>
                     <p id="posPStock" style="color:#e74c3c; font-weight:bold; margin-bottom:15px; background: #fff; display: inline-block; padding: 4px 10px; border-radius: 6px;"></p>
                     <div style="display:flex; gap:10px; flex-wrap: wrap;">
                         <div class="form-group" style="flex:1; min-width: 100px;"><label>الوحدة:</label><select id="posUnit" onchange="calcTotal()"><option value="box">علبة كاملة</option><option value="strip" id="optStrip" style="display:none;">شريط</option></select></div>
                         <div class="form-group" style="flex:1; min-width: 100px;"><label>الكمية:</label><input type="number" id="posQty" value="1" min="1" oninput="calcTotal()"></div>
                         <div class="form-group" style="flex:1; min-width: 100px;"><label>الإجمالي (ج.م):</label><input type="number" id="posTotal" readonly style="background:#e9ecef; font-weight: bold; color: #1e3c72;"></div>
                     </div>
-                    <button class="btn btn-green" id="btnAddItemBtn" style="font-size: 1.1rem;" onclick="addPosItem()">إضافة للفاتورة 🛒</button>
+                    <button class="btn btn-blue" id="btnAddItemBtn" style="font-size: 1.1rem;" onclick="addPosItem()">إضافة للفاتورة 🛒</button>
                 </div>
             </div>
             
@@ -129,7 +159,7 @@
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-red" style="flex: 1; font-size: 1.1rem;" onclick="clearInvoice()">تفريغ 🧹</button>
-                    <button class="btn btn-green" style="flex: 3; font-size: 1.1rem;" onclick="saveInvoice()">حفظ الفاتورة 💾</button>
+                    <button class="btn btn-blue" style="flex: 3; font-size: 1.1rem;" onclick="saveInvoice()">حفظ الفاتورة 💾</button>
                 </div>
             </div>
         </div>
@@ -165,8 +195,8 @@
                     <div class="form-group" style="flex:1; min-width: 120px;"><label>تاريخ الصلاحية:</label><input type="date" id="nExpiry"></div>
                 </div>
                 
-                <div style="background:#eafaf1; padding:15px; border-radius:10px; margin-top:10px; margin-bottom:15px; border: 2px solid #27ae60;">
-                    <label style="display:flex; align-items:center; gap:10px; cursor: pointer; color: #27ae60; font-size: 1.1rem; margin-bottom:0;">
+                <div style="background:#e6f2ff; padding:15px; border-radius:10px; margin-top:10px; margin-bottom:15px; border: 2px solid #0984e3;">
+                    <label style="display:flex; align-items:center; gap:10px; cursor: pointer; color: #0984e3; font-size: 1.1rem; margin-bottom:0;">
                         <input type="checkbox" id="nHasStrips" style="width: 20px; height: 20px;" onchange="document.getElementById('stripArea').style.display=this.checked?'flex':'none'"> 
                         هذا الدواء يحتوي على شرائط (أقراص/كبسولات)
                     </label>
@@ -183,7 +213,7 @@
                     <div class="form-group" style="flex:1; min-width: 120px;"><label id="lblQty">الكمية المضافة (بالعلب):</label><input type="number" id="nQty" value="0"></div>
                 </div>
                 <input type="hidden" id="nId" value="">
-                <button class="btn btn-green" style="font-size: 1.1rem; padding: 12px; margin-top: 15px;" onclick="saveProduct()">حفظ الدواء وتحديث المخزون 💾</button>
+                <button class="btn btn-blue" style="font-size: 1.1rem; padding: 12px; margin-top: 15px;" onclick="saveProduct()">حفظ الدواء وتحديث المخزون 💾</button>
             </div>
         </div>
 
@@ -198,7 +228,7 @@
                         <select id="uRole"><option value="Admin">مدير (Admin)</option><option value="User">كاشير (User)</option></select>
                     </div>
                 </div>
-                <button class="btn btn-green" onclick="saveUser()">حفظ المستخدم 👤</button>
+                <button class="btn btn-blue" onclick="saveUser()">حفظ المستخدم 👤</button>
             </div>
             <div class="card">
                 <h3 style="color:#1e3c72; margin-bottom:10px;">📋 قائمة المستخدمين الحاليين</h3>
@@ -211,11 +241,18 @@
             <div class="card">
                 <div class="form-group"><label>تاريخ التقرير:</label><input type="date" id="reportDate" onchange="generateReport()"></div>
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
-                    <div style="background:#eafaf1; padding:20px; border-radius:12px; text-align:center; border:1px solid #27ae60;"><h3 style="color:#27ae60; margin-bottom:10px;">إجمالي المبيعات 📈</h3><h2 id="repSales" style="color:#1e3c72; font-size:2rem;">0.00</h2></div>
-                    <div style="background:#fdedec; padding:20px; border-radius:12px; text-align:center; border:1px solid #e74c3c;"><h3 style="color:#e74c3c; margin-bottom:10px;">إجمالي المرتجعات 📉</h3><h2 id="repReturns" style="color:#1e3c72; font-size:2rem;">0.00</h2></div>
+                    <div style="background:#e6f2ff; padding:20px; border-radius:12px; text-align:center; border:1px solid #0984e3;">
+                        <h3 style="color:#0984e3; margin-bottom:10px;">إجمالي المبيعات 📈</h3>
+                        <h2 id="repSales" style="color:#1e3c72; font-size:2rem;">0.00</h2>
+                    </div>
+                    <div style="background:#fdedec; padding:20px; border-radius:12px; text-align:center; border:1px solid #e74c3c;">
+                        <h3 style="color:#e74c3c; margin-bottom:10px;">إجمالي المرتجعات 📉</h3>
+                        <h2 id="repReturns" style="color:#1e3c72; font-size:2rem;">0.00</h2>
+                    </div>
                 </div>
                 <div style="background:#1e3c72; color:white; padding:20px; border-radius:12px; margin-top:20px; text-align:center;">
-                    <h3 style="margin-bottom:10px;">صافي الدرج المتوقع</h3><h1 id="repNet" style="color:#f1c40f; font-size:3rem; margin:0;">0.00 ج.م</h1>
+                    <h3 style="margin-bottom:10px;">صافي الدرج المتوقع</h3>
+                    <h1 id="repNet" style="color:#f1c40f; font-size:3rem; margin:0;">0.00 ج.م</h1>
                 </div>
             </div>
         </div>
@@ -227,17 +264,16 @@
         let posItems = [], selP = null, scanner = null, isScanning = false;
         let invoiceCounter = 10001;
 
-        window.addEventListener('load', () => { setTimeout(() => { let splash = document.getElementById('splashScreen'); splash.style.opacity = '0'; setTimeout(() => { splash.style.display = 'none'; document.getElementById('loginOverlay').style.display = 'flex'; fetchData(); }, 800); }, 2200); });
-        function showToast(msg, type='success') { let t = document.getElementById('toast'); t.innerText = msg; t.style.backgroundColor = type === 'error' ? '#e74c3c' : '#27ae60'; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
+        window.addEventListener('load', () => { setTimeout(() => { let splash = document.getElementById('splashScreen'); splash.style.opacity = '0'; setTimeout(() => { splash.style.display = 'none'; document.getElementById('loginOverlay').style.display = 'flex'; fetchData(); }, 800); }, 2700); });
+        function showToast(msg, type) { let t = document.getElementById('toast'); t.innerText = msg; t.style.backgroundColor = type === 'error' ? '#e74c3c' : '#0984e3'; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
         function login() { let u = document.getElementById('loginUser').value.trim(); let p = document.getElementById('loginPass').value.trim(); let found = users.find(x => x.username && x.username.toString().toLowerCase() === u.toLowerCase() && x.password.toString() === p); if(p === '852' || found) { document.getElementById('loginOverlay').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; document.getElementById('currentUserRole').innerText = found ? found.role : 'Admin'; showToast('تم تسجيل الدخول بنجاح 🚀'); } else { showToast('اسم المستخدم أو كلمة المرور غير صحيحة', 'error'); } }
         function showTab(id, btn) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); if(id === 'stockTab') renderStock(); if(id === 'usersTab') renderUsers(); if(id === 'reportsTab') { document.getElementById('reportDate').value = new Date().toISOString().split('T')[0]; generateReport(); } }
-        function setStatus(msg, isSync = false) { let badge = document.getElementById('syncStatus'); badge.innerText = msg; badge.style.background = isSync ? '#fff3cd' : '#eafaf1'; badge.style.color = isSync ? '#856404' : '#27ae60'; badge.style.borderColor = isSync ? '#ffeeba' : '#27ae60'; }
+        function setStatus(msg, isSync) { let badge = document.getElementById('syncStatus'); badge.innerText = msg; badge.style.background = isSync ? '#fff3dc' : '#e6f2ff'; badge.style.color = isSync ? '#856404' : '#0984e3'; badge.style.borderColor = isSync ? '#ffeeba' : '#0984e3'; }
         
         function fetchData() { setStatus('🔄 جاري التحميل...', true); let s = document.createElement('script'); s.src = URL + "?action=getData&callback=loadData"; document.body.appendChild(s); }
         function loadData(res) { if(res.status === 'success') { products = res.products || []; invoices = res.invoices || []; users = res.users || []; invoiceCounter = res.nextInvoiceId || 10001; setStatus('🟢 متصل ومُحدث'); setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect); if(document.getElementById('stockTab').classList.contains('active')) renderStock(); if(document.getElementById('usersTab').classList.contains('active')) renderUsers(); } else { showToast('خطأ في جلب البيانات', 'error'); } }
-        function sendData(action, data) { setStatus('🔄 جاري الحفظ...', true); let s = document.createElement('script'); s.src = URL + "?action="+action+"&data="+encodeURIComponent(JSON.stringify(data))+"&callback=fetchData"; document.body.appendChild(s); }
+        function sendData(action, data) { setStatus('🔄 جاري الحفظ...', true); let s = document.createElement('script'); s.src = URL + "?action=" + action + "&data=" + encodeURIComponent(JSON.stringify(data)) + "&callback=fetchData"; document.body.appendChild(s); }
 
-        /* SMART SEARCH DROPDOWN */
         function setupCustomDropdown(inpId, dataArr, callback) {
             const inp = document.getElementById(inpId); if(!inp) return;
             let existingWrapper = inp.parentNode.querySelector('.autocomplete-items');
@@ -254,7 +290,7 @@
                     
                     if (nEn.includes(val) || nAr.includes(val) || pBarcode === val) {
                         count++; hasItems = true; let b = document.createElement("DIV");
-                        b.innerHTML = `<strong>\({dataArr[i].name_en || ''}</strong> <br> <small style="color:#27ae60;">\){dataArr[i].name_ar || ''}</small> <small style="color:#7f8c8d; display:block;">(${dataArr[i].barcode || ''})</small>`;
+                        b.innerHTML = '<strong>' + (dataArr[i].name_en || '') + '</strong> <br> <small style="color:#0984e3;">' + (dataArr[i].name_ar || '') + '</small> <small style="color:#7f8c8d; display:block;">(' + (dataArr[i].barcode || '') + ')</small>';
                         b.addEventListener("click", function() { inp.value = dataArr[i].name_en || dataArr[i].name_ar; wrapper.style.display = "none"; if(callback) callback(dataArr[i]); });
                         wrapper.appendChild(b); if(count >= 15) break; 
                     }
@@ -265,10 +301,10 @@
             document.addEventListener("click", function(e) { if(e.target !== inp && e.target !== wrapper) wrapper.style.display = "none"; });
         }
 
-        function formatStockDisplay(q, spb, hasStrips) { if (!hasStrips || spb <= 1) return `${q} علبة`; let boxes = Math.floor(q / spb); let strips = q % spb; let txt = []; if (boxes > 0) txt.push(`\({boxes} علبة`); if (strips > 0) txt.push(`\){strips} شريط`); return txt.join(' و ') || '0 علبة'; }
+        function formatStockDisplay(q, spb, hasStrips) { if (!hasStrips || spb <= 1) return q + ' علبة'; let boxes = Math.floor(q / spb); let strips = q % spb; let txt = []; if (boxes > 0) txt.push(boxes + ' علبة'); if (strips > 0) txt.push(strips + ' شريط'); return txt.join(' و ') || '0 علبة'; }
         
         function toggleScanner() { let c = document.getElementById('scannerContainer'); if(isScanning) { scanner.stop(); c.style.display = 'none'; isScanning = false; } else { c.style.display = 'block'; scanner = new Html5Qrcode("reader"); scanner.start({facingMode:"environment"}, {fps:10, qrbox: 250}, (text) => { let p = products.find(x => x.barcode === text); if(p) onPosProductSelect(p); else showToast('دواء غير مسجل!', 'warn'); toggleScanner(); }, ()=>{}).then(() => isScanning = true); } }
-        function updatePosColors() { let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale'; let btn = document.getElementById('btnAddItemBtn'); btn.className = isSale ? 'btn btn-green' : 'btn btn-red'; btn.innerHTML = isSale ? 'إضافة للفاتورة 🛒' : 'تسجيل مرتجع ↩️'; renderPos(); }
+        function updatePosColors() { let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale'; let btn = document.getElementById('btnAddItemBtn'); btn.className = isSale ? 'btn btn-blue' : 'btn btn-red'; btn.innerHTML = isSale ? 'إضافة للفاتورة 🛒' : 'تسجيل مرتجع ↩️'; renderPos(); }
 
         function onPosProductSelect(p) {
             selP = p; document.getElementById('posSearch').value = ''; document.getElementById('posAddBox').style.display='block';
@@ -292,7 +328,14 @@
         function renderPos() {
             let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale'; let tbody = document.getElementById('posTable'); let tot = 0;
             if(posItems.length===0) tbody.innerHTML='<tr><td colspan="6">لم يتم إضافة أدوية</td></tr>';
-            else { tbody.innerHTML = posItems.map((i,x) => { tot += i.total; return `<tr><td style="font-weight:bold; color:#1e3c72;">\({i.n}</td><td>\){i.unit}</td><td>\({i.qty}</td><td>\){i.price}</td><td style="color:#27ae60; font-weight:bold;">\({i.total}</td><td><button class="btn btn-red" style="padding:4px 10px; margin:0;" onclick="posItems.splice(\){x},1); renderPos()">X</button></td></tr>`; }).join(''); }
+            else { 
+                let html = '';
+                posItems.forEach((i, x) => {
+                    tot += i.total; 
+                    html += '<tr><td style="font-weight:bold; color:#1e3c72;">' + i.n + '</td><td>' + i.unit + '</td><td>' + i.qty + '</td><td>' + i.price + '</td><td style="color:#0984e3; font-weight:bold;">' + i.total + '</td><td><button class="btn btn-red" style="padding:4px 10px; margin:0;" onclick="posItems.splice(' + x + ',1); renderPos()">X</button></td></tr>'; 
+                });
+                tbody.innerHTML = html;
+            }
             let fTot = document.getElementById('finalTotal'); fTot.innerText = tot.toFixed(2) + " ج.م"; fTot.style.color = isSale ? '#f1c40f' : '#e74c3c';
         }
 
@@ -301,7 +344,10 @@
         function saveInvoice() {
             if(posItems.length===0) return showToast('لا توجد أصناف لحفظها!', 'error');
             let type = document.querySelector('input[name="invType"]:checked').value; let sign = type === 'sale' ? 1 : -1; let tSell = 0, tCost = 0, txtArr = [];
-            posItems.forEach(i => { tSell += i.total; tCost += i.costTotal; txtArr.push(`\({i.n} (\){i.qty} ${i.unit})`); let p = products.find(x=>x.id==i.id); if(p) { p.q -= (i.strQty * sign); sendData("updateProduct", p); } });
+            posItems.forEach(i => { 
+                tSell += i.total; tCost += i.costTotal; txtArr.push(i.n + ' (' + i.qty + ' ' + i.unit + ')'); 
+                let p = products.find(x=>x.id==i.id); if(p) { p.q -= (i.strQty * sign); sendData("updateProduct", p); } 
+            });
             let invObj = { id: invoiceCounter++, date: new Date().toISOString(), type: type, items: posItems, itemsText: txtArr.join(' | '), totalComm: tCost * sign, totalEGP: tSell * sign, netProfit: (tSell - tCost) * sign, paymentType: "cash" };
             invoices.push(invObj); sendData("saveInvoice", invObj); clearInvoice(); showToast(type === 'sale' ? 'تم حفظ فاتورة البيع ✅' : 'تم استرجاع الأدوية للمخزون ↩️');
         }
@@ -321,7 +367,7 @@
             document.getElementById('nSpStrip').value = p.spStrip || 0;
             document.getElementById('nCostBox').value = p.pBox || 0;
             document.getElementById('nSpBox').value = p.spBox || 0;
-            document.getElementById('lblQty').innerHTML = `إضافة كمية <span style="color:#e74c3c;">(المتاح حالياً: ${formatStockDisplay(p.q, p.spb, hs)})</span>`;
+            document.getElementById('lblQty').innerHTML = 'إضافة كمية <span style="color:#e74c3c;">(المتاح حالياً: ' + formatStockDisplay(p.q, p.spb, hs) + ')</span>';
             document.getElementById('nQty').value = 0; showToast('تم جلب بيانات الدواء للتعديل', 'warn');
         }
 
@@ -349,7 +395,6 @@
             setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect);
         }
 
-        /* SMART SEARCH STOCK RENDER */
         function renderStock(q="") {
             let tbody = document.getElementById('stockTable'); let html = '';
             products.filter(p=>{
@@ -358,15 +403,34 @@
                 let matchBar = p.barcode ? p.barcode.toString().includes(q) : false;
                 return matchEn || matchAr || matchBar;
             }).forEach((p, idx)=>{
-                html += `<tr><td>\({idx+1}</td><td style="font-weight:bold; color:#1e3c72;">\){p.name_en || ''} <br> <small style="color:#27ae60">\({p.name_ar || ''}</small></td><td style="direction:ltr;">\){p.barcode||'-'}</td><td style="color:#27ae60; font-weight:bold;">\({formatStockDisplay(p.q, p.spb, p.hasStrips)}</td><td>\){p.spBox} ج</td><td>\({p.hasStrips?p.spStrip+' ج':'-'}</td><td><button class="btn btn-red" style="padding:4px 8px; margin:0;" onclick="if(confirm('متأكد من الحذف؟')){ products = products.filter(x=>x.id!='\){p.id}'); sendData('deleteProduct',{id:'${p.id}'}); renderStock(); showToast('تم الحذف'); }">🗑️</button></td></tr>`;
+                html += '<tr><td>' + (idx+1) + '</td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || '') + ' <br> <small style="color:#0984e3">' + (p.name_ar || '') + '</small></td><td style="direction:ltr;">' + (p.barcode||'-') + '</td><td style="color:#0984e3; font-weight:bold;">' + formatStockDisplay(p.q, p.spb, p.hasStrips) + '</td><td>' + p.spBox + ' ج</td><td>' + (p.hasStrips?p.spStrip+' ج':'-') + '</td><td><button class="btn btn-red" style="padding:4px 8px; margin:0;" onclick="if(confirm(\'متأكد من الحذف؟\')){ products = products.filter(x=>x.id!=\'' + p.id + '\'); sendData(\'deleteProduct\',{id:\'' + p.id + '\'}); renderStock(); showToast(\'تم الحذف\'); }">🗑️</button></td></tr>';
             });
             tbody.innerHTML = html;
         }
 
-        function renderUsers() { let tbody = document.getElementById('usersTable'); let html = ''; users.forEach((u) => { html += `<tr><td style="font-weight:bold;">\({u.username}</td><td>••••••</td><td><span class="badge\){u.role==='Admin'?'badge-safe':'badge-warn'}">\({u.role}</span></td><td><button class="btn btn-purple" style="padding:4px 8px; margin:0;" onclick="editUser('\){u.username}','\({u.password}','\){u.role}')">تعديل ✏️</button></td></tr>`; }); tbody.innerHTML = html || '<tr><td colspan="4">لا يوجد مستخدمين</td></tr>'; }
+        function renderUsers() { 
+            let tbody = document.getElementById('usersTable'); let html = ''; 
+            users.forEach((u) => { 
+                html += '<tr><td style="font-weight:bold;">' + u.username + '</td><td>••••••</td><td><span class="badge ' + (u.role==='Admin'?'badge-safe':'badge-warn') + '">' + u.role + '</span></td><td><button class="btn btn-purple" style="padding:4px 8px; margin:0;" onclick="editUser(\'' + u.username + '\',\'' + u.password + '\',\'' + u.role + '\')">تعديل ✏️</button></td></tr>'; 
+            }); 
+            tbody.innerHTML = html || '<tr><td colspan="4">لا يوجد مستخدمين</td></tr>'; 
+        }
+        
         function editUser(u, p, r) { document.getElementById('uName').value = u; document.getElementById('uPass').value = p; document.getElementById('uRole').value = r; }
-        function saveUser() { let u = document.getElementById('uName').value.trim(); let p = document.getElementById('uPass').value.trim(); let r = document.getElementById('uRole').value; if(!u || !p) return showToast('أدخل البيانات كاملة!', 'error'); let uObj = { username: u, password: p, role: r }; let idx = users.findIndex(x => x.username === u); if(idx > -1) users[idx] = uObj; else users.push(uObj); showToast('تم حفظ بيانات المستخدم 👤'); renderUsers(); document.getElementById('uName').value = ''; document.getElementById('uPass').value = ''; }
-        function generateReport() { let rDate = document.getElementById('reportDate').value; if(!rDate) return; let sales = 0, returns = 0; invoices.forEach(i => { if(i.date.includes(rDate)) { if(i.type === 'sale') sales += parseFloat(i.totalEGP); if(i.type === 'return') returns += Math.abs(parseFloat(i.totalEGP)); } }); document.getElementById('repSales').textContent = sales.toFixed(2) + " ج.م"; document.getElementById('repReturns').textContent = returns.toFixed(2) + " ج.م"; document.getElementById('repNet').textContent = (sales - returns).toFixed(2) + " ج.م"; }
+        
+        function saveUser() { 
+            let u = document.getElementById('uName').value.trim(); let p = document.getElementById('uPass').value.trim(); let r = document.getElementById('uRole').value; 
+            if(!u || !p) return showToast('أدخل البيانات كاملة!', 'error'); 
+            let uObj = { username: u, password: p, role: r }; let idx = users.findIndex(x => x.username === u); 
+            if(idx > -1) users[idx] = uObj; else users.push(uObj); 
+            showToast('تم حفظ بيانات المستخدم 👤'); renderUsers(); document.getElementById('uName').value = ''; document.getElementById('uPass').value = ''; 
+        }
+        
+        function generateReport() { 
+            let rDate = document.getElementById('reportDate').value; if(!rDate) return; let sales = 0, returns = 0; 
+            invoices.forEach(i => { if(i.date.includes(rDate)) { if(i.type === 'sale') sales += parseFloat(i.totalEGP); if(i.type === 'return') returns += Math.abs(parseFloat(i.totalEGP)); } }); 
+            document.getElementById('repSales').textContent = sales.toFixed(2) + " ج.م"; document.getElementById('repReturns').textContent = returns.toFixed(2) + " ج.م"; document.getElementById('repNet').textContent = (sales - returns).toFixed(2) + " ج.م"; 
+        }
     </script>
 </body>
 </html>
