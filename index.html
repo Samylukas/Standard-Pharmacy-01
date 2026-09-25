@@ -335,7 +335,7 @@
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbwhj5QHRcIUpoiNb2wNNUDI3Sdmc34Tnj8f-_z31IlmDTdro4FLNqWTZBm4Pxv_ju/exec";
+        const URL = "https://script.google.com/macros/s/AKfycbwhj5QHRcIUpoiNb2wNNUDI3Sdmc34Tnj8f-_z31IlmDTdro4FLNqWTZBm4Pxv_juI/exec";
         let products = [], invoices = [], users = [];
         let posItems = [], selP = null, scanner = null, isScanning = false, scanMode = 'pos';
         let invoiceCounter = 10001;
@@ -344,6 +344,21 @@
 
         window.addEventListener('load', () => { 
             fetchData(); 
+            
+            // Fallback: Force hide splash screen after 4 seconds
+            setTimeout(() => {
+                let splash = document.getElementById('splashScreen');
+                if (splash.style.display !== 'none') {
+                    splash.style.opacity = '0';
+                    setTimeout(() => {
+                        splash.style.display = 'none';
+                        document.getElementById('loginOverlay').style.display = 'flex';
+                        if(document.getElementById('loginPass')) document.getElementById('loginPass').focus();
+                    }, 500);
+                    if(products.length === 0) showToast('تأخر الاتصال بقاعدة البيانات، يرجى التحديث', 'error');
+                }
+            }, 4000);
+
             let today = new Date().toISOString().split('T')[0];
             document.getElementById('repStart').value = today; document.getElementById('repEnd').value = today;
         });
@@ -383,14 +398,13 @@
                 setStatus('🟢 متصل ومُحدث'); 
                 setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect); 
                 
-                // Hide splash and show login
                 let splash = document.getElementById('splashScreen');
                 if (splash.style.display !== 'none') {
                     splash.style.opacity = '0';
                     setTimeout(() => {
                         splash.style.display = 'none';
                         document.getElementById('loginOverlay').style.display = 'flex';
-                        document.getElementById('loginPass').focus();
+                        if(document.getElementById('loginPass')) document.getElementById('loginPass').focus();
                     }, 500);
                 }
 
@@ -422,7 +436,7 @@
             inp.addEventListener("input", renderList); document.addEventListener("click", function(e) { if(e.target !== inp && e.target !== wrapper) wrapper.style.display = "none"; });
         }
 
-        function formatStockDisplay(q, spb, hasStrips) { if (!hasStrips || spb < 2) return q + ' علبة'; let boxes = Math.floor(q / spb); let strips = q % spb; let txt = []; if (boxes > 0) txt.push(boxes + ' علبة'); if (strips > 0) txt.push(strips + ' شريط'); return txt.join(' و ') || '0 علبة'; }
+        function formatStockDisplay(q, spb, hasStrips) { if (!hasStrips || spb <= 1) return q + ' علبة'; let boxes = Math.floor(q / spb); let strips = q % spb; let txt = []; if (boxes > 0) txt.push(boxes + ' علبة'); if (strips > 0) txt.push(strips + ' شريط'); return txt.join(' و ') || '0 علبة'; }
         
         function toggleScanner(mode) { 
             scanMode = mode || 'pos'; let c = document.getElementById('scannerContainer'); 
@@ -560,19 +574,7 @@
             
             if(pObj.category) {
                 let dl = document.getElementById('catList');
-                let exists = false; for(let i=0; i<dl.options.length; i++){ if(dl.options[i].value === pObj.category) exists=true; }
-                if(!exists) { let opt = document.createElement('option'); opt.value = pObj.category; dl.appendChild(opt); }
-            }
-            setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect);
-        }
-
-        function printBarcode(code, name) {
-            document.getElementById('modalPName').innerText = name;
-            JsBarcode("#barcodeSvg", code, { format: "CODE128", width: 1.5, height: 40, fontSize: 14, margin: 5, displayValue: true });
-            document.getElementById('barcodeModal').style.display = 'flex';
-        }
-
-        function editProductFromStock(id) { let p = products.find(x => x.id == id); if(p) { document.querySelectorAll('.tab-btn')[3].click(); onAddProductSelect(p); } }
+                let exists = false; for(let i=0; i x.id == id); if(p) { document.querySelectorAll('.tab-btn')[3].click(); onAddProductSelect(p); } }
 
         function renderStock(q="") {
             let tbody = document.getElementById('stockTable'); let html = '';
