@@ -37,6 +37,8 @@
         .autocomplete-items { position: absolute; border: 1px solid #27ae60; z-index: 99; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .autocomplete-items div { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; color: #1e3c72; font-weight: bold; }
         .autocomplete-items div:hover { background: #eafaf1; }
+        .badge { padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; color: white; }
+        .badge-safe { background: #27ae60; } .badge-warn { background: #e67e22; }
     </style>
 </head>
 <body>
@@ -47,30 +49,42 @@
             <h2 style="color:#27ae60; margin-bottom:10px; font-size: 2rem;">Pharmacy Pro 01</h2>
             <p style="margin-bottom: 20px; font-weight: bold; color: #7f8c8d;">نظام الإدارة الذكي</p>
             <div class="form-group">
+                <label style="text-align: right;">اسم المستخدم:</label>
+                <input type="text" id="loginUser" value="admin" style="text-align: center;">
+            </div>
+            <div class="form-group">
+                <label style="text-align: right;">كلمة المرور:</label>
                 <input type="password" id="loginPass" placeholder="كلمة المرور (852)" style="text-align: center; letter-spacing: 2px;" onkeypress="if(event.key === 'Enter') login()">
             </div>
-            <button class="btn btn-green" onclick="login()" style="font-size: 1.1rem;">تسجيل الدخول 🚀</button>
+            <button class="btn btn-green" onclick="login()" style="font-size: 1.1rem;">تسجيل الدخول</button>
         </div>
     </div>
 
     <div class="app-container" id="mainApp" style="display:none;">
         <div class="card" style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #27ae60; padding: 15px 20px;">
-            <h3 style="color:#1e3c72; direction: ltr;">👤 Pharmacy Pro 01</h3>
-            <span id="syncStatus" style="background:#eafaf1; color:#27ae60; padding:5px 10px; border-radius:20px; font-weight:bold; border:1px solid #27ae60; cursor:pointer;" onclick="fetchData()">🟢 متصل ومُحدث</span>
+            <div>
+                <h3 style="color:#1e3c72; direction: ltr; display: inline-block;">Pharmacy Pro 01</h3>
+                <span id="currentUserRole" style="font-size:0.85rem; background:#1e3c72; color:white; padding:3px 8px; border-radius:10px; margin-right:10px;">Admin</span>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <span id="syncStatus" style="background:#eafaf1; color:#27ae60; padding:5px 10px; border-radius:20px; font-weight:bold; border:1px solid #27ae60; cursor:pointer;" onclick="fetchData()">متصل ومُحدث</span>
+                <button class="btn btn-red" style="width:auto; margin:0; padding:5px 15px;" onclick="location.reload()">خروج</button>
+            </div>
         </div>
 
         <div class="nav-tabs">
-            <button class="tab-btn active" onclick="showTab('posTab', this)">🛒 الكاشير (POS)</button>
-            <button class="tab-btn" onclick="showTab('stockTab', this)">📦 المخزون والأدوية</button>
-            <button class="tab-btn" onclick="showTab('addTab', this)">➕ إضافة وتعديل دواء</button>
-            <button class="tab-btn" onclick="showTab('reportsTab', this)">📊 درج الكاشير</button>
+            <button class="tab-btn active" onclick="showTab('posTab', this)">الكاشير (POS)</button>
+            <button class="tab-btn" onclick="showTab('stockTab', this)">المخزون والأدوية</button>
+            <button class="tab-btn" onclick="showTab('addTab', this)">إضافة وتعديل دواء</button>
+            <button class="tab-btn" onclick="showTab('usersTab', this)">إدارة المستخدمين</button>
+            <button class="tab-btn" onclick="showTab('reportsTab', this)">درج الكاشير</button>
         </div>
 
         <div id="posTab" class="tab-content active">
             <div class="card">
                 <div class="radio-switch">
-                    <input type="radio" name="invType" id="tSale" value="sale" checked onchange="updatePosColors()"><label for="tSale">🟢 بيع جديد</label>
-                    <input type="radio" name="invType" id="tRet" value="return" onchange="updatePosColors()"><label for="tRet">🔴 مرتجع مريض</label>
+                    <input type="radio" name="invType" id="tSale" value="sale" checked onchange="updatePosColors()"><label for="tSale">بيع جديد</label>
+                    <input type="radio" name="invType" id="tRet" value="return" onchange="updatePosColors()"><label for="tRet">مرتجع مريض</label>
                 </div>
                 
                 <div style="display:flex; gap:10px; align-items: flex-end; position: relative;">
@@ -78,12 +92,12 @@
                         <label>بحث بالاسم أو الباركود:</label>
                         <input type="text" id="posSearch" placeholder="اكتب اسم الدواء أو الباركود..." autocomplete="off">
                     </div>
-                    <button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner()">📷 مسح</button>
+                    <button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner()">مسح</button>
                 </div>
                 
                 <div id="scannerContainer">
                     <div id="reader"></div>
-                    <button class="btn btn-red" style="width: 90%; margin-top: 10px;" onclick="toggleScanner()">إغلاق الكاميرا ❌</button>
+                    <button class="btn btn-red" style="width: 90%; margin-top: 10px;" onclick="toggleScanner()">إغلاق الكاميرا</button>
                 </div>
                 
                 <div id="posAddBox" style="display:none; background:#eafaf1; padding:15px; border-radius:8px; margin-top:15px; border:2px solid #27ae60;">
@@ -94,7 +108,7 @@
                         <div class="form-group" style="flex:1; min-width: 100px;"><label>الكمية:</label><input type="number" id="posQty" value="1" min="1" oninput="calcTotal()"></div>
                         <div class="form-group" style="flex:1; min-width: 100px;"><label>الإجمالي (ج.م):</label><input type="number" id="posTotal" readonly style="background:#e9ecef; font-weight: bold; color: #1e3c72;"></div>
                     </div>
-                    <button class="btn btn-green" id="btnAddItemBtn" style="font-size: 1.1rem;" onclick="addPosItem()">إضافة للفاتورة 🛒</button>
+                    <button class="btn btn-green" id="btnAddItemBtn" style="font-size: 1.1rem;" onclick="addPosItem()">إضافة للفاتورة</button>
                 </div>
             </div>
             
@@ -110,8 +124,8 @@
                     <h2 id="finalTotal" style="color:#f1c40f; font-size: 2.5rem; margin: 0;">0.00 ج.م</h2>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-red" style="flex: 1; font-size: 1.1rem;" onclick="clearInvoice()">تفريغ 🧹</button>
-                    <button class="btn btn-green" style="flex: 3; font-size: 1.1rem;" onclick="saveInvoice()">حفظ الفاتورة 💾</button>
+                    <button class="btn btn-red" style="flex: 1; font-size: 1.1rem;" onclick="clearInvoice()">تفريغ</button>
+                    <button class="btn btn-green" style="flex: 3; font-size: 1.1rem;" onclick="saveInvoice()">حفظ الفاتورة</button>
                 </div>
             </div>
         </div>
@@ -139,7 +153,7 @@
                 </div>
                 <div style="display:flex; gap:10px; align-items: flex-end;">
                     <div class="form-group" style="flex:1; margin-bottom: 0;"><label>الباركود:</label><input type="text" id="nBarcode" placeholder="الباركود الدولي..." style="direction: ltr;"></div>
-                    <button class="btn btn-purple" style="width:auto; margin:0; height: 44px;" onclick="document.getElementById('nBarcode').value='622'+Math.floor(100000+Math.random()*900000)">توليد 🎲</button>
+                    <button class="btn btn-purple" style="width:auto; margin:0; height: 44px;" onclick="document.getElementById('nBarcode').value='622'+Math.floor(100000+Math.random()*900000)">توليد</button>
                 </div>
                 <div style="display:flex; gap:10px; margin-top:15px; flex-wrap: wrap;">
                     <div class="form-group" style="flex:1; min-width: 120px;"><label>التصنيف:</label><input type="text" id="nCat" placeholder="أقراص، شراب، كريم..."></div>
@@ -164,7 +178,34 @@
                     <div class="form-group" style="flex:1; min-width: 120px;"><label id="lblQty">الكمية المضافة (بالعلب):</label><input type="number" id="nQty" value="0"></div>
                 </div>
                 <input type="hidden" id="nId" value="">
-                <button class="btn btn-green" style="font-size: 1.1rem; padding: 12px; margin-top: 15px;" onclick="saveProduct()">حفظ الدواء وتحديث المخزون 💾</button>
+                <button class="btn btn-green" style="font-size: 1.1rem; padding: 12px; margin-top: 15px;" onclick="saveProduct()">حفظ الدواء وتحديث المخزون</button>
+            </div>
+        </div>
+
+        <div id="usersTab" class="tab-content">
+            <div class="card">
+                <h3 style="color:#1e3c72; margin-bottom:15px;">إضافة / تعديل مستخدم</h3>
+                <div style="display:flex; gap:10px; flex-wrap: wrap;">
+                    <div class="form-group" style="flex:1; min-width:120px;"><label>اسم المستخدم:</label><input type="text" id="uName"></div>
+                    <div class="form-group" style="flex:1; min-width:120px;"><label>كلمة المرور:</label><input type="password" id="uPass"></div>
+                    <div class="form-group" style="flex:1; min-width:120px;"><label>الصلاحية:</label>
+                        <select id="uRole">
+                            <option value="Admin">مدير (Admin)</option>
+                            <option value="User">كاشير (User)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-green" onclick="saveUser()">حفظ المستخدم</button>
+            </div>
+            
+            <div class="card">
+                <h3 style="color:#1e3c72; margin-bottom:10px;">قائمة المستخدمين الحاليين</h3>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead><tr><th>اسم المستخدم</th><th>كلمة المرور</th><th>الصلاحية</th><th>تعديل</th></tr></thead>
+                        <tbody id="usersTable"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -173,11 +214,11 @@
                 <div class="form-group"><label>تاريخ التقرير:</label><input type="date" id="reportDate" onchange="generateReport()"></div>
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
                     <div style="background:#eafaf1; padding:20px; border-radius:12px; text-align:center; border:1px solid #27ae60;">
-                        <h3 style="color:#27ae60; margin-bottom:10px;">إجمالي المبيعات 📈</h3>
+                        <h3 style="color:#27ae60; margin-bottom:10px;">إجمالي المبيعات</h3>
                         <h2 id="repSales" style="color:#1e3c72; font-size:2rem;">0.00</h2>
                     </div>
                     <div style="background:#fdedec; padding:20px; border-radius:12px; text-align:center; border:1px solid #e74c3c;">
-                        <h3 style="color:#e74c3c; margin-bottom:10px;">إجمالي المرتجعات 📉</h3>
+                        <h3 style="color:#e74c3c; margin-bottom:10px;">إجمالي المرتجعات</h3>
                         <h2 id="repReturns" style="color:#1e3c72; font-size:2rem;">0.00</h2>
                     </div>
                 </div>
@@ -192,7 +233,7 @@
     <script>
         const URL = "https://script.google.com/macros/s/AKfycbwhj5QHRcIUpoiNb2wNNUDI3Sdmc34Tnj8f-_z31IlmDTdro4FLNqWTZBm4Pxv_juI/exec";
 
-        let products = [], invoices = [];
+        let products = [], invoices = [], users = [];
         let posItems = [], selP = null, scanner = null, isScanning = false;
         let invoiceCounter = 10001;
 
@@ -205,11 +246,18 @@
         }
 
         function login() {
-            if(document.getElementById('loginPass').value === '852') {
+            let u = document.getElementById('loginUser').value.trim();
+            let p = document.getElementById('loginPass').value.trim();
+            
+            let found = users.find(x => x.username.toString() === u && x.password.toString() === p);
+            if(found || (u === 'admin' && p === '852')) {
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('currentUserRole').innerText = found ? found.role : 'Admin';
                 fetchData();
-            } else showToast('كلمة المرور خطأ', 'error');
+            } else {
+                showToast('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
+            }
         }
 
         function showTab(id, btn) {
@@ -217,6 +265,7 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active'); btn.classList.add('active');
             if(id === 'stockTab') renderStock();
+            if(id === 'usersTab') renderUsers();
             if(id === 'reportsTab') { document.getElementById('reportDate').value = new Date().toISOString().split('T')[0]; generateReport(); }
         }
 
@@ -229,7 +278,7 @@
         }
 
         function fetchData() {
-            setStatus('🔄 جاري التحميل...', true);
+            setStatus('جاري التحميل...', true);
             let s = document.createElement('script');
             s.src = URL + "?action=getData&callback=loadData";
             document.body.appendChild(s);
@@ -237,18 +286,23 @@
         
         function loadData(res) {
             if(res.status === 'success') { 
-                products = res.products || []; invoices = res.invoices || []; invoiceCounter = res.nextInvoiceId || 10001;
-                setStatus('🟢 متصل ومُحدث'); 
+                products = res.products || []; 
+                invoices = res.invoices || []; 
+                users = res.users || [];
+                invoiceCounter = res.nextInvoiceId || 10001;
+                
+                setStatus('متصل ومُحدث'); 
                 
                 setupCustomDropdown('posSearch', products, onPosProductSelect);
                 setupCustomDropdown('nName', products, onAddProductSelect);
 
                 if(document.getElementById('stockTab').classList.contains('active')) renderStock(); 
+                if(document.getElementById('usersTab').classList.contains('active')) renderUsers();
             } else { showToast('خطأ في جلب البيانات', 'error'); }
         }
         
         function sendData(action, data) {
-            setStatus('🔄 جاري الحفظ...', true);
+            setStatus('جاري الحفظ...', true);
             let s = document.createElement('script');
             s.src = URL + "?action="+action+"&data="+encodeURIComponent(JSON.stringify(data))+"&callback=fetchData";
             document.body.appendChild(s);
@@ -308,7 +362,7 @@
             let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale';
             let btn = document.getElementById('btnAddItemBtn');
             btn.className = isSale ? 'btn btn-green' : 'btn btn-red';
-            btn.innerHTML = isSale ? 'إضافة للفاتورة 🛒' : 'تسجيل مرتجع ↩️';
+            btn.innerHTML = isSale ? 'إضافة للفاتورة' : 'تسجيل مرتجع';
             renderPos();
         }
 
