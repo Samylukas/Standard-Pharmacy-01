@@ -1,16 +1,16 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pharmacy Pro 01</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+~!DOCTYPE html>
+~html lang="ar" dir="rtl">
+~head>
+    ~meta charset="UTF-8">
+    ~meta name="viewport" content="width=device-width, initial-scale=1.0">
+    ~title>Pharmacy Pro 01~/title>
+    ~link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
+    ~script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js">~/script>
+    ~script src="https://cdn.jsdelivr.net/npm/chart.js">~/script>
+    ~script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">~/script>
+    ~script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js">~/script>
     
-    <style>
+    ~style>
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
         body { background: #f4f7f6; color: #333; overflow-x: hidden; }
 
@@ -78,264 +78,264 @@
             .btn { display: none !important; }
             .no-print { display: none !important; }
         }
-    </style>
-</head>
-<body>
-    <div id="toast"></div>
+    ~/style>
+~/head>
+~body>
+    ~div id="toast">~/div>
 
-    <div id="splashScreen">
-        <div class="pharmacy-logo-container">
-            <svg viewBox="0 0 100 100" class="logo-svg">
-                <defs><filter id="glow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-                <path d="M20 40 Q 50 80 80 40 Z" fill="#0984e3" filter="url(#glow)"/><rect x="46" y="55" width="8" height="30" fill="#0984e3" filter="url(#glow)"/><rect x="30" y="85" width="40" height="6" rx="3" fill="#0984e3" filter="url(#glow)"/>
-                <path class="animated-snake" d="M 50 90 C 15 80, 15 50, 50 45 C 85 40, 85 10, 50 15 C 35 17, 35 30, 45 30" fill="none" stroke="#f1c40f" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
-                <circle cx="43" cy="28" r="1.5" fill="#000" class="snake-eye"/>
-            </svg>
-        </div>
-        <div class="splash-title">Pharmacy Pro 01</div>
-        <div class="splash-subtitle">نظام الصيدلية الذكي والمتكامل</div>
-        <div class="loader-bar"><div class="loader-fill"></div></div>
-    </div>
+    ~div id="splashScreen">
+        ~div class="pharmacy-logo-container">
+            ~svg viewBox="0 0 100 100" class="logo-svg">
+                ~defs>~filter id="glow">~feGaussianBlur stdDeviation="2" result="coloredBlur"/>~feMerge>~feMergeNode in="coloredBlur"/>~feMergeNode in="SourceGraphic"/>~/feMerge>~/filter>~/defs>
+                ~path d="M20 40 Q 50 80 80 40 Z" fill="#0984e3" filter="url(#glow)"/>~rect x="46" y="55" width="8" height="30" fill="#0984e3" filter="url(#glow)"/>~rect x="30" y="85" width="40" height="6" rx="3" fill="#0984e3" filter="url(#glow)"/>
+                ~path class="animated-snake" d="M 50 90 C 15 80, 15 50, 50 45 C 85 40, 85 10, 50 15 C 35 17, 35 30, 45 30" fill="none" stroke="#f1c40f" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+                ~circle cx="43" cy="28" r="1.5" fill="#000" class="snake-eye"/>
+            ~/svg>
+        ~/div>
+        ~div class="splash-title">Pharmacy Pro 01~/div>
+        ~div class="splash-subtitle">نظام الصيدلية الذكي والمتكامل~/div>
+        ~div class="loader-bar">~div class="loader-fill">~/div>~/div>
+    ~/div>
 
-    <!-- Dynamic Login Overlay -->
-    <div id="loginOverlay" style="position:fixed; inset:0; background:linear-gradient(135deg, rgba(10,25,47,0.95), rgba(9,132,227,0.95)); display:none; justify-content:center; align-items:center; z-index:999;">
-        <div class="card" style="width:90%; max-width:400px; text-align:center;">
-            <h2 style="color:#0984e3; margin-bottom:10px; font-size: 2rem;">Pharmacy Pro 01</h2>
-            <p style="margin-bottom: 20px; font-weight: bold; color: #7f8c8d;">تسجيل الدخول للنظام</p>
-            <div class="form-group">
-                <label style="text-align: right;">اختر المستخدم:</label>
-                <select id="loginUserSelect" style="text-align: center; font-weight:bold;"></select>
-            </div>
-            <div class="form-group">
-                <label style="text-align: right;">كلمة المرور:</label>
-                <input type="password" id="loginPass" placeholder="••••••••" style="text-align: center; letter-spacing: 2px;" autocomplete="off" onkeypress="if(event.key === 'Enter') login()">
-            </div>
-            <button class="btn btn-blue" onclick="login()" style="font-size: 1.1rem;">تسجيل الدخول 🚀</button>
-        </div>
-    </div>
+    ~!-- Dynamic Login Overlay -->
+    ~div id="loginOverlay" style="position:fixed; inset:0; background:linear-gradient(135deg, rgba(10,25,47,0.95), rgba(9,132,227,0.95)); display:none; justify-content:center; align-items:center; z-index:999;">
+        ~div class="card" style="width:90%; max-width:400px; text-align:center;">
+            ~h2 style="color:#0984e3; margin-bottom:10px; font-size: 2rem;">Pharmacy Pro 01~/h2>
+            ~p style="margin-bottom: 20px; font-weight: bold; color: #7f8c8d;">تسجيل الدخول للنظام~/p>
+            ~div class="form-group">
+                ~label style="text-align: right;">اختر المستخدم:~/label>
+                ~select id="loginUserSelect" style="text-align: center; font-weight:bold;">~option value="admin">admin (Admin)~/option>~/select>
+            ~/div>
+            ~div class="form-group">
+                ~label style="text-align: right;">كلمة المرور:~/label>
+                ~input type="password" id="loginPass" placeholder="••••••••" style="text-align: center; letter-spacing: 2px;" autocomplete="off" onkeypress="if(event.key === 'Enter') login()">
+            ~/div>
+            ~button class="btn btn-blue" onclick="login()" style="font-size: 1.1rem;">تسجيل الدخول 🚀~/button>
+        ~/div>
+    ~/div>
 
-    <div id="barcodeModal">
-        <div class="modal-content">
-            <div id="printSection">
-                <div id="modalPName"></div>
-                <svg id="barcodeSvg"></svg>
-            </div>
-            <button class="btn btn-green no-print" onclick="window.print()" style="margin-top:20px;">طباعة 🖨️</button>
-            <button class="btn btn-red no-print" onclick="document.getElementById('barcodeModal').style.display='none'">إغلاق ❌</button>
-        </div>
-    </div>
+    ~div id="barcodeModal">
+        ~div class="modal-content">
+            ~div id="printSection">
+                ~div id="modalPName">~/div>
+                ~svg id="barcodeSvg">~/svg>
+            ~/div>
+            ~button class="btn btn-green no-print" onclick="window.print()" style="margin-top:20px;">طباعة 🖨️~/button>
+            ~button class="btn btn-red no-print" onclick="document.getElementById('barcodeModal').style.display='none'">إغلاق ❌~/button>
+        ~/div>
+    ~/div>
 
-    <div class="app-container" id="mainApp" style="display:none;">
-        <div class="card no-print" style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #0984e3; padding: 15px 20px;">
-            <div><h3 style="color:#1e3c72; direction: ltr; display: inline-block;">👤 Pharmacy Pro 01</h3><span id="currentUserRole" style="font-size:0.85rem; background:#1e3c72; color:white; padding:3px 8px; border-radius:10px; margin-right:10px;">Admin</span></div>
-            <div style="display:flex; gap:10px; align-items:center;"><span id="syncStatus" style="background:#e6f2ff; color:#0984e3; padding:5px 10px; border-radius:20px; font-weight:bold; border:1px solid #0984e3; cursor:pointer;" onclick="fetchData()">🟢 متصل ومُحدث</span><button class="btn btn-red" style="width:auto; margin:0; padding:5px 15px;" onclick="location.reload()">خروج 🚪</button></div>
-        </div>
+    ~div class="app-container" id="mainApp" style="display:none;">
+        ~div class="card no-print" style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #0984e3; padding: 15px 20px;">
+            ~div>~h3 style="color:#1e3c72; direction: ltr; display: inline-block;">👤 Pharmacy Pro 01~/h3>~span id="currentUserRole" style="font-size:0.85rem; background:#1e3c72; color:white; padding:3px 8px; border-radius:10px; margin-right:10px;">Admin~/span>~/div>
+            ~div style="display:flex; gap:10px; align-items:center;">~span id="syncStatus" style="background:#e6f2ff; color:#0984e3; padding:5px 10px; border-radius:20px; font-weight:bold; border:1px solid #0984e3; cursor:pointer;" onclick="fetchData()">🟢 متصل ومُحدث~/span>~button class="btn btn-red" style="width:auto; margin:0; padding:5px 15px;" onclick="location.reload()">خروج 🚪~/button>~/div>
+        ~/div>
 
-        <div class="nav-tabs no-print">
-            <button class="tab-btn active" onclick="showTab('posTab', this)">🛒 الكاشير (POS)</button>
-            <button class="tab-btn" onclick="showTab('stockTab', this)">📦 المخزون</button>
-            <button class="tab-btn" onclick="showTab('clientsTab', this)">📝 العملاء والآجل</button>
-            <button class="tab-btn" onclick="showTab('addTab', this)">➕ إضافة وتعديل</button>
-            <button class="tab-btn" onclick="showTab('shortagesTab', this)">⚠️ النواقص</button>
-            <button class="tab-btn" onclick="showTab('reportsTab', this)">📊 التقارير الذكية</button>
-            <button class="tab-btn" onclick="showTab('usersTab', this)">👥 المستخدمين</button>
-        </div>
+        ~div class="nav-tabs no-print">
+            ~button class="tab-btn active" onclick="showTab('posTab', this)">🛒 الكاشير (POS)~/button>
+            ~button class="tab-btn" onclick="showTab('stockTab', this)">📦 المخزون~/button>
+            ~button class="tab-btn" onclick="showTab('clientsTab', this)">📝 العملاء والآجل~/button>
+            ~button class="tab-btn" onclick="showTab('addTab', this)">➕ إضافة وتعديل~/button>
+            ~button class="tab-btn" onclick="showTab('shortagesTab', this)">⚠️ النواقص~/button>
+            ~button class="tab-btn" onclick="showTab('reportsTab', this)">📊 التقارير الذكية~/button>
+            ~button class="tab-btn" onclick="showTab('usersTab', this)">👥 المستخدمين~/button>
+        ~/div>
 
-        <!-- POS Tab -->
-        <div id="posTab" class="tab-content active">
-            <div class="card">
-                <!-- Invoice Navigator -->
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#f4f7f6; padding:10px; border-radius:8px; margin-bottom:15px; border: 1px solid #ccc;">
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('first')">|<</button>
-                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('prev')"><</button>
-                    </div>
-                    <span id="posInvoiceViewerLabel" style="font-weight:bold; color:#1e3c72; font-size:1.1rem;">فاتورة جديدة 🛒</span>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('next')">></button>
-                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('last')">>|</button>
-                        <button class="btn btn-green" style="width:auto; margin:0; padding:5px 15px; margin-right:10px;" onclick="newInvoiceMode()">➕ جديد</button>
-                    </div>
-                </div>
+        ~!-- POS Tab -->
+        ~div id="posTab" class="tab-content active">
+            ~div class="card">
+                ~!-- Invoice Navigator -->
+                ~div style="display:flex; justify-content:space-between; align-items:center; background:#f4f7f6; padding:10px; border-radius:8px; margin-bottom:15px; border: 1px solid #ccc;">
+                    ~div style="display:flex; gap:5px;">
+                        ~button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('first')">|<~/button>
+                        ~button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('prev')"><~/button>
+                    ~/div>
+                    ~span id="posInvoiceViewerLabel" style="font-weight:bold; color:#1e3c72; font-size:1.1rem;">فاتورة جديدة 🛒~/span>
+                    ~div style="display:flex; gap:5px;">
+                        ~button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('next')">>~/button>
+                        ~button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('last')">>|~/button>
+                        ~button class="btn btn-green" style="width:auto; margin:0; padding:5px 15px; margin-right:10px;" onclick="newInvoiceMode()">➕ جديد~/button>
+                    ~/div>
+                ~/div>
 
-                <div id="posInputArea">
-                    <div class="radio-switch">
-                        <input type="radio" name="invType" id="tSale" value="sale" checked onchange="updatePosColors()"><label for="tSale">🔵 بيع جديد</label>
-                        <input type="radio" name="invType" id="tRet" value="return" onchange="updatePosColors()"><label for="tRet">🔴 مرتجع مريض</label>
-                    </div>
+                ~div id="posInputArea">
+                    ~div class="radio-switch">
+                        ~input type="radio" name="invType" id="tSale" value="sale" checked onchange="updatePosColors()">~label for="tSale">🔵 بيع جديد~/label>
+                        ~input type="radio" name="invType" id="tRet" value="return" onchange="updatePosColors()">~label for="tRet">🔴 مرتجع مريض~/label>
+                    ~/div>
                     
-                    <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:#e6f2ff; padding:10px; border-radius:8px;">
-                        <div class="form-group" style="flex:1; margin-bottom:0;"><label>طريقة الدفع:</label>
-                            <select id="posPaymentType" onchange="toggleCreditFields()">
-                                <option value="cash">كاش 💵</option>
-                                <option value="visa">فيزا 💳</option>
-                                <option value="credit">آجل (شكك) 📝</option>
-                            </select>
-                        </div>
-                        <div class="form-group credit-fields" style="display:none; flex:1; margin-bottom:0;"><label>اسم العميل:</label><input type="text" id="posClientName" placeholder="الاسم..."></div>
-                        <div class="form-group credit-fields" style="display:none; flex:1; margin-bottom:0;"><label>رقم الواتس:</label><input type="text" id="posClientPhone" placeholder="01..."></div>
-                    </div>
+                    ~div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:#e6f2ff; padding:10px; border-radius:8px;">
+                        ~div class="form-group" style="flex:1; margin-bottom:0;">~label>طريقة الدفع:~/label>
+                            ~select id="posPaymentType" onchange="toggleCreditFields()">
+                                ~option value="cash">كاش 💵~/option>
+                                ~option value="visa">فيزا 💳~/option>
+                                ~option value="credit">آجل (شكك) 📝~/option>
+                            ~/select>
+                        ~/div>
+                        ~div class="form-group credit-fields" style="display:none; flex:1; margin-bottom:0;">~label>اسم العميل:~/label>~input type="text" id="posClientName" placeholder="الاسم...">~/div>
+                        ~div class="form-group credit-fields" style="display:none; flex:1; margin-bottom:0;">~label>رقم الواتس:~/label>~input type="text" id="posClientPhone" placeholder="01...">~/div>
+                    ~/div>
 
-                    <div style="display:flex; gap:10px; align-items: flex-end; position: relative;">
-                        <div class="form-group" style="margin-bottom: 0; flex: 1;"><label>بحث بالاسم أو الباركود:</label><input type="text" id="posSearch" placeholder="اكتب اسم الدواء أو الباركود..." autocomplete="off"></div>
-                        <button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner('pos')">📷 مسح</button>
-                    </div>
-                </div>
+                    ~div style="display:flex; gap:10px; align-items: flex-end; position: relative;">
+                        ~div class="form-group" style="margin-bottom: 0; flex: 1;">~label>بحث بالاسم أو الباركود:~/label>~input type="text" id="posSearch" placeholder="اكتب اسم الدواء أو الباركود..." autocomplete="off">~/div>
+                        ~button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner('pos')">📷 مسح~/button>
+                    ~/div>
+                ~/div>
                 
-                <div id="scannerContainer"><div id="reader"></div><button class="btn btn-red" style="width: 90%; margin-top: 10px;" onclick="toggleScanner()">إغلاق الكاميرا ❌</button></div>
+                ~div id="scannerContainer">~div id="reader">~/div>~button class="btn btn-red" style="width: 90%; margin-top: 10px;" onclick="toggleScanner()">إغلاق الكاميرا ❌~/button>~/div>
                 
-                <div id="posAddBox" style="display:none; background:#e6f2ff; padding:15px; border-radius:8px; margin-top:15px; border:2px solid #0984e3;">
-                    <h3 id="posPNameEn" style="color:#1e3c72; margin-bottom: 2px;"></h3>
-                    <p id="posPNameAr" style="color:#0984e3; font-weight:bold; margin-bottom: 10px;"></p>
-                    <p id="posPStock" style="color:#e74c3c; font-weight:bold; margin-bottom:15px; background: #fff; display: inline-block; padding: 4px 10px; border-radius: 6px;"></p>
-                    <div style="display:flex; gap:10px; flex-wrap: wrap;">
-                        <div class="form-group" style="flex:1; min-width: 100px;"><label>الوحدة:</label><select id="posUnit" onchange="calcTotal()"><option value="box">علبة كاملة</option><option value="strip" id="optStrip" style="display:none;">شريط</option></select></div>
-                        <div class="form-group" style="flex:1; min-width: 100px;"><label>الكمية:</label><input type="number" id="posQty" value="1" min="1" oninput="calcTotal()"></div>
-                        <div class="form-group" style="flex:1; min-width: 100px;"><label>الإجمالي (ج.م):</label><input type="number" id="posTotal" readonly style="background:#e9ecef; font-weight: bold; color: #1e3c72;"></div>
-                    </div>
-                    <button class="btn btn-blue" id="btnAddItemBtn" style="font-size: 1.1rem;" onclick="addPosItem()">إضافة للفاتورة 🛒</button>
-                </div>
-            </div>
+                ~div id="posAddBox" style="display:none; background:#e6f2ff; padding:15px; border-radius:8px; margin-top:15px; border:2px solid #0984e3;">
+                    ~h3 id="posPNameEn" style="color:#1e3c72; margin-bottom: 2px;">~/h3>
+                    ~p id="posPNameAr" style="color:#0984e3; font-weight:bold; margin-bottom: 10px;">~/p>
+                    ~p id="posPStock" style="color:#e74c3c; font-weight:bold; margin-bottom:15px; background: #fff; display: inline-block; padding: 4px 10px; border-radius: 6px;">~/p>
+                    ~div style="display:flex; gap:10px; flex-wrap: wrap;">
+                        ~div class="form-group" style="flex:1; min-width: 100px;">~label>الوحدة:~/label>~select id="posUnit" onchange="calcTotal()">~option value="box">علبة كاملة~/option>~option value="strip" id="optStrip" style="display:none;">شريط~/option>~/select>~/div>
+                        ~div class="form-group" style="flex:1; min-width: 100px;">~label>الكمية:~/label>~input type="number" id="posQty" value="1" min="1" oninput="calcTotal()">~/div>
+                        ~div class="form-group" style="flex:1; min-width: 100px;">~label>الإجمالي (ج.م):~/label>~input type="number" id="posTotal" readonly style="background:#e9ecef; font-weight: bold; color: #1e3c72;">~/div>
+                    ~/div>
+                    ~button class="btn btn-blue" id="btnAddItemBtn" style="font-size: 1.1rem;" onclick="addPosItem()">إضافة للفاتورة 🛒~/button>
+                ~/div>
+            ~/div>
             
-            <div class="card">
-                <div style="overflow-x: auto;">
-                    <table>
-                        <thead><tr><th>الصنف</th><th>الوحدة</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th><th>إلغاء</th></tr></thead>
-                        <tbody id="posTable"><tr><td colspan="6">لم يتم إضافة أدوية</td></tr></tbody>
-                    </table>
-                </div>
-                <div style="background:#1e3c72; color:white; padding:20px; border-radius:12px; margin-top:20px; text-align:center;">
-                    <p style="font-size: 1.1rem; margin-bottom: 5px;">الإجمالي النهائي:</p>
-                    <h2 id="finalTotal" style="color:#f1c40f; font-size: 2.5rem; margin: 0;">0.00 ج.م</h2>
-                </div>
-                <div id="posActionButtons" style="display: flex; gap: 10px;">
-                    <button class="btn btn-red" style="flex: 1; font-size: 1.1rem;" onclick="clearInvoice()">تفريغ 🧹</button>
-                    <button class="btn btn-blue" style="flex: 3; font-size: 1.1rem;" onclick="saveInvoice()">حفظ الفاتورة 💾</button>
-                </div>
-            </div>
-        </div>
+            ~div class="card">
+                ~div style="overflow-x: auto;">
+                    ~table>
+                        ~thead>~tr>~th>الصنف~/th>~th>الوحدة~/th>~th>الكمية~/th>~th>السعر~/th>~th>الإجمالي~/th>~th>إلغاء~/th>~/tr>~/thead>
+                        ~tbody id="posTable">~tr>~td colspan="6">لم يتم إضافة أدوية~/td>~/tr>~/tbody>
+                    ~/table>
+                ~/div>
+                ~div style="background:#1e3c72; color:white; padding:20px; border-radius:12px; margin-top:20px; text-align:center;">
+                    ~p style="font-size: 1.1rem; margin-bottom: 5px;">الإجمالي النهائي:~/p>
+                    ~h2 id="finalTotal" style="color:#f1c40f; font-size: 2.5rem; margin: 0;">0.00 ج.م~/h2>
+                ~/div>
+                ~div id="posActionButtons" style="display: flex; gap: 10px;">
+                    ~button class="btn btn-red" style="flex: 1; font-size: 1.1rem;" onclick="clearInvoice()">تفريغ 🧹~/button>
+                    ~button class="btn btn-blue" style="flex: 3; font-size: 1.1rem;" onclick="saveInvoice()">حفظ الفاتورة 💾~/button>
+                ~/div>
+            ~/div>
+        ~/div>
 
-        <!-- Stock Tab -->
-        <div id="stockTab" class="tab-content">
-            <div class="card">
-                <div style="display:flex; gap:10px; align-items: flex-end;">
-                    <div class="form-group" style="flex:1; margin-bottom:0;">
-                        <input type="text" id="stockFilterInput" placeholder="بحث ذكي في المخزون (عربي/إنجليزي/باركود)..." oninput="renderStock(this.value)">
-                    </div>
-                    <button class="btn btn-red" style="width:auto; margin:0; height: 44px; padding: 0 15px;" onclick="document.getElementById('stockFilterInput').value=''; renderStock();">✖</button>
-                    <button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner('stock')">📷 مسح</button>
-                </div>
-                <div style="overflow-x:auto; margin-top:15px;">
-                    <table>
-                        <thead><tr><th>#</th><th>الدواء (إنجليزي/عربي)</th><th>الباركود</th><th>المتاح</th><th>سعر العلبة/الشريط</th><th>أدوات التحكم</th></tr></thead>
-                        <tbody id="stockTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        ~!-- Stock Tab -->
+        ~div id="stockTab" class="tab-content">
+            ~div class="card">
+                ~div style="display:flex; gap:10px; align-items: flex-end;">
+                    ~div class="form-group" style="flex:1; margin-bottom:0;">
+                        ~input type="text" id="stockFilterInput" placeholder="بحث ذكي في المخزون (عربي/إنجليزي/باركود)..." oninput="renderStock(this.value)">
+                    ~/div>
+                    ~button class="btn btn-red" style="width:auto; margin:0; height: 44px; padding: 0 15px;" onclick="document.getElementById('stockFilterInput').value=''; renderStock();">✖~/button>
+                    ~button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner('stock')">📷 مسح~/button>
+                ~/div>
+                ~div style="overflow-x:auto; margin-top:15px;">
+                    ~table>
+                        ~thead>~tr>~th>#~/th>~th>الدواء (إنجليزي/عربي)~/th>~th>الباركود~/th>~th>المتاح~/th>~th>سعر العلبة/الشريط~/th>~th>أدوات التحكم~/th>~/tr>~/thead>
+                        ~tbody id="stockTable">~/tbody>
+                    ~/table>
+                ~/div>
+            ~/div>
+        ~/div>
 
-        <!-- Clients & Credit Tab -->
-        <div id="clientsTab" class="tab-content">
-            <div class="card">
-                <h3 style="color:#1e3c72; margin-bottom:15px;">📝 حسابات العملاء والآجل (الشكك)</h3>
-                <div style="overflow-x:auto;">
-                    <table>
-                        <thead><tr><th>#</th><th>اسم العميل</th><th>رقم الهاتف</th><th>المديونية (ج.م)</th><th>إجراءات</th></tr></thead>
-                        <tbody id="clientsTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        ~!-- Clients & Credit Tab -->
+        ~div id="clientsTab" class="tab-content">
+            ~div class="card">
+                ~h3 style="color:#1e3c72; margin-bottom:15px;">📝 حسابات العملاء والآجل (الشكك)~/h3>
+                ~div style="overflow-x:auto;">
+                    ~table>
+                        ~thead>~tr>~th>#~/th>~th>اسم العميل~/th>~th>رقم الهاتف~/th>~th>المديونية (ج.م)~/th>~th>إجراءات~/th>~/tr>~/thead>
+                        ~tbody id="clientsTable">~/tbody>
+                    ~/table>
+                ~/div>
+            ~/div>
+        ~/div>
 
-        <!-- Add/Edit Tab -->
-        <div id="addTab" class="tab-content">
-            <div class="card">
-                <p style="font-weight:bold; color:#e74c3c; margin-bottom:15px; font-size:0.9rem;">* للبحث عن دواء وتعديله، ابحث باسمه بالإنجليزي أو العربي هنا:</p>
-                <div class="form-group" style="position:relative;"><label>بحث للتعديل / أو إضافة دواء جديد بالإنجليزي:</label><input type="text" id="nNameEn" placeholder="مثال: Panadol Extra..." autocomplete="off"></div>
-                <div class="form-group"><label>اسم الدواء بالعربي:</label><input type="text" id="nNameAr" placeholder="مثال: بنادول إكسترا..." autocomplete="off"></div>
-                <div style="display:flex; gap:10px; align-items: flex-end;">
-                    <div class="form-group" style="flex:1; margin-bottom: 0;"><label>الباركود:</label><input type="text" id="nBarcode" placeholder="الباركود الدولي..." style="direction: ltr;"></div>
-                    <button class="btn btn-purple" style="width:auto; margin:0; height: 44px;" onclick="document.getElementById('nBarcode').value='622'+Math.floor(100000+Math.random()*900000)">توليد 🎲</button>
-                </div>
-                <div style="display:flex; gap:10px; margin-top:15px; flex-wrap: wrap;">
-                    <div class="form-group" style="flex:1; min-width: 120px;">
-                        <label>التصنيف:</label>
-                        <input type="text" id="nCat" list="catList" placeholder="اكتب أو اختر تصنيفاً..." autocomplete="off">
-                        <datalist id="catList"></datalist>
-                    </div>
-                    <div class="form-group" style="flex:1; min-width: 120px;"><label>تاريخ الصلاحية:</label><input type="date" id="nExpiry"></div>
-                </div>
-                <div style="background:#e6f2ff; padding:15px; border-radius:10px; margin-top:10px; margin-bottom:15px; border: 2px solid #0984e3;">
-                    <label style="display:flex; align-items:center; gap:10px; cursor: pointer; color: #0984e3; font-size: 1.1rem; margin-bottom:0;">
-                        <input type="checkbox" id="nHasStrips" style="width: 20px; height: 20px;" onchange="document.getElementById('stripArea').style.display=this.checked?'flex':'none'"> هذا الدواء يحتوي على شرائط</label>
-                    <div id="stripArea" style="display:none; gap:10px; margin-top:15px; flex-wrap: wrap;">
-                        <div class="form-group" style="flex:1; min-width: 120px;"><label>عدد الشرائط بالعلبة:</label><input type="number" id="nSpb" value="1"></div>
-                        <div class="form-group" style="flex:1; min-width: 120px;"><label>سعر شراء الشريط:</label><input type="number" id="nCostStrip" value="0"></div>
-                        <div class="form-group" style="flex:1; min-width: 120px;"><label>سعر بيع الشريط:</label><input type="number" id="nSpStrip" value="0"></div>
-                    </div>
-                </div>
-                <div style="display:flex; gap:10px; flex-wrap: wrap;">
-                    <div class="form-group" style="flex:1; min-width: 120px;"><label>سعر شراء العلبة:</label><input type="number" id="nCostBox" value="0"></div>
-                    <div class="form-group" style="flex:1; min-width: 120px;"><label>سعر بيع العلبة:</label><input type="number" id="nSpBox" value="0"></div>
-                    <div class="form-group" style="flex:1; min-width: 120px;"><label id="lblQty">الكمية المضافة (بالعلب):</label><input type="number" id="nQty" value="0"></div>
-                </div>
-                <input type="hidden" id="nId" value="">
-                <button class="btn btn-blue" style="font-size: 1.1rem; padding: 12px; margin-top: 15px;" onclick="saveProduct()">حفظ الدواء وتحديث المخزون 💾</button>
-            </div>
-        </div>
+        ~!-- Add/Edit Tab -->
+        ~div id="addTab" class="tab-content">
+            ~div class="card">
+                ~p style="font-weight:bold; color:#e74c3c; margin-bottom:15px; font-size:0.9rem;">* للبحث عن دواء وتعديله، ابحث باسمه بالإنجليزي أو العربي هنا:~/p>
+                ~div class="form-group" style="position:relative;">~label>بحث للتعديل / أو إضافة دواء جديد بالإنجليزي:~/label>~input type="text" id="nNameEn" placeholder="مثال: Panadol Extra..." autocomplete="off">~/div>
+                ~div class="form-group">~label>اسم الدواء بالعربي:~/label>~input type="text" id="nNameAr" placeholder="مثال: بنادول إكسترا..." autocomplete="off">~/div>
+                ~div style="display:flex; gap:10px; align-items: flex-end;">
+                    ~div class="form-group" style="flex:1; margin-bottom: 0;">~label>الباركود:~/label>~input type="text" id="nBarcode" placeholder="الباركود الدولي..." style="direction: ltr;">~/div>
+                    ~button class="btn btn-purple" style="width:auto; margin:0; height: 44px;" onclick="document.getElementById('nBarcode').value='622'+Math.floor(100000+Math.random()*900000)">توليد 🎲~/button>
+                ~/div>
+                ~div style="display:flex; gap:10px; margin-top:15px; flex-wrap: wrap;">
+                    ~div class="form-group" style="flex:1; min-width: 120px;">
+                        ~label>التصنيف:~/label>
+                        ~input type="text" id="nCat" list="catList" placeholder="اكتب أو اختر تصنيفاً..." autocomplete="off">
+                        ~datalist id="catList">~/datalist>
+                    ~/div>
+                    ~div class="form-group" style="flex:1; min-width: 120px;">~label>تاريخ الصلاحية:~/label>~input type="date" id="nExpiry">~/div>
+                ~/div>
+                ~div style="background:#e6f2ff; padding:15px; border-radius:10px; margin-top:10px; margin-bottom:15px; border: 2px solid #0984e3;">
+                    ~label style="display:flex; align-items:center; gap:10px; cursor: pointer; color: #0984e3; font-size: 1.1rem; margin-bottom:0;">
+                        ~input type="checkbox" id="nHasStrips" style="width: 20px; height: 20px;" onchange="document.getElementById('stripArea').style.display=this.checked?'flex':'none'"> هذا الدواء يحتوي على شرائط~/label>
+                    ~div id="stripArea" style="display:none; gap:10px; margin-top:15px; flex-wrap: wrap;">
+                        ~div class="form-group" style="flex:1; min-width: 120px;">~label>عدد الشرائط بالعلبة:~/label>~input type="number" id="nSpb" value="1">~/div>
+                        ~div class="form-group" style="flex:1; min-width: 120px;">~label>سعر شراء الشريط:~/label>~input type="number" id="nCostStrip" value="0">~/div>
+                        ~div class="form-group" style="flex:1; min-width: 120px;">~label>سعر بيع الشريط:~/label>~input type="number" id="nSpStrip" value="0">~/div>
+                    ~/div>
+                ~/div>
+                ~div style="display:flex; gap:10px; flex-wrap: wrap;">
+                    ~div class="form-group" style="flex:1; min-width: 120px;">~label>سعر شراء العلبة:~/label>~input type="number" id="nCostBox" value="0">~/div>
+                    ~div class="form-group" style="flex:1; min-width: 120px;">~label>سعر بيع العلبة:~/label>~input type="number" id="nSpBox" value="0">~/div>
+                    ~div class="form-group" style="flex:1; min-width: 120px;">~label id="lblQty">الكمية المضافة (بالعلب):~/label>~input type="number" id="nQty" value="0">~/div>
+                ~/div>
+                ~input type="hidden" id="nId" value="">
+                ~button class="btn btn-blue" style="font-size: 1.1rem; padding: 12px; margin-top: 15px;" onclick="saveProduct()">حفظ الدواء وتحديث المخزون 💾~/button>
+            ~/div>
+        ~/div>
 
-        <!-- Shortages Tab -->
-        <div id="shortagesTab" class="tab-content">
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 style="color:#e74c3c;">⚠️ الأدوية الناقصة (أقل من 5 علب)</h3>
-                    <button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير كـ PDF 📄</button>
-                </div>
-                <div id="shortagesReportArea"><table><thead><tr><th class="no-print">تحديد</th><th>الدواء</th><th>الكمية المتاحة</th></tr></thead><tbody id="shortagesTable"></tbody></table></div>
-            </div>
-        </div>
+        ~!-- Shortages Tab -->
+        ~div id="shortagesTab" class="tab-content">
+            ~div class="card">
+                ~div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    ~h3 style="color:#e74c3c;">⚠️ الأدوية الناقصة (أقل من 5 علب)~/h3>
+                    ~button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير كـ PDF 📄~/button>
+                ~/div>
+                ~div id="shortagesReportArea">~table>~thead>~tr>~th class="no-print">تحديد~/th>~th>الدواء~/th>~th>الكمية المتاحة~/th>~/tr>~/thead>~tbody id="shortagesTable">~/tbody>~/table>~/div>
+            ~/div>
+        ~/div>
 
-        <!-- Reports Tab -->
-        <div id="reportsTab" class="tab-content">
-            <div class="card no-print">
-                <h3 style="color:#1e3c72; margin-bottom:15px;">تحديد فترة التقرير:</h3>
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    <div class="form-group" style="flex:1;"><label>من تاريخ:</label><input type="date" id="repStart"></div>
-                    <div class="form-group" style="flex:1;"><label>إلى تاريخ:</label><input type="date" id="repEnd"></div>
-                    <button class="btn btn-blue" style="flex:1; height:44px; margin-top:28px;" onclick="generateDashboard()">عرض التقرير 📊</button>
-                </div>
-            </div>
-            <div id="dashboardReportArea" style="background:#f4f7f6; padding:15px; border-radius:12px;">
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                    <div style="background:#fff; padding:20px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #0984e3;"><h3 style="color:#7f8c8d; margin-bottom:10px;">إجمالي المبيعات</h3><h2 id="dashSales" style="color:#0984e3; font-size:2rem;">0.00</h2></div>
-                    <div style="background:#fff; padding:20px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #e74c3c;"><h3 style="color:#7f8c8d; margin-bottom:10px;">إجمالي المرتجعات</h3><h2 id="dashReturns" style="color:#e74c3c; font-size:2rem;">0.00</h2></div>
-                    <div style="background:#fff; padding:20px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #27ae60;"><h3 style="color:#7f8c8d; margin-bottom:10px;">صافي الدرج</h3><h2 id="dashNet" style="color:#27ae60; font-size:2rem;">0.00</h2></div>
-                </div>
-                <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
-                    <div style="flex:1; min-width:300px; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">مقارنة المبيعات والمرتجعات</h4><canvas id="salesChart"></canvas></div>
-                    <div style="flex:1; min-width:300px; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">أعلى 10 أصناف مبيعاً</h4><canvas id="topItemsChart"></canvas></div>
-                </div>
-            </div>
-            <button class="btn btn-dark no-print" onclick="exportDashboardPDF()">تصدير التقرير كـ PDF 📄</button>
-        </div>
+        ~!-- Reports Tab -->
+        ~div id="reportsTab" class="tab-content">
+            ~div class="card no-print">
+                ~h3 style="color:#1e3c72; margin-bottom:15px;">تحديد فترة التقرير:~/h3>
+                ~div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    ~div class="form-group" style="flex:1;">~label>من تاريخ:~/label>~input type="date" id="repStart">~/div>
+                    ~div class="form-group" style="flex:1;">~label>إلى تاريخ:~/label>~input type="date" id="repEnd">~/div>
+                    ~button class="btn btn-blue" style="flex:1; height:44px; margin-top:28px;" onclick="generateDashboard()">عرض التقرير 📊~/button>
+                ~/div>
+            ~/div>
+            ~div id="dashboardReportArea" style="background:#f4f7f6; padding:15px; border-radius:12px;">
+                ~div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    ~div style="background:#fff; padding:20px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #0984e3;">~h3 style="color:#7f8c8d; margin-bottom:10px;">إجمالي المبيعات~/h3>~h2 id="dashSales" style="color:#0984e3; font-size:2rem;">0.00~/h2>~/div>
+                    ~div style="background:#fff; padding:20px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #e74c3c;">~h3 style="color:#7f8c8d; margin-bottom:10px;">إجمالي المرتجعات~/h3>~h2 id="dashReturns" style="color:#e74c3c; font-size:2rem;">0.00~/h2>~/div>
+                    ~div style="background:#fff; padding:20px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #27ae60;">~h3 style="color:#7f8c8d; margin-bottom:10px;">صافي الدرج~/h3>~h2 id="dashNet" style="color:#27ae60; font-size:2rem;">0.00~/h2>~/div>
+                ~/div>
+                ~div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
+                    ~div style="flex:1; min-width:300px; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);">~h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">مقارنة المبيعات والمرتجعات~/h4>~canvas id="salesChart">~/canvas>~/div>
+                    ~div style="flex:1; min-width:300px; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);">~h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">أعلى 10 أصناف مبيعاً~/h4>~canvas id="topItemsChart">~/canvas>~/div>
+                ~/div>
+            ~/div>
+            ~button class="btn btn-dark no-print" onclick="exportDashboardPDF()">تصدير التقرير كـ PDF 📄~/button>
+        ~/div>
 
-        <!-- Users Tab -->
-        <div id="usersTab" class="tab-content">
-            <div class="card">
-                <h3 style="color:#1e3c72; margin-bottom:15px;">➕ إضافة / تعديل مستخدم</h3>
-                <div style="display:flex; gap:10px; flex-wrap: wrap;">
-                    <div class="form-group" style="flex:1; min-width:120px;"><label>اسم المستخدم:</label><input type="text" id="uName"></div>
-                    <div class="form-group" style="flex:1; min-width:120px;"><label>كلمة المرور:</label><input type="password" id="uPass"></div>
-                    <div class="form-group" style="flex:1; min-width:120px;"><label>الصلاحية:</label><select id="uRole"><option value="Admin">مدير (Admin)</option><option value="User">كاشير (User)</option></select></div>
-                </div>
-                <button class="btn btn-blue" onclick="saveUser()">حفظ المستخدم 👤</button>
-            </div>
-            <div class="card"><h3 style="color:#1e3c72; margin-bottom:10px;">📋 قائمة المستخدمين الحاليين</h3><div style="overflow-x:auto;"><table><thead><tr><th>اسم المستخدم</th><th>كلمة المرور</th><th>الصلاحية</th><th>تعديل</th></tr></thead><tbody id="usersTable"></tbody></table></div></div>
-        </div>
-    </div>
+        ~!-- Users Tab -->
+        ~div id="usersTab" class="tab-content">
+            ~div class="card">
+                ~h3 style="color:#1e3c72; margin-bottom:15px;">➕ إضافة / تعديل مستخدم~/h3>
+                ~div style="display:flex; gap:10px; flex-wrap: wrap;">
+                    ~div class="form-group" style="flex:1; min-width:120px;">~label>اسم المستخدم:~/label>~input type="text" id="uName">~/div>
+                    ~div class="form-group" style="flex:1; min-width:120px;">~label>كلمة المرور:~/label>~input type="password" id="uPass">~/div>
+                    ~div class="form-group" style="flex:1; min-width:120px;">~label>الصلاحية:~/label>~select id="uRole">~option value="Admin">مدير (Admin)~/option>~option value="User">كاشير (User)~/option>~/select>~/div>
+                ~/div>
+                ~button class="btn btn-blue" onclick="saveUser()">حفظ المستخدم 👤~/button>
+            ~/div>
+            ~div class="card">~h3 style="color:#1e3c72; margin-bottom:10px;">📋 قائمة المستخدمين الحاليين~/h3>~div style="overflow-x:auto;">~table>~thead>~tr>~th>اسم المستخدم~/th>~th>كلمة المرور~/th>~th>الصلاحية~/th>~th>تعديل~/th>~/tr>~/thead>~tbody id="usersTable">~/tbody>~/table>~/div>~/div>
+        ~/div>
+    ~/div>
 
-    <script>
-        const URL = "https://script.google.com/macros/s/AKfycbwhj5QHRcIUpoiNb2wNNUDI3Sdmc34Tnj8f-_z31IlmDTdro4FLNqWTZBm4Pxv_juI/exec";
+    ~script>
+        const URL = "https://script.google.com/macros/s/AKfycbwhj5QHRcIUpoiNb2wNNUDI3Sdmc34Tnj8f-_z31IlmDTdro4FLNqWTZBm4Pxv_ju/exec";
         let products = [], invoices = [], users = [];
         let posItems = [], selP = null, scanner = null, isScanning = false, scanMode = 'pos';
         let invoiceCounter = 10001;
@@ -343,8 +343,16 @@
         let posViewMode = false, posViewIdx = -1, posInvoicesOnly = [];
 
         window.addEventListener('load', () => { 
-            // Start fetching data immediately behind the splash screen
             fetchData(); 
+            setTimeout(() => { 
+                let splash = document.getElementById('splashScreen'); 
+                splash.style.opacity = '0'; 
+                setTimeout(() => { 
+                    splash.style.display = 'none'; 
+                    document.getElementById('loginOverlay').style.display = 'flex'; 
+                    if(document.getElementById('loginPass')) document.getElementById('loginPass').focus();
+                }, 800); 
+            }, 2000); 
             let today = new Date().toISOString().split('T')[0];
             document.getElementById('repStart').value = today; document.getElementById('repEnd').value = today;
         });
@@ -373,27 +381,16 @@
                 products = res.products || []; invoices = res.invoices || []; users = res.users || []; invoiceCounter = res.nextInvoiceId || 10001; 
                 if(users.length === 0) users = [{username: 'admin', password: '852', role: 'Admin'}];
                 
-                // Populate Category Datalist
                 let catSet = new Set();
                 products.forEach(p => { if(p.category) catSet.add(p.category); });
                 let dl = document.getElementById('catList'); dl.innerHTML = '';
                 catSet.forEach(c => { let opt = document.createElement('option'); opt.value = c; dl.appendChild(opt); });
 
-                // Populate Login Dropdown
                 let uSelect = document.getElementById('loginUserSelect');
-                uSelect.innerHTML = users.map(u => '<option value="' + u.username + '">' + u.username + ' (' + u.role + ')</option>').join('');
+                uSelect.innerHTML = users.map(u => '~option value="' + u.username + '">' + u.username + ' (' + u.role + ')~/option>').join('');
 
                 setStatus('🟢 متصل ومُحدث'); 
                 setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect); 
-                
-                // Hide splash and show login
-                document.getElementById('splashScreen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('splashScreen').style.display = 'none';
-                    document.getElementById('loginOverlay').style.display = 'flex';
-                    document.getElementById('loginPass').focus();
-                }, 800);
-
                 if(document.getElementById('stockTab').classList.contains('active')) renderStock(); if(document.getElementById('usersTab').classList.contains('active')) renderUsers(); 
             } else { showToast('خطأ في جلب البيانات', 'error'); } 
         }
@@ -407,13 +404,13 @@
             function renderList() {
                 let val = inp.value.trim().toLowerCase(); wrapper.innerHTML = ""; if(!val) { wrapper.style.display = "none"; return; }
                 let count = 0; let hasItems = false;
-                for (let i = 0; i < dataArr.length; i++) {
+                for (let i = 0; i ~ dataArr.length; i++) {
                     let nEn = dataArr[i].name_en ? dataArr[i].name_en.toLowerCase() : ""; let nAr = dataArr[i].name_ar ? dataArr[i].name_ar.toLowerCase() : ""; let pBarcode = dataArr[i].barcode ? dataArr[i].barcode.toString() : "";
                     if (nEn.includes(val) || nAr.includes(val) || pBarcode === val) {
                         count++; hasItems = true; let b = document.createElement("DIV");
-                        b.innerHTML = '<strong>' + (dataArr[i].name_en || '') + '</strong> <br> <small style="color:#0984e3;">' + (dataArr[i].name_ar || '') + '</small> <small style="color:#7f8c8d; display:block;">(' + (dataArr[i].barcode || '') + ')</small>';
+                        b.innerHTML = '~strong>' + (dataArr[i].name_en || '') + '~/strong> ~br> ~small style="color:#0984e3;">' + (dataArr[i].name_ar || '') + '~/small> ~small style="color:#7f8c8d; display:block;">(' + (dataArr[i].barcode || '') + ')~/small>';
                         b.addEventListener("click", function() { inp.value = dataArr[i].name_en || dataArr[i].name_ar; wrapper.style.display = "none"; if(callback) callback(dataArr[i]); });
-                        wrapper.appendChild(b); if(count >= 15) break; 
+                        wrapper.appendChild(b); if(count > 15) break; 
                     }
                 }
                 wrapper.style.display = hasItems ? "block" : "none";
@@ -421,7 +418,7 @@
             inp.addEventListener("input", renderList); document.addEventListener("click", function(e) { if(e.target !== inp && e.target !== wrapper) wrapper.style.display = "none"; });
         }
 
-        function formatStockDisplay(q, spb, hasStrips) { if (!hasStrips || spb <= 1) return q + ' علبة'; let boxes = Math.floor(q / spb); let strips = q % spb; let txt = []; if (boxes > 0) txt.push(boxes + ' علبة'); if (strips > 0) txt.push(strips + ' شريط'); return txt.join(' و ') || '0 علبة'; }
+        function formatStockDisplay(q, spb, hasStrips) { if (!hasStrips || spb ~ 2) return q + ' علبة'; let boxes = Math.floor(q / spb); let strips = q % spb; let txt = []; if (boxes > 0) txt.push(boxes + ' علبة'); if (strips > 0) txt.push(strips + ' شريط'); return txt.join(' و ') || '0 علبة'; }
         
         function toggleScanner(mode) { 
             scanMode = mode || 'pos'; let c = document.getElementById('scannerContainer'); 
@@ -460,9 +457,9 @@
 
         function renderPos() {
             let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale'; let tbody = document.getElementById('posTable'); let tot = 0;
-            if(posItems.length===0) tbody.innerHTML='<tr><td colspan="6">لم يتم إضافة أدوية</td></tr>';
+            if(posItems.length===0) tbody.innerHTML='~tr>~td colspan="6">لم يتم إضافة أدوية~/td>~/tr>';
             else { 
-                let html = ''; posItems.forEach((i, x) => { tot += i.total; html += '<tr><td style="font-weight:bold; color:#1e3c72;">' + i.n + '</td><td>' + i.unit + '</td><td>' + i.qty + '</td><td>' + i.price + '</td><td style="color:#0984e3; font-weight:bold;">' + i.total + '</td><td><button class="btn btn-red" style="padding:4px 10px; margin:0;" onclick="posItems.splice(' + x + ',1); renderPos()">X</button></td></tr>'; });
+                let html = ''; posItems.forEach((i, x) => { tot += i.total; html += '~tr>~td style="font-weight:bold; color:#1e3c72;">' + i.n + '~/td>~td>' + i.unit + '~/td>~td>' + i.qty + '~/td>~td>' + i.price + '~/td>~td style="color:#0984e3; font-weight:bold;">' + i.total + '~/td>~td>~button class="btn btn-red" style="padding:4px 10px; margin:0;" onclick="posItems.splice(' + x + ',1); renderPos()">X~/button>~/td>~/tr>'; });
                 tbody.innerHTML = html;
             }
             document.getElementById('finalTotal').innerText = tot.toFixed(2) + " ج.م"; document.getElementById('finalTotal').style.color = isSale ? '#f1c40f' : '#e74c3c';
@@ -480,22 +477,24 @@
             let invObj = { id: invoiceCounter++, date: new Date().toISOString(), type: type, items: posItems, itemsText: txtArr.join(' | '), totalComm: tCost * sign, totalEGP: tSell * sign, netProfit: (tSell - tCost) * sign, paymentType: pType, clientName: cName, clientPhone: cPhone };
             invoices.push(invObj); sendData("saveInvoice", invObj); clearInvoice();
             
-            // Return to cash automatically to prevent accidental credit sales
             document.getElementById('posPaymentType').value = 'cash'; toggleCreditFields(); document.getElementById('posClientName').value = ''; document.getElementById('posClientPhone').value = '';
             showToast(type === 'sale' ? 'تم حفظ الفاتورة ✅' : 'تم استرجاع الأدوية ↩️');
         }
 
-        /* --- Invoice Navigation Logic --- */
         function navInvoice(dir) {
             posInvoicesOnly = invoices.filter(function(i) { return i.type === 'sale'; });
             if(posInvoicesOnly.length === 0) return showToast('لا توجد فواتير سابقة', 'warn');
             posViewMode = true;
-            if(dir === 'first') posViewIdx = 0; else if(dir === 'last') posViewIdx = posInvoicesOnly.length - 1; else if(dir === 'prev') { posViewIdx--; if(posViewIdx < 0) posViewIdx = 0; } else if(dir === 'next') { posViewIdx++; if(posViewIdx >= posInvoicesOnly.length) posViewIdx = posInvoicesOnly.length - 1; }
+            if(dir === 'first') posViewIdx = 0; 
+            else if(dir === 'last') posViewIdx = posInvoicesOnly.length - 1; 
+            else if(dir === 'prev') { posViewIdx--; if(posViewIdx ~ 0) posViewIdx = 0; } 
+            else if(dir === 'next') { posViewIdx++; if(posViewIdx > posInvoicesOnly.length - 1) posViewIdx = posInvoicesOnly.length - 1; }
+            
             let inv = posInvoicesOnly[posViewIdx];
             document.getElementById('posInvoiceViewerLabel').innerText = 'عرض فاتورة #' + inv.id + ' (' + inv.date.split('T')[0] + ')';
             document.getElementById('posInputArea').style.display = 'none'; document.getElementById('posActionButtons').style.display = 'none';
             let tbody = document.getElementById('posTable'); let html = '';
-            inv.items.forEach(function(i) { html += '<tr><td style="font-weight:bold; color:#1e3c72;">' + i.n + '</td><td>' + i.unit + '</td><td>' + i.qty + '</td><td>' + i.price + '</td><td style="color:#0984e3; font-weight:bold;">' + i.total + '</td><td>🔒</td></tr>'; });
+            inv.items.forEach(function(i) { html += '~tr>~td style="font-weight:bold; color:#1e3c72;">' + i.n + '~/td>~td>' + i.unit + '~/td>~td>' + i.qty + '~/td>~td>' + i.price + '~/td>~td style="color:#0984e3; font-weight:bold;">' + i.total + '~/td>~td>🔒~/td>~/tr>'; });
             tbody.innerHTML = html;
             let payTxt = inv.paymentType === 'credit' ? ' (آجل: ' + inv.clientName + ')' : (inv.paymentType === 'visa' ? ' (فيزا)' : ' (كاش)');
             document.getElementById('finalTotal').innerText = inv.totalEGP + ' ج.م' + payTxt;
@@ -508,7 +507,6 @@
             renderPos();
         }
 
-        /* --- Clients (Credit) Logic --- */
         function renderClients() {
             let clientsMap = {};
             invoices.forEach(function(inv) {
@@ -524,10 +522,10 @@
                 if(bal > 0) {
                     let waMsg = 'مرحباً ' + cName + '، تذكير ودي من صيدلية Pharmacy Pro بوجود مديونية مستحقة بقيمة ' + bal.toFixed(2) + ' ج.م. شكراً لثقتكم بنا!';
                     let waLink = 'https://wa.me/2' + clientsMap[cName].phone + '?text=' + encodeURIComponent(waMsg);
-                    html += '<tr><td>' + idx++ + '</td><td style="font-weight:bold; color:#1e3c72;">' + cName + '</td><td dir="ltr">' + clientsMap[cName].phone + '</td><td style="color:#e74c3c; font-weight:bold; font-size:1.1rem;">' + bal.toFixed(2) + ' ج.م</td><td><button class="btn btn-green" style="padding:5px 10px; margin:2px; width:auto;" onclick="window.open(\'' + waLink + '\', \'_blank\')">واتس 💬</button> <button class="btn btn-blue" style="padding:5px 10px; margin:2px; width:auto;" onclick="payDebt(\'' + cName + '\', \'' + clientsMap[cName].phone + '\')">تسديد 💰</button></td></tr>';
+                    html += '~tr>~td>' + idx++ + '~/td>~td style="font-weight:bold; color:#1e3c72;">' + cName + '~/td>~td dir="ltr">' + clientsMap[cName].phone + '~/td>~td style="color:#e74c3c; font-weight:bold; font-size:1.1rem;">' + bal.toFixed(2) + ' ج.م~/td>~td>~button class="btn btn-green" style="padding:5px 10px; margin:2px; width:auto;" onclick="window.open(\'' + waLink + '\', \'_blank\')">واتس 💬~/button> ~button class="btn btn-blue" style="padding:5px 10px; margin:2px; width:auto;" onclick="payDebt(\'' + cName + '\', \'' + clientsMap[cName].phone + '\')">تسديد 💰~/button>~/td>~/tr>';
                 }
             }
-            tbody.innerHTML = html || '<tr><td colspan="5">لا يوجد عملاء عليهم مديونيات</td></tr>';
+            tbody.innerHTML = html || '~tr>~td colspan="5">لا يوجد عملاء عليهم مديونيات~/td>~/tr>';
         }
 
         function payDebt(cName, phone) {
@@ -543,7 +541,7 @@
             document.getElementById('nBarcode').value = p.barcode || ''; document.getElementById('nCat').value = p.category || ''; document.getElementById('nExpiry').value = p.expiry || '';
             let hs = p.hasStrips === true || p.hasStrips === 'true'; document.getElementById('nHasStrips').checked = hs; document.getElementById('stripArea').style.display = hs ? 'flex' : 'none';
             document.getElementById('nSpb').value = p.spb || 1; document.getElementById('nCostStrip').value = p.pStrip || 0; document.getElementById('nSpStrip').value = p.spStrip || 0; document.getElementById('nCostBox').value = p.pBox || 0; document.getElementById('nSpBox').value = p.spBox || 0;
-            document.getElementById('lblQty').innerHTML = 'إضافة كمية <span style="color:#e74c3c;">(المتاح حالياً: ' + formatStockDisplay(p.q, p.spb, hs) + ')</span>'; document.getElementById('nQty').value = 0; showToast('تم جلب بيانات الدواء للتعديل', 'warn');
+            document.getElementById('lblQty').innerHTML = 'إضافة كمية ~span style="color:#e74c3c;">(المتاح حالياً: ' + formatStockDisplay(p.q, p.spb, hs) + ')~/span>'; document.getElementById('nQty').value = 0; showToast('تم جلب بيانات الدواء للتعديل', 'warn');
         }
 
         function saveProduct() {
@@ -552,28 +550,39 @@
             let hs = document.getElementById('nHasStrips').checked; let spb = hs ? (parseInt(document.getElementById('nSpb').value)||1) : 1; let addedBoxes = parseInt(document.getElementById('nQty').value)||0; let addedStrips = addedBoxes * spb;
             let existingId = document.getElementById('nId').value; let currentQ = 0; if(existingId) { let exP = products.find(x => x.id == existingId); if(exP) currentQ = parseInt(exP.q)||0; }
             let pObj = { id: existingId || Date.now().toString(), name_en: nEn, name_ar: nAr, barcode: document.getElementById('nBarcode').value, category: document.getElementById('nCat').value, expiry: document.getElementById('nExpiry').value, hasStrips: hs, spb: spb, pBox: parseFloat(document.getElementById('nCostBox').value)||0, spBox: parseFloat(document.getElementById('nSpBox').value)||0, pStrip: parseFloat(document.getElementById('nCostStrip').value)||0, spStrip: parseFloat(document.getElementById('nSpStrip').value)||0, q: currentQ + addedStrips };
-            if(existingId) { let idx = products.findIndex(x => x.id == existingId); if(idx>-1) products[idx] = pObj; } else { products.push(pObj); }
+            if(existingId) { let idx = products.findIndex(x => x.id == existingId); if(idx > -1) products[idx] = pObj; } else { products.push(pObj); }
             sendData("updateProduct", pObj); showToast('تم حفظ الدواء بنجاح 📦');
             document.querySelectorAll('#addTab input').forEach(i=>i.value=''); document.getElementById('nHasStrips').checked = false; document.getElementById('stripArea').style.display='none'; document.getElementById('nQty').value='0'; document.getElementById('lblQty').innerText = "الكمية المضافة (بالعلب):"; document.getElementById('nId').value='';
             
-            // Update DataList if new category
             if(pObj.category) {
                 let dl = document.getElementById('catList');
-                let exists = false; for(let i=0; i x.id == id); if(p) { document.querySelectorAll('.tab-btn')[3].click(); onAddProductSelect(p); } }
+                let exists = false; for(let i=0; i~dl.options.length; i++){ if(dl.options[i].value === pObj.category) exists=true; }
+                if(!exists) { let opt = document.createElement('option'); opt.value = pObj.category; dl.appendChild(opt); }
+            }
+            setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect);
+        }
+
+        function printBarcode(code, name) {
+            document.getElementById('modalPName').innerText = name;
+            JsBarcode("#barcodeSvg", code, { format: "CODE128", width: 1.5, height: 40, fontSize: 14, margin: 5, displayValue: true });
+            document.getElementById('barcodeModal').style.display = 'flex';
+        }
+
+        function editProductFromStock(id) { let p = products.find(x => x.id == id); if(p) { document.querySelectorAll('.tab-btn')[3].click(); onAddProductSelect(p); } }
 
         function renderStock(q="") {
             let tbody = document.getElementById('stockTable'); let html = '';
             products.filter(p=>{ let matchEn = p.name_en ? p.name_en.toLowerCase().includes(q.toLowerCase()) : false; let matchAr = p.name_ar ? p.name_ar.toLowerCase().includes(q.toLowerCase()) : false; let matchBar = p.barcode ? p.barcode.toString().includes(q) : false; return matchEn || matchAr || matchBar; }).forEach((p, idx)=>{
-                html += '<tr><td>' + (idx+1) + '</td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || '') + ' <br> <small style="color:#0984e3">' + (p.name_ar || '') + '</small></td><td style="direction:ltr;">' + (p.barcode||'-') + '</td><td style="color:#0984e3; font-weight:bold;">' + formatStockDisplay(p.q, p.spb, p.hasStrips) + '</td><td>' + p.spBox + ' ج.م' + (p.hasStrips?' / '+p.spStrip+' ج.م':'') + '</td><td><button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock(\'' + p.id + '\')">✏️</button><button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="printBarcode(\'' + p.barcode + '\', \'' + (p.name_en||p.name_ar) + '\')">🖨️</button><button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm(\'متأكد من الحذف؟\')){ products = products.filter(x=>x.id!=\'' + p.id + '\'); sendData(\'deleteProduct\',{id:\'' + p.id + '\'}); renderStock(); showToast(\'تم الحذف\'); }">🗑️</button></td></tr>';
+                html += '~tr>~td>' + (idx+1) + '~/td>~td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || '') + ' ~br> ~small style="color:#0984e3">' + (p.name_ar || '') + '~/small>~/td>~td style="direction:ltr;">' + (p.barcode||'-') + '~/td>~td style="color:#0984e3; font-weight:bold;">' + formatStockDisplay(p.q, p.spb, p.hasStrips) + '~/td>~td>' + p.spBox + ' ج.م' + (p.hasStrips?' / '+p.spStrip+' ج.م':'') + '~/td>~td>~button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock(\'' + p.id + '\')">✏️~/button>~button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="printBarcode(\'' + p.barcode + '\', \'' + (p.name_en||p.name_ar) + '\')">🖨️~/button>~button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm(\'متأكد من الحذف؟\')){ products = products.filter(x=>x.id!=\'' + p.id + '\'); sendData(\'deleteProduct\',{id:\'' + p.id + '\'}); renderStock(); showToast(\'تم الحذف\'); }">🗑️~/button>~/td>~/tr>';
             });
             tbody.innerHTML = html;
         }
 
         function renderShortages() {
             let tbody = document.getElementById('shortagesTable'); let html = '';
-            let shortages = products.filter(p => { let boxes = p.hasStrips ? Math.floor(p.q / (p.spb||1)) : p.q; return boxes < 5; });
-            if(shortages.length === 0) { tbody.innerHTML = '<tr><td colspan="3">لا توجد نواقص بالمخزن</td></tr>'; return; }
-            shortages.forEach(p => { html += '<tr><td class="no-print"><input type="checkbox" class="short-chk" checked></td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.name_ar) + '</td><td style="color:#e74c3c; font-weight:bold;">' + formatStockDisplay(p.q, p.spb, p.hasStrips) + '</td></tr>'; });
+            let shortages = products.filter(p => { let boxes = p.hasStrips ? Math.floor(p.q / (p.spb||1)) : p.q; return boxes ~ 5; });
+            if(shortages.length === 0) { tbody.innerHTML = '~tr>~td colspan="3">لا توجد نواقص بالمخزن~/td>~/tr>'; return; }
+            shortages.forEach(p => { html += '~tr>~td class="no-print">~input type="checkbox" class="short-chk" checked>~/td>~td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.name_ar) + '~/td>~td style="color:#e74c3c; font-weight:bold;">' + formatStockDisplay(p.q, p.spb, p.hasStrips) + '~/td>~/tr>'; });
             tbody.innerHTML = html;
         }
 
@@ -610,9 +619,9 @@
             chart2 = new Chart(document.getElementById('topItemsChart'), { type: 'bar', data: { labels: topItems.map(i=>i[0]), datasets: [{ label: 'الكمية المباعة', data: topItems.map(i=>i[1]), backgroundColor: '#27ae60' }] } });
         }
 
-        function renderUsers() { let tbody = document.getElementById('usersTable'); let html = ''; users.forEach((u) => { html += '<tr><td style="font-weight:bold;">' + u.username + '</td><td>••••••</td><td><span class="badge ' + (u.role==='Admin'?'badge-safe':'badge-warn') + '">' + u.role + '</span></td><td><button class="btn btn-purple" style="padding:4px 8px; margin:0; width:auto;" onclick="editUser(\'' + u.username + '\',\'' + u.password + '\',\'' + u.role + '\')">تعديل ✏️</button></td></tr>'; }); tbody.innerHTML = html || '<tr><td colspan="4">لا يوجد مستخدمين</td></tr>'; }
+        function renderUsers() { let tbody = document.getElementById('usersTable'); let html = ''; users.forEach((u) => { html += '~tr>~td style="font-weight:bold;">' + u.username + '~/td>~td>••••••~/td>~td>~span class="badge ' + (u.role==='Admin'?'badge-safe':'badge-warn') + '">' + u.role + '~/span>~/td>~td>~button class="btn btn-purple" style="padding:4px 8px; margin:0; width:auto;" onclick="editUser(\'' + u.username + '\',\'' + u.password + '\',\'' + u.role + '\')">تعديل ✏️~/button>~/td>~/tr>'; }); tbody.innerHTML = html || '~tr>~td colspan="4">لا يوجد مستخدمين~/td>~/tr>'; }
         function editUser(u, p, r) { document.getElementById('uName').value = u; document.getElementById('uPass').value = p; document.getElementById('uRole').value = r; }
         function saveUser() { let u = document.getElementById('uName').value.trim(); let p = document.getElementById('uPass').value.trim(); let r = document.getElementById('uRole').value; if(!u || !p) return showToast('أدخل البيانات كاملة!', 'error'); let uObj = { username: u, password: p, role: r }; let idx = users.findIndex(x => x.username === u); if(idx > -1) users[idx] = uObj; else users.push(uObj); showToast('تم حفظ بيانات المستخدم 👤'); renderUsers(); document.getElementById('uName').value = ''; document.getElementById('uPass').value = ''; }
-    </script>
-</body>
-</html>
+    ~/script>
+~/body>
+~/html>
