@@ -334,6 +334,21 @@
         </div>
     </div>
 
+    <!-- Emergency script directly loaded to prevent hangs -->
+    <script>
+        setTimeout(function() {
+            var splash = document.getElementById('splashScreen');
+            if (splash && splash.style.display !== 'none') {
+                splash.style.opacity = '0';
+                setTimeout(function() {
+                    splash.style.display = 'none';
+                    var login = document.getElementById('loginOverlay');
+                    if (login) login.style.display = 'flex';
+                }, 500);
+            }
+        }, 3000);
+    </script>
+
     <script>
         const URL = "https://script.google.com/macros/s/AKfycbwhj5QHRcIUpoiNb2wNNUDI3Sdmc34Tnj8f-_z31IlmDTdro4FLNqWTZBm4Pxv_juI/exec";
         let products = [], invoices = [], users = [];
@@ -342,25 +357,12 @@
         let chart1 = null, chart2 = null;
         let posViewMode = false, posViewIdx = -1, posInvoicesOnly = [];
 
-        window.addEventListener('load', () => { 
+        document.addEventListener('DOMContentLoaded', function() { 
             fetchData(); 
-            
-            // Fallback: Force hide splash screen after 4 seconds
-            setTimeout(() => {
-                let splash = document.getElementById('splashScreen');
-                if (splash.style.display !== 'none') {
-                    splash.style.opacity = '0';
-                    setTimeout(() => {
-                        splash.style.display = 'none';
-                        document.getElementById('loginOverlay').style.display = 'flex';
-                        if(document.getElementById('loginPass')) document.getElementById('loginPass').focus();
-                    }, 500);
-                    if(products.length === 0) showToast('تأخر الاتصال بقاعدة البيانات، يرجى التحديث', 'error');
-                }
-            }, 4000);
-
             let today = new Date().toISOString().split('T')[0];
-            document.getElementById('repStart').value = today; document.getElementById('repEnd').value = today;
+            if(document.getElementById('repStart')){
+                document.getElementById('repStart').value = today; document.getElementById('repEnd').value = today;
+            }
         });
 
         function showToast(msg, type) { let t = document.getElementById('toast'); t.innerText = msg; t.style.backgroundColor = type === 'error' ? '#e74c3c' : '#0984e3'; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
@@ -436,7 +438,7 @@
             inp.addEventListener("input", renderList); document.addEventListener("click", function(e) { if(e.target !== inp && e.target !== wrapper) wrapper.style.display = "none"; });
         }
 
-        function formatStockDisplay(q, spb, hasStrips) { if (!hasStrips || spb <= 1) return q + ' علبة'; let boxes = Math.floor(q / spb); let strips = q % spb; let txt = []; if (boxes > 0) txt.push(boxes + ' علبة'); if (strips > 0) txt.push(strips + ' شريط'); return txt.join(' و ') || '0 علبة'; }
+        function formatStockDisplay(q, spb, hasStrips) { if (!hasStrips || spb < 2) return q + ' علبة'; let boxes = Math.floor(q / spb); let strips = q % spb; let txt = []; if (boxes > 0) txt.push(boxes + ' علبة'); if (strips > 0) txt.push(strips + ' شريط'); return txt.join(' و ') || '0 علبة'; }
         
         function toggleScanner(mode) { 
             scanMode = mode || 'pos'; let c = document.getElementById('scannerContainer'); 
