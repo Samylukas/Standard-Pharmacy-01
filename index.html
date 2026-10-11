@@ -71,15 +71,6 @@
         .checkbox-group label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-weight: bold; cursor: pointer; color: #1e3c72; }
         .checkbox-group input { width: 18px; height: 18px; }
 
-        @media (max-width: 768px) {
-            .card.no-print > div { justify-content: center; flex-wrap: wrap; width: 100%; text-align: center; }
-            .form-group label { font-size: 0.85rem; }
-            th, td { font-size: 0.85rem; padding: 8px 3px; }
-            .btn { font-size: 0.95rem !important; padding: 8px 10px; }
-            #posActionButtons { flex-direction: column; }
-            #posActionButtons .btn { width: 100%; margin: 0; }
-        }
-
         @media print { .no-print { display: none !important; } }
     </style>
 </head>
@@ -124,7 +115,7 @@
             <h3 style="color:#1e3c72; margin-bottom:15px;">🖨️ اختر طريقة طباعة الفاتورة</h3>
             <button class="btn btn-blue" onclick="executeInvoicePrint('web-bluetooth')" style="padding:12px;">طابعة بلوتوث حرارية (مباشر)</button>
             <button class="btn btn-green" onclick="executeInvoicePrint('print-bridge')" style="padding:12px;">تطبيق PrintBridge (أندرويد)</button>
-            <button class="btn btn-dark" onclick="executeInvoicePrint('system')" style="padding:12px;">طابعة النظام العادية (A4)</button>
+            <button class="btn btn-dark" onclick="executeInvoicePrint('system')" style="padding:12px;">طابعة النظام العادية (A4/Thermal)</button>
             <button class="btn btn-red" onclick="document.getElementById('invoicePrintModal').style.display='none'" style="margin-top:20px;">إلغاء ❌</button>
         </div>
     </div>
@@ -155,6 +146,7 @@
 
         <div class="nav-tabs no-print">
             <button class="tab-btn active" onclick="showTab('posTab', this)">🛒 الكاشير</button>
+            <button class="tab-btn" onclick="showTab('returnsTab', this)">↩️ المرتجعات</button>
             <button class="tab-btn" onclick="showTab('stockTab', this)">📦 المخزون</button>
             <button class="tab-btn" onclick="showTab('clientsTab', this)">📝 العملاء</button>
             <button class="tab-btn" onclick="showTab('addTab', this)">➕ إضافة</button>
@@ -166,30 +158,25 @@
         <!-- POS Tab -->
         <div id="posTab" class="tab-content active">
             
-            <!-- التنسيق الجديد لشريط التنقل -->
-            <div class="card" style="background:#f4f7f6; padding:10px; border-radius:8px; margin-bottom:15px; border: 1px solid #ccc; text-align:center;">
-                <!-- السطر الأول: أزرار التنقل والاسم -->
-                <div style="display:flex; justify-content:center; align-items:center; gap:15px; margin-bottom:15px; flex-wrap:wrap;">
-                    <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 15px;" onclick="navInvoice('first')">|&lt;</button>
-                    <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 15px;" onclick="navInvoice('prev')">&lt;</button>
-                    <span id="posInvoiceViewerLabel" style="font-weight:bold; color:#1e3c72; font-size:1.1rem; min-width:150px;">فاتورة جديدة 🛒</span>
-                    <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 15px;" onclick="navInvoice('next')">&gt;</button>
-                    <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 15px;" onclick="navInvoice('last')">&gt;|</button>
+            <!-- التنسيق الاحترافي الجديد لأزرار الكاشير -->
+            <div class="card" style="background:#f4f7f6; padding:15px; border-radius:8px; margin-bottom:15px; border: 1px solid #ccc; text-align:center;">
+                <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:10px;">
+                    <button class="btn btn-dark" style="width:auto; margin:0; padding:6px 15px;" onclick="navInvoice('first')">|&lt;</button>
+                    <button class="btn btn-dark" style="width:auto; margin:0; padding:6px 15px;" onclick="navInvoice('prev')">&lt;</button>
+                    <button class="btn btn-dark" style="width:auto; margin:0; padding:6px 15px;" onclick="navInvoice('next')">&gt;</button>
+                    <button class="btn btn-dark" style="width:auto; margin:0; padding:6px 15px;" onclick="navInvoice('last')">&gt;|</button>
                 </div>
-                <!-- السطر الثاني: الطباعة والجديد -->
-                <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                <div style="margin-bottom:10px;">
+                    <span id="posInvoiceViewerLabel" style="font-weight:bold; color:#1e3c72; font-size:1.2rem;">فاتورة جديدة 🛒</span>
+                </div>
+                <div style="display:flex; justify-content:center; gap:15px;">
                     <button class="btn btn-green" style="width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="newInvoiceMode()">➕ جديد</button>
-                    <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="openInvoicePrintModal()">🖨️ طباعة الفاتورة</button>
+                    <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="openInvoicePrintModal()">🖨️ طباعة</button>
                 </div>
             </div>
 
             <div class="card">
                 <div id="posInputArea">
-                    <div class="radio-switch">
-                        <input type="radio" name="invType" id="tSale" value="sale" checked onchange="updatePosColors()"><label for="tSale">🔵 بيع جديد</label>
-                        <input type="radio" name="invType" id="tRet" value="return" onchange="updatePosColors()"><label for="tRet">🔴 مرتجع مريض</label>
-                    </div>
-                    
                     <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:#e6f2ff; padding:10px; border-radius:8px;">
                         <div class="form-group" style="flex:1; margin-bottom:0;"><label>طريقة الدفع:</label>
                             <select id="posPaymentType" onchange="toggleCreditFields()">
@@ -237,6 +224,34 @@
                 <div id="posActionButtons" style="display: flex; gap: 10px; margin-top:15px;">
                     <button class="btn btn-red" style="flex: 1;" onclick="clearInvoice()">تفريغ 🧹</button>
                     <button class="btn btn-blue" style="flex: 2;" onclick="saveInvoice()">حفظ الفاتورة 💾</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Returns Tab (المرتجعات) -->
+        <div id="returnsTab" class="tab-content">
+            <div class="card">
+                <h3 style="color:#e74c3c; margin-bottom:15px;">↩️ إرجاع فاتورة بالكامل للمخزن</h3>
+                <div style="display:flex; gap:10px; align-items: flex-end; flex-wrap:wrap;">
+                    <div class="form-group" style="flex:1; margin-bottom:0; min-width:200px;">
+                        <label>رقم الفاتورة (أو امسح الباركود المطبوع عليها):</label>
+                        <input type="number" id="returnInvoiceId" placeholder="اكتب رقم الفاتورة هنا..." autocomplete="off">
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-blue" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="searchInvoiceForReturn()">🔍 بحث</button>
+                        <button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner('return')">📷 مسح</button>
+                    </div>
+                </div>
+                
+                <div id="returnInvoiceDetails" style="display:none; margin-top:20px; background:#fdedec; padding:15px; border-radius:8px; border:2px solid #e74c3c;">
+                    <h4 id="retInvTitle" style="color:#e74c3c; margin-bottom:10px; text-align:center;"></h4>
+                    <div style="overflow-x:auto;">
+                        <table style="background:#fff;">
+                            <thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead>
+                            <tbody id="retInvTable"></tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-red" style="margin-top:15px; font-size:1.1rem; padding:12px; width:100%;" onclick="processFullReturn()">تأكيد إرجاع الفاتورة للمخزن ↩️</button>
                 </div>
             </div>
         </div>
@@ -367,9 +382,9 @@
         <div id="usersTab" class="tab-content">
             <!-- Settings Card -->
             <div class="card" style="border: 2px solid #0984e3;">
-                <h3 style="color:#0984e3; margin-bottom:15px;">⚙️ إعدادات الصيدلية (الطباعة)</h3>
+                <h3 style="color:#0984e3; margin-bottom:15px;">⚙️ إعدادات الصيدلية (تظهر في الطباعة)</h3>
                 <div class="form-group">
-                    <label>اسم الصيدلية (يظهر على الفواتير والملصقات):</label>
+                    <label>اسم الصيدلية / اللوجو النصي:</label>
                     <input type="text" id="pharmacyNameSetting" placeholder="اكتب اسم الصيدلية هنا...">
                 </div>
                 <button class="btn btn-green" onclick="savePharmacySettings()">حفظ الإعدادات 💾</button>
@@ -400,9 +415,9 @@
         
         let currentPrintInvoice = null;
         let currentPrintLabel = null;
+        let invoiceToReturn = null;
         let myPharmacyName = localStorage.getItem('pharmName') || 'Pharmacy Pro';
 
-        // Emergency Override
         setTimeout(function() {
             let splash = document.getElementById('splashScreen');
             if (splash && splash.style.display !== 'none') {
@@ -444,9 +459,7 @@
         // ================== Web Bluetooth "JS Bridge" ==================
         async function printViaWebBluetooth(textToPrint) {
             try {
-                if (!navigator.bluetooth) {
-                    throw new Error("متصفحك لا يدعم Web Bluetooth.");
-                }
+                if (!navigator.bluetooth) throw new Error("متصفحك لا يدعم Web Bluetooth.");
                 showToast("جاري البحث عن طابعات بلوتوث...", "warn");
                 
                 const device = await navigator.bluetooth.requestDevice({
@@ -462,20 +475,15 @@
                 
                 let targetService = null;
                 const knownUUIDs = ['000018f0-0000-1000-8000-00805f9b34fb', '49535343-fe7d-4ae5-8fa9-9fafd205e455', '0000fee7-0000-1000-8000-00805f9b34fb'];
-                
-                for(let uuid of knownUUIDs) {
-                    try { targetService = await server.getPrimaryService(uuid); if(targetService) break; } catch(e) {}
-                }
+                for(let uuid of knownUUIDs) { try { targetService = await server.getPrimaryService(uuid); if(targetService) break; } catch(e) {} }
                 
                 if(!targetService) throw new Error("لم يتم العثور على خدمة الطباعة.");
-
                 const characteristics = await targetService.getCharacteristics();
                 let writeChar = characteristics.find(c => c.properties.write || c.properties.writeWithoutResponse);
                 if(!writeChar) throw new Error("الطابعة لا تدعم استقبال البيانات المباشر.");
 
                 const encoder = new TextEncoder();
                 const data = encoder.encode(textToPrint); 
-                
                 for (let i = 0; i < data.length; i += 100) {
                     let chunk = data.slice(i, i + 100);
                     await writeChar.writeValue(chunk);
@@ -483,9 +491,7 @@
                 
                 showToast("تمت الطباعة بنجاح! 🖨️", "success");
                 device.gatt.disconnect();
-            } catch (error) {
-                showToast("فشل الطباعة: " + error.message, "error");
-            }
+            } catch (error) { showToast("فشل الطباعة: " + error.message, "error"); }
         }
 
         // ================== Print Modals Logic ==================
@@ -508,12 +514,12 @@
                 let textEncoded = encodeURIComponent(txt);
                 window.location.href = `printbridge://print?type=receipt&text=${textEncoded}`;
             } else if (method === 'system') {
-                // Table layout with very small font for Thermal A4 simulation
-                let html = `<div style="text-align:center; padding:5px; width:280px; margin:0 auto; font-family:'Cairo', sans-serif; direction:rtl;">
+                // الفاتورة المصغرة والباركود بدون إهدار ورق
+                let html = `<div style="text-align:center; padding:2px; width:280px; margin:0 auto; font-family:'Cairo', sans-serif; direction:rtl;">
                     <h2 style="margin:2px 0; font-size:16px;">${myPharmacyName}</h2>
                     <p style="margin:2px 0; font-size:11px;">رقم الفاتورة: ${currentPrintInvoice.id}</p>
                     <p style="margin:2px 0; font-size:11px;">التاريخ: ${formatDateLocal(currentPrintInvoice.date)}</p>
-                    <hr style="border:0; border-top:1px dashed #000; margin:5px 0;">
+                    <hr style="border:0; border-top:1px dashed #000; margin:4px 0;">
                     <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;">
                         <thead><tr style="border-bottom:1px dashed #000;"><th>م</th><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead>
                         <tbody>`;
@@ -521,14 +527,16 @@
                     html += `<tr><td>${idx+1}</td><td>${i.n}</td><td>${i.qty}</td><td>${i.total}</td></tr>`; 
                 });
                 html += `</tbody></table>
-                    <hr style="border:0; border-top:1px dashed #000; margin:5px 0;">
-                    <h3 style="margin:5px 0; font-size:14px;">الإجمالي: ${currentPrintInvoice.totalEGP} ج.م</h3>
+                    <hr style="border:0; border-top:1px dashed #000; margin:4px 0;">
+                    <h3 style="margin:4px 0; font-size:14px;">الإجمالي: ${currentPrintInvoice.totalEGP} ج.م</h3>
+                    <svg id="receiptBarcodeSvg" style="max-width:100%; margin-top:5px;"></svg>
                 </div>`;
                 
                 let printArea = document.getElementById('systemPrintArea');
                 document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
                 printArea.innerHTML = html;
                 printArea.style.display = 'block';
+                JsBarcode("#receiptBarcodeSvg", currentPrintInvoice.id.toString(), { format: "CODE128", width: 1.5, height: 30, fontSize: 12, margin: 2, displayValue: true });
                 window.print();
                 printArea.style.display = 'none';
                 document.querySelectorAll('.app-container').forEach(e => e.classList.remove('no-print'));
@@ -551,7 +559,6 @@
             let finalPrice = incPrice ? currentPrintLabel.price : "";
 
             if (method === 'web-bluetooth') {
-                // Centered text for bluetooth. Barcode numbers, then name, then price
                 let txt = `\x1B\x61\x01${myPharmacyName}\n${currentPrintLabel.barcode}\n${finalName}\n${finalPrice}\n\x1B\x61\x00`;
                 printViaWebBluetooth(txt);
             } else if (method === 'print-bridge') {
@@ -563,7 +570,7 @@
                 let printArea = document.getElementById('systemPrintArea');
                 document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
                 
-                // Centered Label HTML (Pharmacy Name -> Barcode -> Product Name -> Price)
+                // تنسيق الملصق المركزي المثالي
                 printArea.innerHTML = `
                     <div style="width:1.5in; text-align:center; padding:2px; margin:0 auto; display:flex; flex-direction:column; align-items:center;">
                         <p style="font-size:11px; font-weight:bold; margin:0;">${myPharmacyName}</p>
@@ -586,18 +593,11 @@
             text += "رقم الفاتورة: " + inv.id + "\n";
             text += "التاريخ: " + formatDateLocal(inv.date) + "\n";
             text += "الكاشير: " + document.getElementById('currentUserRole').innerText + "\n";
-            if(inv.customerName) text += "العميل: " + inv.customerName + "\n";
             text += "------------------------\n";
-            inv.items.forEach(i => {
-                text += `${i.n}\n${i.qty} x ${i.price} = ${i.total} ج.م\n`;
-            });
+            inv.items.forEach(i => { text += `${i.n}\n${i.qty} x ${i.price} = ${i.total} ج.م\n`; });
             text += "------------------------\n";
             text += "الإجمالي: " + inv.totalEGP + " ج.م\n";
-            let payTxt = inv.paymentType === 'credit' ? 'آجل' : (inv.paymentType === 'visa' ? 'فيزا' : 'كاش');
-            text += "الدفع: " + payTxt + "\n";
-            text += "------------------------\n";
-            text += "مع تمنياتنا بالشفاء العاجل\n";
-            // No extra newlines to prevent paper waste
+            text += "باركود الفاتورة: " + inv.id + "\n";
             return text;
         }
 
@@ -650,389 +650,4 @@
                     }, 600);
                 }
 
-                if(document.getElementById('stockTab').classList.contains('active')) renderStock(); if(document.getElementById('usersTab').classList.contains('active')) renderUsers(); 
-            } else { showToast('خطأ في جلب البيانات', 'error'); } 
-        }
-        
-        function sendData(action, data) { setStatus('🔄 جاري الحفظ...', true); let s = document.createElement('script'); s.src = URL + "?action=" + action + "&data=" + encodeURIComponent(JSON.stringify(data)) + "&callback=fetchData"; document.body.appendChild(s); }
-
-        function setupCustomDropdown(inpId, dataArr, callback) {
-            const inp = document.getElementById(inpId); if(!inp) return;
-            let existingWrapper = inp.parentNode.querySelector('.autocomplete-items'); if(existingWrapper) existingWrapper.remove();
-            let wrapper = document.createElement("DIV"); wrapper.setAttribute("class", "autocomplete-items"); inp.parentNode.appendChild(wrapper);
-            function renderList() {
-                let val = inp.value.trim().toLowerCase(); wrapper.innerHTML = ""; if(!val) { wrapper.style.display = "none"; return; }
-                let count = 0; let hasItems = false;
-                for (let i = 0; i < dataArr.length; i++) {
-                    let p = dataArr[i];
-                    let nEn = (p.name_en || p.n || "").toLowerCase(); let nAr = (p.name_ar || "").toLowerCase(); let pBarcode = (p.barcode || "").toString();
-                    if (nEn.includes(val) || nAr.includes(val) || pBarcode === val) {
-                        count++; hasItems = true; let b = document.createElement("DIV");
-                        b.innerHTML = '<strong>' + (p.name_en || p.n || '') + '</strong> <br> <small style="color:#0984e3;">' + (p.name_ar || '') + '</small> <small style="color:#7f8c8d; display:block;">(' + pBarcode + ')</small>';
-                        b.addEventListener("click", function() { inp.value = p.name_en || p.name_ar || p.n; wrapper.style.display = "none"; if(callback) callback(p); });
-                        wrapper.appendChild(b); if(count >= 15) break; 
-                    }
-                }
-                wrapper.style.display = hasItems ? "block" : "none";
-            }
-            inp.addEventListener("input", renderList); document.addEventListener("click", function(e) { if(e.target !== inp && e.target !== wrapper) wrapper.style.display = "none"; });
-        }
-
-        function formatStockDisplay(q, spb, hasStrips) { if (!hasStrips || spb < 2) return q + ' علبة'; let boxes = Math.floor(q / spb); let strips = q % spb; let txt = []; if (boxes > 0) txt.push(boxes + ' علبة'); if (strips > 0) txt.push(strips + ' شريط'); return txt.join(' و ') || '0 علبة'; }
-        
-        function toggleScanner(mode) { 
-            scanMode = mode || 'pos'; let c = document.getElementById('scannerContainer'); 
-            if(isScanning) { 
-                if(scanner) { scanner.stop().then(() => { scanner.clear(); }); }
-                c.style.display = 'none'; 
-                isScanning = false; 
-            } 
-            else { 
-                // يجب عرض العنصر أولاً قبل تشغيل الكاميرا لتجنب أخطاء Html5Qrcode
-                c.style.display = 'block'; 
-                scanner = new Html5Qrcode("reader"); 
-                scanner.start({facingMode:"environment"}, {fps:10, qrbox: {width: 250, height: 250}}, (text) => { 
-                    let p = products.find(x => x.barcode.toString() === text); 
-                    if(p) { if(scanMode === 'pos') onPosProductSelect(p); else { document.getElementById('stockFilterInput').value = p.barcode; renderStock(p.barcode); } } 
-                    else showToast('دواء غير مسجل!', 'warn'); 
-                    toggleScanner(); 
-                }, (err)=>{}).then(() => {
-                    isScanning = true; 
-                }).catch((err) => {
-                    showToast('خطأ في الكاميرا، تأكد من الصلاحيات ووجود https', 'error');
-                    c.style.display = 'none';
-                });
-            } 
-        }
-
-        function toggleCreditFields() { let pType = document.getElementById('posPaymentType').value; let fields = document.querySelectorAll('.credit-fields'); fields.forEach(f => f.style.display = (pType === 'credit') ? 'block' : 'none'); }
-
-        function updatePosColors() { let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale'; let btn = document.getElementById('btnAddItemBtn'); btn.className = isSale ? 'btn btn-blue' : 'btn btn-red'; btn.innerHTML = isSale ? 'إضافة للفاتورة 🛒' : 'تسجيل مرتجع ↩️'; renderPos(); }
-
-        function onPosProductSelect(p) {
-            selP = p; document.getElementById('posSearch').value = ''; document.getElementById('posAddBox').style.display='block';
-            document.getElementById('posPNameEn').innerText = selP.name_en || selP.n || ''; document.getElementById('posPNameAr').innerText = selP.name_ar || '';
-            document.getElementById('posPStock').innerText = "المتاح: " + formatStockDisplay(selP.q || 0, selP.spb || 1, selP.hasStrips);
-            document.getElementById('optStrip').style.display = selP.hasStrips ? 'block' : 'none'; document.getElementById('posUnit').value='box'; document.getElementById('posQty').value=1; calcTotal();
-        }
-
-        function calcTotal() { if(!selP) return; let isBox = document.getElementById('posUnit').value === 'box'; let price = isBox ? selP.spBox : selP.spStrip; document.getElementById('posTotal').value = (price * document.getElementById('posQty').value).toFixed(2); }
-        
-        function addPosItem() {
-            if(!selP) return; let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale'; let isBox = document.getElementById('posUnit').value === 'box'; let qty = parseInt(document.getElementById('posQty').value); let strips = isBox ? (qty*(selP.spb||1)) : qty;
-            if(isSale && strips > (selP.q||0)) return showToast('الكمية المطلوبة غير متوفرة بالمخزن!', 'error');
-            let price = isBox ? selP.spBox : selP.spStrip; let cost = isBox ? selP.pBox : selP.pStrip;
-            posItems.push({ id: selP.id, n: (selP.name_en || selP.n || selP.name_ar), unit: isBox?'علبة':'شريط', qty: qty, strQty: strips, price: price, total: price * qty, costTotal: cost * qty });
-            document.getElementById('posAddBox').style.display='none'; selP=null; showToast(isSale ? 'تمت الإضافة' : 'تم إضافة المرتجع'); renderPos();
-        }
-
-        function renderPos() {
-            let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale'; let tbody = document.getElementById('posTable'); let tot = 0;
-            if(posItems.length===0) tbody.innerHTML='<tr><td colspan="6">لم يتم إضافة أدوية</td></tr>';
-            else { 
-                let html = ''; posItems.forEach((i, x) => { tot += i.total; html += '<tr><td style="font-weight:bold; color:#1e3c72;">' + i.n + '</td><td>' + i.unit + '</td><td>' + i.qty + '</td><td>' + i.price + '</td><td style="color:#0984e3; font-weight:bold;">' + i.total + '</td><td><button class="btn btn-red" style="padding:4px 10px; margin:0;" onclick="posItems.splice(' + x + ',1); renderPos()">X</button></td></tr>'; });
-                tbody.innerHTML = html;
-            }
-            document.getElementById('finalTotal').innerText = tot.toFixed(2) + " ج.م"; document.getElementById('finalTotal').style.color = isSale ? '#f1c40f' : '#e74c3c';
-        }
-
-        function clearInvoice() { posItems = []; document.getElementById('posAddBox').style.display='none'; renderPos(); }
-        
-        function saveInvoice() {
-            if(posItems.length===0) return showToast('لا توجد أصناف لحفظها!', 'error');
-            let type = document.querySelector('input[name="invType"]:checked').value; let sign = type === 'sale' ? 1 : -1; let tSell = 0, tCost = 0, txtArr = [];
-            let pType = document.getElementById('posPaymentType').value; let cName = document.getElementById('posClientName').value.trim(); let cPhone = document.getElementById('posClientPhone').value.trim();
-            if(pType === 'credit' && (!cName || !cPhone)) return showToast('الرجاء إدخال اسم العميل ورقم الهاتف للآجل', 'error');
-
-            posItems.forEach(i => { tSell += i.total; tCost += i.costTotal; txtArr.push(i.n + ' (' + i.qty + ' ' + i.unit + ')'); let p = products.find(x=>x.id==i.id); if(p) { p.q -= (i.strQty * sign); sendData("updateProduct", p); } });
-            
-            let mappedItems = posItems.map(item => ({
-                id: item.id, n: item.n, unit: item.unit, qty: item.qty, strQty: item.strQty, price: item.price, total: item.total, costTotal: item.costTotal
-            }));
-            
-            let invObj = { 
-                id: invoiceCounter++, 
-                date: new Date().toISOString(), 
-                type: type, 
-                items: mappedItems, 
-                itemsText: txtArr.join(' | '), 
-                totalComm: tCost * sign, 
-                totalEGP: tSell * sign, 
-                netProfit: (tSell - tCost) * sign, 
-                paymentType: pType, 
-                customerName: cName, 
-                customerPhone: cPhone 
-            };
-            
-            invoices.push(invObj); sendData("saveInvoice", invObj); clearInvoice();
-            
-            document.getElementById('posPaymentType').value = 'cash'; toggleCreditFields(); document.getElementById('posClientName').value = ''; document.getElementById('posClientPhone').value = '';
-            
-            if(type === 'sale') {
-                showToast('تم حفظ الفاتورة ✅', 'success');
-                currentPrintInvoice = invObj;
-                document.getElementById('invoicePrintModal').style.display = 'flex';
-            } else {
-                showToast('تم استرجاع الأدوية ↩️', 'success');
-            }
-        }
-
-        function navInvoice(dir) {
-            posInvoicesOnly = invoices.filter(function(i) { return i.type === 'sale'; });
-            if(posInvoicesOnly.length === 0) return showToast('لا توجد فواتير سابقة', 'warn');
-            posViewMode = true;
-            if(dir === 'first') posViewIdx = 0; 
-            else if(dir === 'last') posViewIdx = posInvoicesOnly.length - 1; 
-            else if(dir === 'prev') { posViewIdx--; if(posViewIdx < 0) posViewIdx = 0; } 
-            else if(dir === 'next') { posViewIdx++; if(posViewIdx > posInvoicesOnly.length - 1) posViewIdx = posInvoicesOnly.length - 1; }
-            
-            let inv = posInvoicesOnly[posViewIdx];
-            document.getElementById('posInvoiceViewerLabel').innerText = 'عرض فاتورة #' + inv.id + ' (' + formatDateLocal(inv.date).split(' ')[0] + ')';
-            document.getElementById('posInputArea').style.display = 'none'; document.getElementById('posActionButtons').style.display = 'none';
-            document.getElementById('btnPrintReceiptBtn').style.display = 'inline-flex';
-
-            let tbody = document.getElementById('posTable'); let html = '';
-            inv.items.forEach(function(i) { html += '<tr><td style="font-weight:bold; color:#1e3c72;">' + i.n + '</td><td>' + i.unit + '</td><td>' + i.qty + '</td><td>' + i.price + '</td><td style="color:#0984e3; font-weight:bold;">' + i.total + '</td><td>🔒</td></tr>'; });
-            tbody.innerHTML = html;
-            let payTxt = inv.paymentType === 'credit' ? ' (آجل: ' + inv.customerName + ')' : (inv.paymentType === 'visa' ? ' (فيزا)' : ' (كاش)');
-            document.getElementById('finalTotal').innerText = inv.totalEGP + ' ج.م' + payTxt;
-        }
-
-        function newInvoiceMode() {
-            posViewMode = false; posViewIdx = -1;
-            document.getElementById('posInvoiceViewerLabel').innerText = 'فاتورة جديدة 🛒';
-            document.getElementById('posInputArea').style.display = 'block'; document.getElementById('posActionButtons').style.display = 'flex';
-            document.getElementById('btnPrintReceiptBtn').style.display = 'none';
-            renderPos();
-        }
-
-        function renderClients() {
-            let clientsMap = {};
-            invoices.forEach(function(inv) {
-                if(inv.customerName) {
-                    if(!clientsMap[inv.customerName]) clientsMap[inv.customerName] = { phone: inv.customerPhone || '', balance: 0 };
-                    if(inv.type === 'sale' && inv.paymentType === 'credit') clientsMap[inv.customerName].balance += parseFloat(inv.totalEGP);
-                    else if (inv.type === 'client_payment') clientsMap[inv.customerName].balance -= parseFloat(inv.totalEGP);
-                }
-            });
-            let tbody = document.getElementById('clientsTable'); let html = ''; let idx = 1;
-            for(let cName in clientsMap) {
-                let bal = clientsMap[cName].balance;
-                if(bal > 0) {
-                    let waMsg = 'مرحباً ' + cName + '، تذكير ودي من صيدلية Pharmacy Pro بوجود مديونية مستحقة بقيمة ' + bal.toFixed(2) + ' ج.م. شكراً لثقتكم بنا!';
-                    let waLink = 'https://wa.me/2' + clientsMap[cName].phone + '?text=' + encodeURIComponent(waMsg);
-                    html += '<tr><td>' + idx++ + '</td><td style="font-weight:bold; color:#1e3c72;">' + cName + '</td><td dir="ltr">' + clientsMap[cName].phone + '</td><td style="color:#e74c3c; font-weight:bold; font-size:1.1rem;">' + bal.toFixed(2) + ' ج.م</td><td><button class="btn btn-green" style="padding:5px 10px; margin:2px; width:auto;" onclick="window.open(\'' + waLink + '\', \'_blank\')">واتس 💬</button> <button class="btn btn-blue" style="padding:5px 10px; margin:2px; width:auto;" onclick="payDebt(\'' + cName + '\', \'' + clientsMap[cName].phone + '\')">تسديد 💰</button></td></tr>';
-                }
-            }
-            tbody.innerHTML = html || '<tr><td colspan="5">لا يوجد عملاء عليهم مديونيات</td></tr>';
-        }
-
-        function payDebt(cName, phone) {
-            let amt = prompt('أدخل المبلغ المراد تسديده للعميل: ' + cName);
-            if(amt && !isNaN(amt) && parseFloat(amt) > 0) {
-                let invObj = { id: invoiceCounter++, date: new Date().toISOString(), type: 'client_payment', customerName: cName, customerPhone: phone, items: [], itemsText: 'تسديد دفعة نقدية', totalComm: 0, totalEGP: parseFloat(amt), netProfit: 0, paymentType: 'cash' };
-                invoices.push(invObj); sendData('saveInvoice', invObj); showToast('تم تسجيل الدفعة بنجاح ✅'); renderClients();
-            }
-        }
-
-        function onAddProductSelect(p) {
-            document.getElementById('nId').value = p.id; 
-            document.getElementById('nNameEn').value = p.name_en || p.n || ''; 
-            document.getElementById('nNameAr').value = p.name_ar || '';
-            document.getElementById('nBarcode').value = p.barcode || ''; 
-            document.getElementById('nCat').value = p.category || ''; 
-            document.getElementById('nExpiry').value = p.expiry || '';
-            let hs = p.hasStrips === true || p.hasStrips === 'true'; 
-            document.getElementById('nHasStrips').checked = hs; 
-            document.getElementById('stripArea').style.display = hs ? 'flex' : 'none';
-            document.getElementById('nSpb').value = p.spb || 1; 
-            document.getElementById('nCostStrip').value = p.pStrip || 0; 
-            document.getElementById('nSpStrip').value = p.spStrip || 0; 
-            document.getElementById('nCostBox').value = p.pBox || 0; 
-            document.getElementById('nSpBox').value = p.spBox || 0;
-            document.getElementById('lblQty').innerHTML = 'إضافة كمية <span style="color:#e74c3c;">(المتاح حالياً: ' + formatStockDisplay(p.q||0, p.spb||1, hs) + ')</span>'; 
-            document.getElementById('nQty').value = 0; 
-            showToast('تم جلب بيانات الدواء للتعديل', 'warn');
-        }
-
-        function saveProduct() {
-            let nEn = document.getElementById('nNameEn').value.trim(); let nAr = document.getElementById('nNameAr').value.trim();
-            if(!nEn && !nAr) return showToast('أدخل اسم الدواء على الأقل!', 'error');
-            let hs = document.getElementById('nHasStrips').checked; let spb = hs ? (parseInt(document.getElementById('nSpb').value)||1) : 1; let addedBoxes = parseInt(document.getElementById('nQty').value)||0; let addedStrips = addedBoxes * spb;
-            let existingId = document.getElementById('nId').value; let currentQ = 0; if(existingId) { let exP = products.find(x => x.id == existingId); if(exP) currentQ = parseInt(exP.q)||0; }
-            
-            let pObj = { 
-                id: existingId || Date.now().toString(), 
-                barcode: document.getElementById('nBarcode').value,
-                name_en: nEn, 
-                name_ar: nAr, 
-                category: document.getElementById('nCat').value, 
-                expiry: document.getElementById('nExpiry').value, 
-                hasStrips: hs, 
-                spb: spb, 
-                pBox: parseFloat(document.getElementById('nCostBox').value)||0, 
-                spBox: parseFloat(document.getElementById('nSpBox').value)||0, 
-                pStrip: parseFloat(document.getElementById('nCostStrip').value)||0, 
-                spStrip: parseFloat(document.getElementById('nSpStrip').value)||0, 
-                q: currentQ + addedStrips 
-            };
-            
-            if(existingId) { let idx = products.findIndex(x => x.id == existingId); if(idx > -1) products[idx] = pObj; } else { products.push(pObj); }
-            sendData("updateProduct", pObj); showToast('تم حفظ الدواء بنجاح 📦');
-            document.querySelectorAll('#addTab input').forEach(i=>i.value=''); document.getElementById('nHasStrips').checked = false; document.getElementById('stripArea').style.display='none'; document.getElementById('nQty').value='0'; document.getElementById('lblQty').innerText = "الكمية المضافة (بالعلب):"; document.getElementById('nId').value='';
-            
-            if(pObj.category) {
-                let dl = document.getElementById('catList');
-                let exists = false; for(let i=0; i<dl.options.length; i++){ if(dl.options[i].value === pObj.category) exists=true; }
-                if(!exists) { let opt = document.createElement('option'); opt.value = pObj.category; dl.appendChild(opt); }
-            }
-            setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect);
-        }
-
-        function editProductFromStock(id) { let p = products.find(x => x.id == id); if(p) { document.querySelectorAll('.tab-btn')[3].click(); onAddProductSelect(p); } }
-
-        function renderStock(q="") {
-            let tbody = document.getElementById('stockTable'); let html = '';
-            products.filter(p=>{ 
-                if(!q) return true;
-                let matchEn = (p.name_en||p.n||'').toLowerCase().includes(q.toLowerCase()); let matchAr = (p.name_ar||'').toLowerCase().includes(q.toLowerCase()); let matchBar = (p.barcode||'').toString().includes(q); return matchEn || matchAr || matchBar; 
-            }).forEach((p, idx)=>{
-                html += `<tr>
-                    <td>${idx+1}</td>
-                    <td style="font-weight:bold; color:#1e3c72;">${p.name_en || p.n || ''} <br> <small style="color:#0984e3">${p.name_ar || ''}</small></td>
-                    <td style="direction:ltr;">${p.barcode||'-'}</td>
-                    <td style="color:#0984e3; font-weight:bold;">${formatStockDisplay(p.q||0, p.spb||1, p.hasStrips)}</td>
-                    <td>${p.spBox||0} ج.م${p.hasStrips?' / '+(p.spStrip||0)+' ج.م':''}</td>
-                    <td>
-                        <button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock('${p.id}')">✏️</button>
-                        <button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="openLabelPrintModal('${p.barcode||''}', '${p.name_en||p.n||''}', '${p.name_ar||''}', '${p.spBox||0}')">🖨️</button>
-                        <button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm('متأكد من الحذف؟')){ products = products.filter(x=>x.id!='${p.id}'); sendData('deleteProduct',{id:'${p.id}'}); renderStock(); showToast('تم الحذف'); }">🗑️</button>
-                    </td>
-                </tr>`;
-            });
-            tbody.innerHTML = html;
-        }
-
-        function toggleAllShortages(source) {
-            let checkboxes = document.querySelectorAll('.short-chk');
-            checkboxes.forEach(chk => {
-                chk.checked = source.checked;
-                let id = chk.getAttribute('data-id');
-                let qtyInput = document.getElementById('reqQty_' + id);
-                if(qtyInput) {
-                    qtyInput.style.display = source.checked ? 'inline-block' : 'none';
-                }
-            });
-        }
-
-        function renderShortages() {
-            let tbody = document.getElementById('shortagesTable'); let html = '';
-            let selectAllBox = document.getElementById('selectAllShortages');
-            if(selectAllBox) selectAllBox.checked = true;
-
-            let shortages = products.filter(p => { let boxes = p.hasStrips ? Math.floor((p.q||0) / (p.spb||1)) : (p.q||0); return boxes < 5; });
-            if(shortages.length === 0) { tbody.innerHTML = '<tr><td colspan="5">لا توجد نواقص بالمخزن</td></tr>'; return; }
-            shortages.forEach(p => { 
-                let cost = p.pBox || 0;
-                html += '<tr><td class="no-print"><input type="checkbox" class="short-chk" data-id="' + p.id + '" onchange="document.getElementById(\'reqQty_' + p.id + '\').style.display = this.checked ? \'inline-block\' : \'none\'" checked></td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.n || p.name_ar) + '</td><td style="color:#e74c3c; font-weight:bold;">' + formatStockDisplay(p.q||0, p.spb||1, p.hasStrips) + '</td><td>' + cost + ' ج.م</td><td><input type="number" id="reqQty_' + p.id + '" style="width:70px; padding:5px; border-radius:5px; border:1px solid #ccc; text-align:center;" min="1" value="1"></td></tr>'; 
-            });
-            tbody.innerHTML = html;
-        }
-
-        function exportShortagesPDF() { 
-            let checkedBoxes = document.querySelectorAll('.short-chk:checked');
-            if(checkedBoxes.length === 0) return showToast('حدد صنفاً واحداً على الأقل للطباعة', 'error');
-
-            let printDiv = document.createElement('div');
-            printDiv.style.padding = '20px'; printDiv.style.direction = 'rtl'; printDiv.style.fontFamily = 'Cairo';
-
-            let html = '<h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">تقرير النواقص وطلبيات الأدوية</h2>';
-            html += '<table style="width:100%; border-collapse: collapse; text-align:center;" border="1">';
-            html += '<tr style="background:#e6f2ff;"><th>م</th><th>اسم الصنف</th><th>سعر الشراء (التجاري)</th><th>الكمية المطلوبة</th><th>الإجمالي</th></tr>';
-
-            let totalItems = 0; let totalCost = 0;
-            
-            checkedBoxes.forEach((chk, index) => {
-                let id = chk.getAttribute('data-id');
-                let p = products.find(x => x.id == id);
-                let reqQty = parseInt(document.getElementById('reqQty_' + id).value) || 0;
-                
-                if(reqQty > 0) {
-                    let cost = p.pBox || 0;
-                    let rowTotal = cost * reqQty;
-                    totalItems += reqQty; totalCost += rowTotal;
-                    html += `<tr><td>${index + 1}</td><td style="font-weight:bold;">${p.name_en || p.n || p.name_ar}</td><td>${cost} ج.م</td><td>${reqQty}</td><td>${rowTotal.toFixed(2)} ج.م</td></tr>`;
-                }
-            });
-
-            html += `<tr style="background:#1e3c72; color:#fff;"><th colspan="3" style="text-align:left; padding-left:15px;">الإجمالي الكلي:</th><th>${totalItems} علبة</th><th>${totalCost.toFixed(2)} ج.م</th></tr>`;
-            html += '</table>';
-            printDiv.innerHTML = html;
-
-            let opt = { margin: 10, filename: 'Shortages_Order.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; 
-            html2pdf().set(opt).from(printDiv).save(); 
-        }
-
-        function exportDashboardPDF() { let element = document.getElementById('dashboardReportArea'); let opt = { margin: 10, filename: 'Sales_Dashboard.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }; html2pdf().set(opt).from(element).save(); }
-
-        function generateDashboard() { 
-            let sDate = document.getElementById('repStart').value; let eDate = document.getElementById('repEnd').value;
-            if(!sDate || !eDate) return showToast('الرجاء تحديد التواريخ', 'error');
-            let sales = 0, returns = 0; let itemsCount = {}; let datesData = {};
-            invoices.forEach(inv => {
-                let invDateStr = "";
-                if(inv.date) {
-                    let d = new Date(inv.date);
-                    if(!isNaN(d)) {
-                        let mm = String(d.getMonth() + 1).padStart(2, '0');
-                        let dd = String(d.getDate()).padStart(2, '0');
-                        invDateStr = d.getFullYear() + '-' + mm + '-' + dd;
-                    } else {
-                        invDateStr = inv.date.substring(0,10);
-                    }
-                }
-
-                if(invDateStr >= sDate && invDateStr <= eDate) {
-                    if(inv.type === 'sale') {
-                        sales += parseFloat(inv.totalEGP);
-                        datesData[invDateStr] = datesData[invDateStr] || {s:0, r:0}; datesData[invDateStr].s += parseFloat(inv.totalEGP);
-                        inv.items.forEach(it => { itemsCount[it.n] = (itemsCount[it.n] || 0) + parseInt(it.qty); });
-                    }
-                    if(inv.type === 'return') {
-                        let retAmt = Math.abs(parseFloat(inv.totalEGP)); returns += retAmt;
-                        datesData[invDateStr] = datesData[invDateStr] || {s:0, r:0}; datesData[invDateStr].r += retAmt;
-                    }
-                }
-            });
-
-            document.getElementById('dashSales').textContent = sales.toFixed(2) + " ج.م"; document.getElementById('dashReturns').textContent = returns.toFixed(2) + " ج.م"; document.getElementById('dashNet').textContent = (sales - returns).toFixed(2) + " ج.م"; 
-
-            let labels = Object.keys(datesData).sort(); let sData = labels.map(d => datesData[d].s); let rData = labels.map(d => datesData[d].r);
-            if(chart1) chart1.destroy();
-            chart1 = new Chart(document.getElementById('salesChart'), { type: 'line', data: { labels: labels, datasets: [ { label: 'مبيعات', data: sData, borderColor: '#0984e3', fill: false, tension:0.1 }, { label: 'مرتجعات', data: rData, borderColor: '#e74c3c', fill: false, tension:0.1 } ]} });
-
-            let topItems = Object.entries(itemsCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
-            if(chart2) chart2.destroy();
-            chart2 = new Chart(document.getElementById('topItemsChart'), { type: 'bar', data: { labels: topItems.map(i=>i[0]), datasets: [{ label: 'الكمية المباعة', data: topItems.map(i=>i[1]), backgroundColor: '#27ae60' }] } });
-        }
-
-        function renderUsers() { let tbody = document.getElementById('usersTable'); let html = ''; users.forEach((u) => { html += '<tr><td style="font-weight:bold;">' + u.username + '</td><td>••••••</td><td><span class="badge ' + (u.role==='Admin'?'badge-safe':'badge-warn') + '">' + u.role + '</span></td><td><button class="btn btn-purple" style="padding:4px 8px; margin:0; width:auto;" onclick="editUser(\'' + u.username + '\',\'' + u.password + '\',\'' + u.role + '\')">تعديل ✏️</button></td></tr>'; }); tbody.innerHTML = html || '<tr><td colspan="4">لا يوجد مستخدمين</td></tr>'; }
-        
-        function editUser(u, p, r) { document.getElementById('uName').value = u; document.getElementById('uPass').value = p; document.getElementById('uRole').value = r; }
-        
-        function saveUser() { 
-            let u = document.getElementById('uName').value.trim(); let p = document.getElementById('uPass').value.trim(); let r = document.getElementById('uRole').value; 
-            if(!u || !p) return showToast('أدخل البيانات كاملة!', 'error'); 
-            
-            let uObj = {};
-            uObj.username = u;
-            uObj.password = p;
-            uObj.role = r;
-
-            let idx = users.findIndex(x => x.username === u); if(idx > -1) users[idx] = uObj; else users.push(uObj); 
-            showToast('تم حفظ بيانات المستخدم 👤'); renderUsers(); document.getElementById('uName').value = ''; document.getElementById('uPass').value = ''; 
-            sendData("updateUser", uObj); 
-        }
-    </script>
-</body>
-</html>
+                if(document.getElementById('stockTab
