@@ -8,76 +8,52 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
         body { background: #f4f7f6; color: #333; overflow-x: hidden; }
-
         #splashScreen { position: fixed; inset: 0; background: linear-gradient(135deg, #0a192f, #112240, #233554); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: opacity 0.8s ease, visibility 0.8s ease; }
         .pharmacy-logo-container { position: relative; width: 150px; height: 150px; margin-bottom: 20px; }
         .logo-svg { width: 100%; height: 100%; }
         .animated-snake { stroke-dasharray: 200; stroke-dashoffset: 200; animation: slitherUp 2s ease-out forwards; animation-delay: 0.2s; }
         .snake-eye { opacity: 0; animation: showEye 0.1s 2s forwards; }
         @keyframes slitherUp { to { stroke-dashoffset: 0; } } @keyframes showEye { to { opacity: 1; } }
-
         .splash-title { color: #fff; font-size: 2.2rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
         .splash-subtitle { color: #0984e3; font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
         .loader-bar { width: 200px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; position: relative; }
         .loader-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #0984e3, #f1c40f); border-radius: 10px; animation: fillBar 2s ease-in-out forwards; }
         @keyframes fillBar { 0% { width: 0%; } 100% { width: 100%; } }
-
         .app-container { max-width: 1200px; margin: 20px auto; padding: 15px; }
         .card { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .btn { border: none; padding: 10px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; color: white; width: 100%; margin-top: 10px; transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
-        .btn-blue { background: #0984e3; } .btn-red { background: #e74c3c; } .btn-dark { background: #1e3c72; } .btn-purple { background: #8e44ad; } .btn-green { background: #27ae60; }
-        
+        .btn-blue { background: #0984e3; } .btn-red { background: #e74c3c; } .btn-dark { background: #1e3c72; } .btn-purple { background: #8e44ad; } .btn-green { background: #27ae60; } .btn-yellow { background: #f39c12; }
         .form-group { margin-bottom: 15px; width: 100%; position: relative; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #1e3c72; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: 'Cairo'; outline: none; }
         .form-group input:focus, .form-group select:focus { border-color: #0984e3; }
-        
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
         .tab-btn { background: #fff; border: 1px solid #ccc; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; white-space: nowrap; color: #7f8c8d; }
         .tab-btn.active { background: #1e3c72; color: #fff; border-color: #1e3c72; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: center; font-size: 0.95rem; }
         th, td { padding: 12px 5px; border-bottom: 1px solid #eee; }
         th { background: #1e3c72; color: #fff; }
-        
         #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #0984e3; color: white; padding: 15px; border-radius: 8px; display: none; z-index: 99999; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .radio-switch { display: flex; gap: 10px; margin-bottom: 15px; background: #f8f9fa; padding: 5px; border-radius: 10px; border: 1px solid #ddd; }
         .radio-switch label { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #7f8c8d; transition: 0.3s; }
         .radio-switch input { display: none; }
         .radio-switch input[value="sale"]:checked + label { background: #e6f2ff; color: #0984e3; border: 1px solid #0984e3; }
         .radio-switch input[value="return"]:checked + label { background: #fdedec; color: #e74c3c; border: 1px solid #e74c3c; }
-        
         .autocomplete-items { position: absolute; border: 1px solid #0984e3; z-index: 99; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .autocomplete-items div { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; color: #1e3c72; font-weight: bold; }
         .autocomplete-items div:hover { background: #e6f2ff; }
         .badge { padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; color: white; }
         .badge-safe { background: #0984e3; } .badge-warn { background: #e67e22; } .badge-danger { background: #e74c3c; }
-        
         #scannerContainer { display: none; background: #000; padding: 10px; border-radius: 12px; margin-bottom: 15px; text-align: center; }
         #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 8px; overflow: hidden; }
-        
-        #barcodeModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; }
-        .modal-content { background:#fff; padding:20px; border-radius:12px; text-align:center; }
-        
-        /* Print Styles - 1x1.5 Inch Xprinter */
-        @media print {
-            @page { size: 1.5in 1in; margin: 0; }
-            body * { visibility: hidden; }
-            #barcodeModal, #barcodeModal * { visibility: visible; }
-            #barcodeModal { position: absolute; left: 0; top: 0; width: 1.5in; height: 1in; background: #fff; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
-            #modalPName { font-size: 9px; margin-bottom: 2px; color: #000; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 1.4in; }
-            #printSection { margin: 0; padding: 0; display: flex; justify-content: center; }
-            .btn { display: none !important; }
-            .no-print { display: none !important; }
-        }
+        @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body>
@@ -97,31 +73,20 @@
         <div class="loader-bar"><div class="loader-fill"></div></div>
     </div>
 
-    <!-- Dynamic Login Overlay -->
+    <!-- Login Overlay -->
     <div id="loginOverlay" style="position:fixed; inset:0; background:linear-gradient(135deg, rgba(10,25,47,0.95), rgba(9,132,227,0.95)); display:none; justify-content:center; align-items:center; z-index:999;">
         <div class="card" style="width:90%; max-width:400px; text-align:center;">
             <h2 style="color:#0984e3; margin-bottom:10px; font-size: 2rem;">Pharmacy Pro 01</h2>
             <p style="margin-bottom: 20px; font-weight: bold; color: #7f8c8d;">تسجيل الدخول للنظام</p>
             <div class="form-group">
                 <label style="text-align: right;">اختر المستخدم:</label>
-                <select id="loginUserSelect" style="text-align: center; font-weight:bold;"><option value="admin">admin (Admin)</option></select>
+                <select id="loginUserSelect" style="text-align: center; font-weight:bold;"></select>
             </div>
             <div class="form-group">
                 <label style="text-align: right;">كلمة المرور:</label>
                 <input type="password" id="loginPass" placeholder="••••••••" style="text-align: center; letter-spacing: 2px;" autocomplete="off" onkeypress="if(event.key === 'Enter') login()">
             </div>
             <button class="btn btn-blue" onclick="login()" style="font-size: 1.1rem;">تسجيل الدخول 🚀</button>
-        </div>
-    </div>
-
-    <div id="barcodeModal">
-        <div class="modal-content">
-            <div id="printSection">
-                <div id="modalPName"></div>
-                <svg id="barcodeSvg"></svg>
-            </div>
-            <button class="btn btn-green no-print" onclick="window.print()" style="margin-top:20px;">طباعة 🖨️</button>
-            <button class="btn btn-red no-print" onclick="document.getElementById('barcodeModal').style.display='none'">إغلاق ❌</button>
         </div>
     </div>
 
@@ -150,7 +115,10 @@
                         <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('first')">|&lt;</button>
                         <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('prev')">&lt;</button>
                     </div>
-                    <span id="posInvoiceViewerLabel" style="font-weight:bold; color:#1e3c72; font-size:1.1rem;">فاتورة جديدة 🛒</span>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span id="posInvoiceViewerLabel" style="font-weight:bold; color:#1e3c72; font-size:1.1rem;">فاتورة جديدة 🛒</span>
+                        <button id="btnPrintReceipt" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:5px 15px;" onclick="handlePrintReceipt()">🖨️ طباعة الفاتورة</button>
+                    </div>
                     <div style="display:flex; gap:5px;">
                         <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('next')">&gt;</button>
                         <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('last')">&gt;|</button>
@@ -292,9 +260,17 @@
                     <h3 style="color:#e74c3c;">⚠️ الأدوية الناقصة (أقل من 5 علب)</h3>
                     <button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير كـ PDF 📄</button>
                 </div>
-                <div id="shortagesReportArea">
+                <div style="overflow-x:auto;">
                     <table>
-                        <thead><tr><th class="no-print">تحديد</th><th>الدواء</th><th>الكمية المتاحة</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th class="no-print">تحديد</th>
+                                <th>الدواء</th>
+                                <th>الكمية المتاحة</th>
+                                <th>سعر الشراء</th>
+                                <th>العدد المطلوب</th>
+                            </tr>
+                        </thead>
                         <tbody id="shortagesTable"></tbody>
                     </table>
                 </div>
@@ -374,6 +350,49 @@
                 document.getElementById('repEnd').value = today;
             }
         });
+
+        // ------------------ Bridge Functions ------------------
+        function printLabelViaBridge(barcode, productName, productPrice) {
+            let nameEncoded = encodeURIComponent(productName);
+            let priceEncoded = encodeURIComponent(productPrice);
+            let bridgeUrl = `printbridge://print?type=label&barcode=${barcode}&name=${nameEncoded}&price=${priceEncoded}`;
+            window.location.href = bridgeUrl;
+        }
+
+        function printReceiptViaBridge(receiptText) {
+            let textEncoded = encodeURIComponent(receiptText);
+            let bridgeUrl = `printbridge://print?type=receipt&text=${textEncoded}`;
+            window.location.href = bridgeUrl;
+        }
+
+        function generateReceiptText(inv) {
+            let text = "صيدلية Pharmacy Pro\n";
+            text += "--------------------------------\n";
+            text += "رقم الفاتورة: " + inv.id + "\n";
+            text += "التاريخ: " + inv.date.split('T')[0] + " " + inv.date.split('T')[1].substring(0,5) + "\n";
+            text += "الكاشير: " + document.getElementById('currentUserRole').innerText + "\n";
+            if(inv.clientName) text += "العميل: " + inv.clientName + "\n";
+            text += "--------------------------------\n";
+            inv.items.forEach(i => {
+                text += `${i.n}\n${i.qty} ${i.unit} x ${i.price} = ${i.total} ج.م\n`;
+            });
+            text += "--------------------------------\n";
+            text += "الإجمالي: " + inv.totalEGP + " ج.م\n";
+            let payTxt = inv.paymentType === 'credit' ? 'آجل' : (inv.paymentType === 'visa' ? 'فيزا' : 'كاش');
+            text += "الدفع: " + payTxt + "\n";
+            text += "--------------------------------\n";
+            text += "مع تمنياتنا بالشفاء العاجل\n";
+            return text;
+        }
+        // ------------------------------------------------------
+
+        function handlePrintReceipt() {
+            if(posViewMode && posViewIdx >= 0) {
+                let inv = posInvoicesOnly[posViewIdx];
+                let txt = generateReceiptText(inv);
+                printReceiptViaBridge(txt);
+            }
+        }
 
         function showToast(msg, type) { let t = document.getElementById('toast'); t.innerText = msg; t.style.backgroundColor = type === 'error' ? '#e74c3c' : '#0984e3'; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
         
@@ -524,7 +543,17 @@
             invoices.push(invObj); sendData("saveInvoice", invObj); clearInvoice();
             
             document.getElementById('posPaymentType').value = 'cash'; toggleCreditFields(); document.getElementById('posClientName').value = ''; document.getElementById('posClientPhone').value = '';
-            showToast(type === 'sale' ? 'تم حفظ الفاتورة ✅' : 'تم استرجاع الأدوية ↩️');
+            
+            // Show print option for the saved invoice
+            if(type === 'sale') {
+                showToast('تم حفظ الفاتورة ✅', 'success');
+                if(confirm('هل تريد طباعة الفاتورة عبر الطابعة الحرارية؟')) {
+                    let txt = generateReceiptText(invObj);
+                    printReceiptViaBridge(txt);
+                }
+            } else {
+                showToast('تم استرجاع الأدوية ↩️', 'success');
+            }
         }
 
         function navInvoice(dir) {
@@ -539,6 +568,8 @@
             let inv = posInvoicesOnly[posViewIdx];
             document.getElementById('posInvoiceViewerLabel').innerText = 'عرض فاتورة #' + inv.id + ' (' + inv.date.split('T')[0] + ')';
             document.getElementById('posInputArea').style.display = 'none'; document.getElementById('posActionButtons').style.display = 'none';
+            document.getElementById('btnPrintReceipt').style.display = 'inline-block';
+
             let tbody = document.getElementById('posTable'); let html = '';
             inv.items.forEach(function(i) { html += '<tr><td style="font-weight:bold; color:#1e3c72;">' + i.n + '</td><td>' + i.unit + '</td><td>' + i.qty + '</td><td>' + i.price + '</td><td style="color:#0984e3; font-weight:bold;">' + i.total + '</td><td>🔒</td></tr>'; });
             tbody.innerHTML = html;
@@ -550,6 +581,7 @@
             posViewMode = false; posViewIdx = -1;
             document.getElementById('posInvoiceViewerLabel').innerText = 'فاتورة جديدة 🛒';
             document.getElementById('posInputArea').style.display = 'block'; document.getElementById('posActionButtons').style.display = 'flex';
+            document.getElementById('btnPrintReceipt').style.display = 'none';
             renderPos();
         }
 
@@ -608,12 +640,6 @@
             setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect);
         }
 
-        function printBarcode(code, name) {
-            document.getElementById('modalPName').innerText = name;
-            JsBarcode("#barcodeSvg", code, { format: "CODE128", width: 1.5, height: 40, fontSize: 14, margin: 5, displayValue: true });
-            document.getElementById('barcodeModal').style.display = 'flex';
-        }
-
         function editProductFromStock(id) { let p = products.find(x => x.id == id); if(p) { document.querySelectorAll('.tab-btn')[3].click(); onAddProductSelect(p); } }
 
         function renderStock(q="") {
@@ -622,7 +648,8 @@
                 if(!q) return true;
                 let matchEn = (p.name_en||p.n||'').toLowerCase().includes(q.toLowerCase()); let matchAr = (p.name_ar||'').toLowerCase().includes(q.toLowerCase()); let matchBar = (p.barcode||'').toString().includes(q); return matchEn || matchAr || matchBar; 
             }).forEach((p, idx)=>{
-                html += '<tr><td>' + (idx+1) + '</td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.n || '') + ' <br> <small style="color:#0984e3">' + (p.name_ar || '') + '</small></td><td style="direction:ltr;">' + (p.barcode||'-') + '</td><td style="color:#0984e3; font-weight:bold;">' + formatStockDisplay(p.q||0, p.spb||1, p.hasStrips) + '</td><td>' + (p.spBox||0) + ' ج.م' + (p.hasStrips?' / '+(p.spStrip||0)+' ج.م':'') + '</td><td><button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock(\'' + p.id + '\')">✏️</button><button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="printBarcode(\'' + (p.barcode||'') + '\', \'' + (p.name_en||p.n||p.name_ar||'') + '\')">🖨️</button><button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm(\'متأكد من الحذف؟\')){ products = products.filter(x=>x.id!=\'' + p.id + '\'); sendData(\'deleteProduct\',{id:\'' + p.id + '\'}); renderStock(); showToast(\'تم الحذف\'); }">🗑️</button></td></tr>';
+                // طباعة الباركود مربوطة الان بدالة ال Bridge مباشرة
+                html += '<tr><td>' + (idx+1) + '</td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.n || '') + ' <br> <small style="color:#0984e3">' + (p.name_ar || '') + '</small></td><td style="direction:ltr;">' + (p.barcode||'-') + '</td><td style="color:#0984e3; font-weight:bold;">' + formatStockDisplay(p.q||0, p.spb||1, p.hasStrips) + '</td><td>' + (p.spBox||0) + ' ج.م' + (p.hasStrips?' / '+(p.spStrip||0)+' ج.م':'') + '</td><td><button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock(\'' + p.id + '\')">✏️</button><button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="printLabelViaBridge(\'' + (p.barcode||'') + '\', \'' + (p.name_en||p.n||p.name_ar||'') + '\', \'' + (p.spBox||0) + ' ج.م\')">🖨️</button><button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm(\'متأكد من الحذف؟\')){ products = products.filter(x=>x.id!=\'' + p.id + '\'); sendData(\'deleteProduct\',{id:\'' + p.id + '\'}); renderStock(); showToast(\'تم الحذف\'); }">🗑️</button></td></tr>';
             });
             tbody.innerHTML = html;
         }
@@ -630,9 +657,46 @@
         function renderShortages() {
             let tbody = document.getElementById('shortagesTable'); let html = '';
             let shortages = products.filter(p => { let boxes = p.hasStrips ? Math.floor((p.q||0) / (p.spb||1)) : (p.q||0); return boxes < 5; });
-            if(shortages.length === 0) { tbody.innerHTML = '<tr><td colspan="3">لا توجد نواقص بالمخزن</td></tr>'; return; }
-            shortages.forEach(p => { html += '<tr><td class="no-print"><input type="checkbox" class="short-chk" checked></td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.n || p.name_ar) + '</td><td style="color:#e74c3c; font-weight:bold;">' + formatStockDisplay(p.q||0, p.spb||1, p.hasStrips) + '</td></tr>'; });
+            if(shortages.length === 0) { tbody.innerHTML = '<tr><td colspan="5">لا توجد نواقص بالمخزن</td></tr>'; return; }
+            shortages.forEach(p => { 
+                let cost = p.pBox || 0;
+                html += '<tr><td class="no-print"><input type="checkbox" class="short-chk" data-id="' + p.id + '" onchange="document.getElementById(\'reqQty_' + p.id + '\').style.display = this.checked ? \'inline-block\' : \'none\'" checked></td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.n || p.name_ar) + '</td><td style="color:#e74c3c; font-weight:bold;">' + formatStockDisplay(p.q||0, p.spb||1, p.hasStrips) + '</td><td>' + cost + ' ج.م</td><td><input type="number" id="reqQty_' + p.id + '" style="width:70px; padding:5px; border-radius:5px; border:1px solid #ccc; text-align:center;" min="1" value="1"></td></tr>'; 
+            });
             tbody.innerHTML = html;
+        }
+
+        function exportShortagesPDF() { 
+            let checkedBoxes = document.querySelectorAll('.short-chk:checked');
+            if(checkedBoxes.length === 0) return showToast('حدد صنفاً واحداً على الأقل للطباعة', 'error');
+
+            let printDiv = document.createElement('div');
+            printDiv.style.padding = '20px'; printDiv.style.direction = 'rtl'; printDiv.style.fontFamily = 'Cairo';
+
+            let html = '<h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">تقرير النواقص وطلبيات الأدوية</h2>';
+            html += '<table style="width:100%; border-collapse: collapse; text-align:center;" border="1">';
+            html += '<tr style="background:#e6f2ff;"><th>م</th><th>اسم الصنف</th><th>سعر الشراء (التجاري)</th><th>الكمية المطلوبة</th><th>الإجمالي</th></tr>';
+
+            let totalItems = 0; let totalCost = 0;
+            
+            checkedBoxes.forEach((chk, index) => {
+                let id = chk.getAttribute('data-id');
+                let p = products.find(x => x.id == id);
+                let reqQty = parseInt(document.getElementById('reqQty_' + id).value) || 0;
+                
+                if(reqQty > 0) {
+                    let cost = p.pBox || 0;
+                    let rowTotal = cost * reqQty;
+                    totalItems += reqQty; totalCost += rowTotal;
+                    html += `<tr><td>${index + 1}</td><td style="font-weight:bold;">${p.name_en || p.n || p.name_ar}</td><td>${cost} ج.م</td><td>${reqQty}</td><td>${rowTotal.toFixed(2)} ج.م</td></tr>`;
+                }
+            });
+
+            html += `<tr style="background:#1e3c72; color:#fff;"><th colspan="3" style="text-align:left; padding-left:15px;">الإجمالي الكلي:</th><th>${totalItems} علبة</th><th>${totalCost.toFixed(2)} ج.م</th></tr>`;
+            html += '</table>';
+            printDiv.innerHTML = html;
+
+            let opt = { margin: 10, filename: 'Shortages_Order.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; 
+            html2pdf().set(opt).from(printDiv).save(); 
         }
 
         function closeShift() {
@@ -641,7 +705,6 @@
             }
         }
 
-        function exportShortagesPDF() { let element = document.getElementById('shortagesReportArea'); let opt = { margin: 10, filename: 'Shortages_Report.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; html2pdf().set(opt).from(element).save(); }
         function exportDashboardPDF() { let element = document.getElementById('dashboardReportArea'); let opt = { margin: 10, filename: 'Sales_Dashboard.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }; html2pdf().set(opt).from(element).save(); }
 
         function generateDashboard() { 
