@@ -339,6 +339,19 @@
         let chart1 = null, chart2 = null;
         let posViewMode = false, posViewIdx = -1, posInvoicesOnly = [];
 
+        // Emergency Override
+        setTimeout(function() {
+            let splash = document.getElementById('splashScreen');
+            if (splash && splash.style.display !== 'none') {
+                splash.style.opacity = '0';
+                setTimeout(function() {
+                    splash.style.display = 'none';
+                    let login = document.getElementById('loginOverlay');
+                    if (login) login.style.display = 'flex';
+                }, 500);
+            }
+        }, 4000);
+
         document.addEventListener('DOMContentLoaded', function() { 
             fetchData(); 
             let today = new Date().toISOString().split('T')[0];
@@ -347,6 +360,21 @@
                 document.getElementById('repEnd').value = today;
             }
         });
+
+        // Date Formatter Helper (Local Time)
+        function getLocalFormattedDateTime() {
+            let now = new Date();
+            let y = now.getFullYear();
+            let m = String(now.getMonth() + 1).padStart(2, '0');
+            let d = String(now.getDate()).padStart(2, '0');
+            let h = now.getHours();
+            let min = String(now.getMinutes()).padStart(2, '0');
+            let ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12;
+            h = h ? h : 12; 
+            let strH = String(h).padStart(2, '0');
+            return `${y}-${m}-${d} ${strH}:${min} ${ampm}`;
+        }
 
         // ------------------ Bridge Functions ------------------
         function printLabelViaBridge(barcode, productName, productPrice) {
@@ -366,9 +394,9 @@
             let text = "صيدلية Pharmacy Pro\n";
             text += "--------------------------------\n";
             text += "رقم الفاتورة: " + inv.id + "\n";
-            text += "التاريخ: " + inv.date.split('T')[0] + " " + inv.date.split('T')[1].substring(0,5) + "\n";
+            text += "التاريخ: " + inv.date + "\n";
             text += "الكاشير: " + document.getElementById('currentUserRole').innerText + "\n";
-            if(inv.clientName) text += "العميل: " + inv.clientName + "\n";
+            if(inv.customerName) text += "العميل: " + inv.customerName + "\n";
             text += "--------------------------------\n";
             inv.items.forEach(i => {
                 text += `${i.n}\n${i.qty} ${i.unit} x ${i.price} = ${i.total} ج.م\n`;
@@ -396,7 +424,6 @@
         function login() { 
             let u = document.getElementById('loginUserSelect').value; 
             let p = document.getElementById('loginPass').value.trim(); 
-            // Case-insensitive username check
             let found = users.find(x => x.username && x.username.toLowerCase() === u.toLowerCase() && x.password.toString() === p); 
             if(found) { 
                 document.getElementById('loginOverlay').style.display = 'none'; 
@@ -415,6 +442,7 @@
         function loadData(res) { 
             if(res.status === 'success') { 
                 products = res.products || []; invoices = res.invoices || []; users = res.users || []; invoiceCounter = res.nextInvoiceId || 10001; 
+                if(users.length === 0) users = [{username: 'admin', password: '852', role: 'Admin'}];
                 
                 let catSet = new Set();
                 products.forEach(p => { if(p.category) catSet.add(p.category); });
@@ -525,31 +553,21 @@
 
             posItems.forEach(i => { tSell += i.total; tCost += i.costTotal; txtArr.push(i.n + ' (' + i.qty + ' ' + i.unit + ')'); let p = products.find(x=>x.id==i.id); if(p) { p.q -= (i.strQty * sign); sendData("updateProduct", p); } });
             
-            // ترتيب البيانات للـ API بدقة
-            let mappedItems = posItems.map(item => ({
-                id: item.id,
-                n: item.n,
-                unit: item.unit,
-                qty: item.qty,
-                strQty: item.strQty,
-                price: item.price,
-                total: item.total,
-                costTotal: item.costTotal
-            }));
+            let mappedItems = posItems.map(item => ({ id: item.id, n: item.n, unit: item.unit, qty: item.qty, strQty: item.strQty, price: item.price, total: item.total, costTotal: item.costTotal }));
             
-            let invObj = { 
-                id: invoiceCounter++, 
-                date: new Date().toISOString(), 
-                type: type, 
-                items: mappedItems, 
-                itemsText: txtArr.join(' | '), 
-                totalComm: tCost * sign, 
-                totalEGP: tSell * sign, 
-                netProfit: (tSell - tCost) * sign, 
-                paymentType: pType, 
-                clientName: cName, 
-                clientPhone: cPhone 
-            };
+            // Explicit Ordering to match Google Sheets exactly
+            let invObj = {};
+            invObj.id = invoiceCounter++;
+            invObj.date = getLocalFormattedDateTime(); // Local format instead of Zulu
+            invObj.type = type;
+            invObj.items = mappedItems;
+            invObj.itemsText = txtArr.join(' | ');
+            invObj.totalComm = tCost * sign;
+            invObj.totalEGP = tSell * sign;
+            invObj.netProfit = (tSell - tCost) * sign;
+            invObj.paymentType = pType;
+            invObj.customerName = cName;
+            invObj.customerPhone = cPhone;
             
             invoices.push(invObj); sendData("saveInvoice", invObj); clearInvoice();
             
@@ -576,14 +594,14 @@
             else if(dir === 'next') { posViewIdx++; if(posViewIdx > posInvoicesOnly.length - 1) posViewIdx = posInvoicesOnly.length - 1; }
             
             let inv = posInvoicesOnly[posViewIdx];
-            document.getElementById('posInvoiceViewerLabel').innerText = 'عرض فاتورة #' + inv.id + ' (' + inv.date.split('T')[0] + ')';
+            document.getElementById('posInvoiceViewerLabel').innerText = 'عرض فاتورة #' + inv.id + ' (' + inv.date.split(' ')[0] + ')';
             document.getElementById('posInputArea').style.display = 'none'; document.getElementById('posActionButtons').style.display = 'none';
             document.getElementById('btnPrintReceipt').style.display = 'inline-block';
 
             let tbody = document.getElementById('posTable'); let html = '';
             inv.items.forEach(function(i) { html += '<tr><td style="font-weight:bold; color:#1e3c72;">' + i.n + '</td><td>' + i.unit + '</td><td>' + i.qty + '</td><td>' + i.price + '</td><td style="color:#0984e3; font-weight:bold;">' + i.total + '</td><td>🔒</td></tr>'; });
             tbody.innerHTML = html;
-            let payTxt = inv.paymentType === 'credit' ? ' (آجل: ' + inv.clientName + ')' : (inv.paymentType === 'visa' ? ' (فيزا)' : ' (كاش)');
+            let payTxt = inv.paymentType === 'credit' ? ' (آجل: ' + inv.customerName + ')' : (inv.paymentType === 'visa' ? ' (فيزا)' : ' (كاش)');
             document.getElementById('finalTotal').innerText = inv.totalEGP + ' ج.م' + payTxt;
         }
 
@@ -598,10 +616,10 @@
         function renderClients() {
             let clientsMap = {};
             invoices.forEach(function(inv) {
-                if(inv.clientName) {
-                    if(!clientsMap[inv.clientName]) clientsMap[inv.clientName] = { phone: inv.clientPhone || '', balance: 0 };
-                    if(inv.type === 'sale' && inv.paymentType === 'credit') clientsMap[inv.clientName].balance += parseFloat(inv.totalEGP);
-                    else if (inv.type === 'client_payment') clientsMap[inv.clientName].balance -= parseFloat(inv.totalEGP);
+                if(inv.customerName) {
+                    if(!clientsMap[inv.customerName]) clientsMap[inv.customerName] = { phone: inv.customerPhone || '', balance: 0 };
+                    if(inv.type === 'sale' && inv.paymentType === 'credit') clientsMap[inv.customerName].balance += parseFloat(inv.totalEGP);
+                    else if (inv.type === 'client_payment') clientsMap[inv.customerName].balance -= parseFloat(inv.totalEGP);
                 }
             });
             let tbody = document.getElementById('clientsTable'); let html = ''; let idx = 1;
@@ -619,7 +637,19 @@
         function payDebt(cName, phone) {
             let amt = prompt('أدخل المبلغ المراد تسديده للعميل: ' + cName);
             if(amt && !isNaN(amt) && parseFloat(amt) > 0) {
-                let invObj = { id: invoiceCounter++, date: new Date().toISOString(), type: 'client_payment', clientName: cName, clientPhone: phone, items: [], itemsText: 'تسديد دفعة نقدية', totalComm: 0, totalEGP: parseFloat(amt), netProfit: 0, paymentType: 'cash' };
+                let invObj = {};
+                invObj.id = invoiceCounter++;
+                invObj.date = getLocalFormattedDateTime();
+                invObj.type = 'client_payment';
+                invObj.items = [];
+                invObj.itemsText = 'تسديد دفعة نقدية';
+                invObj.totalComm = 0;
+                invObj.totalEGP = parseFloat(amt);
+                invObj.netProfit = 0;
+                invObj.paymentType = 'cash';
+                invObj.customerName = cName;
+                invObj.customerPhone = phone;
+                
                 invoices.push(invObj); sendData('saveInvoice', invObj); showToast('تم تسجيل الدفعة بنجاح ✅'); renderClients();
             }
         }
@@ -650,21 +680,21 @@
             let hs = document.getElementById('nHasStrips').checked; let spb = hs ? (parseInt(document.getElementById('nSpb').value)||1) : 1; let addedBoxes = parseInt(document.getElementById('nQty').value)||0; let addedStrips = addedBoxes * spb;
             let existingId = document.getElementById('nId').value; let currentQ = 0; if(existingId) { let exP = products.find(x => x.id == existingId); if(exP) currentQ = parseInt(exP.q)||0; }
             
-            let pObj = { 
-                id: existingId || Date.now().toString(), 
-                barcode: document.getElementById('nBarcode').value,
-                name_en: nEn, 
-                name_ar: nAr, 
-                category: document.getElementById('nCat').value, 
-                expiry: document.getElementById('nExpiry').value, 
-                hasStrips: hs, 
-                spb: spb, 
-                pBox: parseFloat(document.getElementById('nCostBox').value)||0, 
-                spBox: parseFloat(document.getElementById('nSpBox').value)||0, 
-                pStrip: parseFloat(document.getElementById('nCostStrip').value)||0, 
-                spStrip: parseFloat(document.getElementById('nSpStrip').value)||0, 
-                q: currentQ + addedStrips 
-            };
+            // Explicit ordering exactly mirroring Google Sheets to prevent backend shift issues
+            let pObj = {};
+            pObj.id = existingId || Date.now().toString();
+            pObj.barcode = document.getElementById('nBarcode').value;
+            pObj.name_en = nEn;
+            pObj.name_ar = nAr;
+            pObj.category = document.getElementById('nCat').value;
+            pObj.expiry = document.getElementById('nExpiry').value;
+            pObj.hasStrips = hs;
+            pObj.spb = spb;
+            pObj.pBox = parseFloat(document.getElementById('nCostBox').value)||0;
+            pObj.spBox = parseFloat(document.getElementById('nSpBox').value)||0;
+            pObj.pStrip = parseFloat(document.getElementById('nCostStrip').value)||0;
+            pObj.spStrip = parseFloat(document.getElementById('nSpStrip').value)||0;
+            pObj.q = currentQ + addedStrips;
             
             if(existingId) { let idx = products.findIndex(x => x.id == existingId); if(idx > -1) products[idx] = pObj; } else { products.push(pObj); }
             sendData("updateProduct", pObj); showToast('تم حفظ الدواء بنجاح 📦');
@@ -764,7 +794,7 @@
             if(!sDate || !eDate) return showToast('الرجاء تحديد التواريخ', 'error');
             let sales = 0, returns = 0; let itemsCount = {}; let datesData = {};
             invoices.forEach(inv => {
-                let invDate = inv.date.split('T')[0];
+                let invDate = inv.date.split(' ')[0];
                 if(invDate >= sDate && invDate <= eDate) {
                     if(inv.type === 'sale') {
                         sales += parseFloat(inv.totalEGP);
@@ -790,8 +820,23 @@
         }
 
         function renderUsers() { let tbody = document.getElementById('usersTable'); let html = ''; users.forEach((u) => { html += '<tr><td style="font-weight:bold;">' + u.username + '</td><td>••••••</td><td><span class="badge ' + (u.role==='Admin'?'badge-safe':'badge-warn') + '">' + u.role + '</span></td><td><button class="btn btn-purple" style="padding:4px 8px; margin:0; width:auto;" onclick="editUser(\'' + u.username + '\',\'' + u.password + '\',\'' + u.role + '\')">تعديل ✏️</button></td></tr>'; }); tbody.innerHTML = html || '<tr><td colspan="4">لا يوجد مستخدمين</td></tr>'; }
+        
         function editUser(u, p, r) { document.getElementById('uName').value = u; document.getElementById('uPass').value = p; document.getElementById('uRole').value = r; }
-        function saveUser() { let u = document.getElementById('uName').value.trim(); let p = document.getElementById('uPass').value.trim(); let r = document.getElementById('uRole').value; if(!u || !p) return showToast('أدخل البيانات كاملة!', 'error'); let uObj = { username: u, password: p, role: r }; let idx = users.findIndex(x => x.username === u); if(idx > -1) users[idx] = uObj; else users.push(uObj); showToast('تم حفظ بيانات المستخدم 👤'); renderUsers(); document.getElementById('uName').value = ''; document.getElementById('uPass').value = ''; }
+        
+        function saveUser() { 
+            let u = document.getElementById('uName').value.trim(); let p = document.getElementById('uPass').value.trim(); let r = document.getElementById('uRole').value; 
+            if(!u || !p) return showToast('أدخل البيانات كاملة!', 'error'); 
+            
+            // Explicit ordering for users to perfectly match the Google Sheet
+            let uObj = {};
+            uObj.username = u;
+            uObj.password = p;
+            uObj.role = r;
+
+            let idx = users.findIndex(x => x.username === u); if(idx > -1) users[idx] = uObj; else users.push(uObj); 
+            showToast('تم حفظ بيانات المستخدم 👤'); renderUsers(); document.getElementById('uName').value = ''; document.getElementById('uPass').value = ''; 
+            sendData("updateUser", uObj); // Ensure the app script handles 'updateUser'
+        }
     </script>
 </body>
 </html>
