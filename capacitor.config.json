@@ -1,6 +1,6 @@
 {
-  "appId": "com.Standard Pharmacy 01.pro",
-  "appName": "Standard Pharmacy 01",
+  "appId": "com.pharmacypro.app",
+  "appName": "Pharmacy Pro 01",
   "webDir": "www",
   "bundledWebRuntime": false
 }
