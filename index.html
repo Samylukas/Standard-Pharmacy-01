@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
@@ -264,7 +265,9 @@
                     <table>
                         <thead>
                             <tr>
-                                <th class="no-print">تحديد</th>
+                                <th class="no-print">
+                                    <input type="checkbox" id="selectAllShortages" onchange="toggleAllShortages(this)" checked> تحديد الكل
+                                </th>
                                 <th>الدواء</th>
                                 <th>الكمية المتاحة</th>
                                 <th>سعر الشراء</th>
@@ -318,21 +321,6 @@
             <div class="card"><h3 style="color:#1e3c72; margin-bottom:10px;">📋 قائمة المستخدمين الحاليين</h3><div style="overflow-x:auto;"><table><thead><tr><th>اسم المستخدم</th><th>كلمة المرور</th><th>الصلاحية</th><th>تعديل</th></tr></thead><tbody id="usersTable"></tbody></table></div></div>
         </div>
     </div>
-
-    <!-- Emergency script directly loaded to prevent hangs -->
-    <script>
-        setTimeout(function() {
-            var splash = document.getElementById('splashScreen');
-            if (splash && splash.style.display !== 'none') {
-                splash.style.opacity = '0';
-                setTimeout(function() {
-                    splash.style.display = 'none';
-                    var login = document.getElementById('loginOverlay');
-                    if (login) login.style.display = 'flex';
-                }, 500);
-            }
-        }, 3000);
-    </script>
 
     <script>
         const URL = "https://script.google.com/macros/s/AKfycbwhj5QHRcIUpoiNb2wNNUDI3Sdmc34Tnj8f-_z31IlmDTdro4FLNqWTZBm4Pxv_juI/exec";
@@ -544,7 +532,6 @@
             
             document.getElementById('posPaymentType').value = 'cash'; toggleCreditFields(); document.getElementById('posClientName').value = ''; document.getElementById('posClientPhone').value = '';
             
-            // Show print option for the saved invoice
             if(type === 'sale') {
                 showToast('تم حفظ الفاتورة ✅', 'success');
                 if(confirm('هل تريد طباعة الفاتورة عبر الطابعة الحرارية؟')) {
@@ -640,6 +627,12 @@
             setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect);
         }
 
+        function printBarcode(code, name) {
+            document.getElementById('modalPName').innerText = name;
+            JsBarcode("#barcodeSvg", code, { format: "CODE128", width: 1.5, height: 40, fontSize: 14, margin: 5, displayValue: true });
+            document.getElementById('barcodeModal').style.display = 'flex';
+        }
+
         function editProductFromStock(id) { let p = products.find(x => x.id == id); if(p) { document.querySelectorAll('.tab-btn')[3].click(); onAddProductSelect(p); } }
 
         function renderStock(q="") {
@@ -648,14 +641,28 @@
                 if(!q) return true;
                 let matchEn = (p.name_en||p.n||'').toLowerCase().includes(q.toLowerCase()); let matchAr = (p.name_ar||'').toLowerCase().includes(q.toLowerCase()); let matchBar = (p.barcode||'').toString().includes(q); return matchEn || matchAr || matchBar; 
             }).forEach((p, idx)=>{
-                // طباعة الباركود مربوطة الان بدالة ال Bridge مباشرة
                 html += '<tr><td>' + (idx+1) + '</td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.n || '') + ' <br> <small style="color:#0984e3">' + (p.name_ar || '') + '</small></td><td style="direction:ltr;">' + (p.barcode||'-') + '</td><td style="color:#0984e3; font-weight:bold;">' + formatStockDisplay(p.q||0, p.spb||1, p.hasStrips) + '</td><td>' + (p.spBox||0) + ' ج.م' + (p.hasStrips?' / '+(p.spStrip||0)+' ج.م':'') + '</td><td><button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock(\'' + p.id + '\')">✏️</button><button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="printLabelViaBridge(\'' + (p.barcode||'') + '\', \'' + (p.name_en||p.n||p.name_ar||'') + '\', \'' + (p.spBox||0) + ' ج.م\')">🖨️</button><button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm(\'متأكد من الحذف؟\')){ products = products.filter(x=>x.id!=\'' + p.id + '\'); sendData(\'deleteProduct\',{id:\'' + p.id + '\'}); renderStock(); showToast(\'تم الحذف\'); }">🗑️</button></td></tr>';
             });
             tbody.innerHTML = html;
         }
 
+        function toggleAllShortages(source) {
+            let checkboxes = document.querySelectorAll('.short-chk');
+            checkboxes.forEach(chk => {
+                chk.checked = source.checked;
+                let id = chk.getAttribute('data-id');
+                let qtyInput = document.getElementById('reqQty_' + id);
+                if(qtyInput) {
+                    qtyInput.style.display = source.checked ? 'inline-block' : 'none';
+                }
+            });
+        }
+
         function renderShortages() {
             let tbody = document.getElementById('shortagesTable'); let html = '';
+            let selectAllBox = document.getElementById('selectAllShortages');
+            if(selectAllBox) selectAllBox.checked = true;
+
             let shortages = products.filter(p => { let boxes = p.hasStrips ? Math.floor((p.q||0) / (p.spb||1)) : (p.q||0); return boxes < 5; });
             if(shortages.length === 0) { tbody.innerHTML = '<tr><td colspan="5">لا توجد نواقص بالمخزن</td></tr>'; return; }
             shortages.forEach(p => { 
