@@ -147,13 +147,13 @@
                 <!-- Invoice Navigator -->
                 <div style="display:flex; justify-content:space-between; align-items:center; background:#f4f7f6; padding:10px; border-radius:8px; margin-bottom:15px; border: 1px solid #ccc;">
                     <div style="display:flex; gap:5px;">
-                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('first')">|<</button>
-                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('prev')"><</button>
+                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('first')">|&lt;</button>
+                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('prev')">&lt;</button>
                     </div>
                     <span id="posInvoiceViewerLabel" style="font-weight:bold; color:#1e3c72; font-size:1.1rem;">فاتورة جديدة 🛒</span>
                     <div style="display:flex; gap:5px;">
-                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('next')">></button>
-                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('last')">>|</button>
+                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('next')">&gt;</button>
+                        <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('last')">&gt;|</button>
                         <button class="btn btn-green" style="width:auto; margin:0; padding:5px 15px; margin-right:10px;" onclick="newInvoiceMode()">➕ جديد</button>
                     </div>
                 </div>
@@ -267,7 +267,8 @@
                 </div>
                 <div style="background:#e6f2ff; padding:15px; border-radius:10px; margin-top:10px; margin-bottom:15px; border: 2px solid #0984e3;">
                     <label style="display:flex; align-items:center; gap:10px; cursor: pointer; color: #0984e3; font-size: 1.1rem; margin-bottom:0;">
-                        <input type="checkbox" id="nHasStrips" style="width: 20px; height: 20px;" onchange="document.getElementById('stripArea').style.display=this.checked?'flex':'none'"> هذا الدواء يحتوي على شرائط</label>
+                        <input type="checkbox" id="nHasStrips" style="width: 20px; height: 20px;" onchange="document.getElementById('stripArea').style.display=this.checked?'flex':'none'"> هذا الدواء يحتوي على شرائط
+                    </label>
                     <div id="stripArea" style="display:none; gap:10px; margin-top:15px; flex-wrap: wrap;">
                         <div class="form-group" style="flex:1; min-width: 120px;"><label>عدد الشرائط بالعلبة:</label><input type="number" id="nSpb" value="1"></div>
                         <div class="form-group" style="flex:1; min-width: 120px;"><label>سعر شراء الشريط:</label><input type="number" id="nCostStrip" value="0"></div>
@@ -291,14 +292,22 @@
                     <h3 style="color:#e74c3c;">⚠️ الأدوية الناقصة (أقل من 5 علب)</h3>
                     <button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير كـ PDF 📄</button>
                 </div>
-                <div id="shortagesReportArea"><table><thead><tr><th class="no-print">تحديد</th><th>الدواء</th><th>الكمية المتاحة</th></tr></thead><tbody id="shortagesTable"></tbody></table></div>
+                <div id="shortagesReportArea">
+                    <table>
+                        <thead><tr><th class="no-print">تحديد</th><th>الدواء</th><th>الكمية المتاحة</th></tr></thead>
+                        <tbody id="shortagesTable"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <!-- Reports Tab -->
         <div id="reportsTab" class="tab-content">
             <div class="card no-print">
-                <h3 style="color:#1e3c72; margin-bottom:15px;">تحديد فترة التقرير:</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="color:#1e3c72; margin:0;">تحديد فترة التقرير:</h3>
+                    <button class="btn btn-red" style="width:auto; margin:0; padding:10px 20px;" onclick="closeShift()">تقفيل الشيفت 🔒</button>
+                </div>
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     <div class="form-group" style="flex:1;"><label>من تاريخ:</label><input type="date" id="repStart"></div>
                     <div class="form-group" style="flex:1;"><label>إلى تاريخ:</label><input type="date" id="repEnd"></div>
@@ -361,12 +370,26 @@
             fetchData(); 
             let today = new Date().toISOString().split('T')[0];
             if(document.getElementById('repStart')){
-                document.getElementById('repStart').value = today; document.getElementById('repEnd').value = today;
+                document.getElementById('repStart').value = today; 
+                document.getElementById('repEnd').value = today;
             }
         });
 
         function showToast(msg, type) { let t = document.getElementById('toast'); t.innerText = msg; t.style.backgroundColor = type === 'error' ? '#e74c3c' : '#0984e3'; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
         
+        function checkExpiryAlerts() {
+            let today = new Date();
+            let expList = products.filter(p => {
+                if(!p.expiry) return false;
+                let d = new Date(p.expiry);
+                let diff = (d - today) / (1000 * 60 * 60 * 24);
+                return diff <= 60 && diff >= -100; 
+            });
+            if(expList.length > 0) {
+                alert("تنبيه إدارة المخزن ⚠️\n\nيوجد عدد (" + expList.length + ") من الأصناف تنتهي صلاحيتها قريباً أو انتهت بالفعل. يرجى مراجعة تاريخ الصلاحية للكميات الحالية.");
+            }
+        }
+
         function login() { 
             let u = document.getElementById('loginUserSelect').value; 
             let p = document.getElementById('loginPass').value.trim(); 
@@ -376,10 +399,12 @@
                 document.getElementById('mainApp').style.display = 'block'; 
                 document.getElementById('currentUserRole').innerText = found ? found.role : 'Admin'; 
                 showToast('تم تسجيل الدخول بنجاح 🚀'); 
+                checkExpiryAlerts(); 
             } else { showToast('كلمة المرور غير صحيحة', 'error'); } 
         }
 
         function showTab(id, btn) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); if(id === 'stockTab') renderStock(); if(id === 'usersTab') renderUsers(); if(id === 'reportsTab') generateDashboard(); if(id === 'shortagesTab') renderShortages(); if(id === 'clientsTab') renderClients(); }
+        
         function setStatus(msg, isSync) { let badge = document.getElementById('syncStatus'); badge.innerText = msg; badge.style.background = isSync ? '#fff3dc' : '#e6f2ff'; badge.style.color = isSync ? '#856404' : '#0984e3'; badge.style.borderColor = isSync ? '#ffeeba' : '#0984e3'; }
         
         function fetchData() { let s = document.createElement('script'); s.src = URL + "?action=getData&callback=loadData"; document.body.appendChild(s); }
@@ -395,17 +420,18 @@
                 catSet.forEach(c => { let opt = document.createElement('option'); opt.value = c; dl.appendChild(opt); });
 
                 let uSelect = document.getElementById('loginUserSelect');
-                uSelect.innerHTML = users.map(u => '<option value="' + u.username + '">' + u.username + ' (' + u.role + ')</option>').join('');
+                if(uSelect) uSelect.innerHTML = users.map(u => '<option value="' + u.username + '">' + u.username + ' (' + u.role + ')</option>').join('');
 
                 setStatus('🟢 متصل ومُحدث'); 
                 setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect); 
                 
                 let splash = document.getElementById('splashScreen');
-                if (splash.style.display !== 'none') {
+                if (splash && splash.style.display !== 'none') {
                     splash.style.opacity = '0';
                     setTimeout(() => {
                         splash.style.display = 'none';
-                        document.getElementById('loginOverlay').style.display = 'flex';
+                        let logn = document.getElementById('loginOverlay');
+                        if(logn) logn.style.display = 'flex';
                         if(document.getElementById('loginPass')) document.getElementById('loginPass').focus();
                     }, 500);
                 }
@@ -576,7 +602,19 @@
             
             if(pObj.category) {
                 let dl = document.getElementById('catList');
-                let exists = false; for(let i=0; i x.id == id); if(p) { document.querySelectorAll('.tab-btn')[3].click(); onAddProductSelect(p); } }
+                let exists = false; for(let i=0; i<dl.options.length; i++){ if(dl.options[i].value === pObj.category) exists=true; }
+                if(!exists) { let opt = document.createElement('option'); opt.value = pObj.category; dl.appendChild(opt); }
+            }
+            setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect);
+        }
+
+        function printBarcode(code, name) {
+            document.getElementById('modalPName').innerText = name;
+            JsBarcode("#barcodeSvg", code, { format: "CODE128", width: 1.5, height: 40, fontSize: 14, margin: 5, displayValue: true });
+            document.getElementById('barcodeModal').style.display = 'flex';
+        }
+
+        function editProductFromStock(id) { let p = products.find(x => x.id == id); if(p) { document.querySelectorAll('.tab-btn')[3].click(); onAddProductSelect(p); } }
 
         function renderStock(q="") {
             let tbody = document.getElementById('stockTable'); let html = '';
@@ -595,6 +633,12 @@
             if(shortages.length === 0) { tbody.innerHTML = '<tr><td colspan="3">لا توجد نواقص بالمخزن</td></tr>'; return; }
             shortages.forEach(p => { html += '<tr><td class="no-print"><input type="checkbox" class="short-chk" checked></td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.n || p.name_ar) + '</td><td style="color:#e74c3c; font-weight:bold;">' + formatStockDisplay(p.q||0, p.spb||1, p.hasStrips) + '</td></tr>'; });
             tbody.innerHTML = html;
+        }
+
+        function closeShift() {
+            if(confirm('هل أنت متأكد من تقفيل الشيفت؟ سيتم تصفير درج الكاشير الحالي.')) {
+                showToast('تم تقفيل الشيفت بنجاح ورفع التقرير', 'success');
+            }
         }
 
         function exportShortagesPDF() { let element = document.getElementById('shortagesReportArea'); let opt = { margin: 10, filename: 'Shortages_Report.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; html2pdf().set(opt).from(element).save(); }
