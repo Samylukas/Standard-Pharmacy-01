@@ -104,7 +104,7 @@
     <!-- Login Overlay -->
     <div id="loginOverlay" class="modal-overlay" style="background:#f4f7f6;">
         <div class="card" style="width:100%; max-width:400px; text-align:center; padding: 40px 20px;">
-            <h2 style="color:#1e3c72; margin-bottom:10px; font-size: 2rem;">Pharmacy Pro</h2>
+            <h2 id="loginPharmName" style="color:#1e3c72; margin-bottom:10px; font-size: 2rem;">Pharmacy Pro</h2>
             <p style="margin-bottom: 30px; font-weight: bold; color: #7f8c8d;">تسجيل الدخول للنظام</p>
             <div class="form-group">
                 <label style="text-align: right;">المستخدم:</label>
@@ -134,7 +134,7 @@
         <div class="modal-content">
             <h3 style="color:#1e3c72; margin-bottom:15px;">🏷️ خيارات طباعة الملصق (الباركود)</h3>
             <div class="checkbox-group">
-                <label><input type="checkbox" id="lblIncName" checked> طباعة اسم المنتج على الملصق</label>
+                <label><input type="checkbox" id="lblIncName" checked> طباعة اسم الدواء على الملصق</label>
                 <label><input type="checkbox" id="lblIncPrice" checked> طباعة السعر على الملصق</label>
             </div>
             <button class="btn btn-blue" onclick="executeLabelPrint('web-bluetooth')">طابعة بلوتوث حرارية (مباشر)</button>
@@ -145,11 +145,11 @@
     </div>
 
     <!-- System Print Area -->
-    <div id="systemPrintArea" style="display:none; padding:20px; font-family:'Cairo'; direction:rtl;"></div>
+    <div id="systemPrintArea" style="display:none; padding:10px; font-family:'Cairo', sans-serif; direction:rtl;"></div>
 
     <div class="app-container" id="mainApp" style="display:none;">
         <div class="card no-print" style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #0984e3; padding: 15px 20px; gap: 10px;">
-            <div><h3 style="color:#1e3c72; direction: ltr; display: inline-block; font-size:1.2rem;">👤 Pharmacy Pro</h3><span id="currentUserRole" style="font-size:0.75rem; background:#1e3c72; color:white; padding:3px 8px; border-radius:10px; margin-right:10px;">Admin</span></div>
+            <div><h3 id="appPharmName" style="color:#1e3c72; direction: rtl; display: inline-block; font-size:1.2rem;">Pharmacy Pro</h3> <span id="currentUserRole" style="font-size:0.75rem; background:#1e3c72; color:white; padding:3px 8px; border-radius:10px; margin-right:10px;">Admin</span></div>
             <div style="display:flex; gap:10px; align-items:center; justify-content:center;"><span id="syncStatus" style="background:#e6f2ff; color:#0984e3; padding:5px 10px; border-radius:20px; font-weight:bold; border:1px solid #0984e3; cursor:pointer; font-size:0.8rem;" onclick="fetchData()">🟢 متصل ومُحدث</span><button class="btn btn-red" style="width:auto; margin:0; padding:5px 15px; font-size:0.9rem;" onclick="location.reload()">خروج 🚪</button></div>
         </div>
 
@@ -160,29 +160,26 @@
             <button class="tab-btn" onclick="showTab('addTab', this)">➕ إضافة</button>
             <button class="tab-btn" onclick="showTab('shortagesTab', this)">⚠️ النواقص</button>
             <button class="tab-btn" onclick="showTab('reportsTab', this)">📊 التقارير</button>
-            <button class="tab-btn" onclick="showTab('usersTab', this)">👥 المستخدمين</button>
+            <button class="tab-btn" onclick="showTab('usersTab', this)">👥 إعدادات</button>
         </div>
 
         <!-- POS Tab -->
         <div id="posTab" class="tab-content active">
             
-            <!-- Clean Layout for POS Controls -->
-            <div class="card" style="text-align: center; background:#f4f7f6; padding:15px; border-radius:8px; margin-bottom:15px; border: 1px solid #ccc;">
-                <!-- Row 1: Navigation Buttons -->
-                <div style="display:flex; justify-content:center; gap:8px; margin-bottom: 10px;">
-                    <button class="btn btn-dark" style="width:auto; margin:0; padding:6px 15px;" onclick="navInvoice('first')">|&lt;</button>
-                    <button class="btn btn-dark" style="width:auto; margin:0; padding:6px 15px;" onclick="navInvoice('prev')">&lt;</button>
-                    <button class="btn btn-dark" style="width:auto; margin:0; padding:6px 15px;" onclick="navInvoice('next')">&gt;</button>
-                    <button class="btn btn-dark" style="width:auto; margin:0; padding:6px 15px;" onclick="navInvoice('last')">&gt;|</button>
+            <!-- التنسيق الجديد لشريط التنقل -->
+            <div class="card" style="background:#f4f7f6; padding:10px; border-radius:8px; margin-bottom:15px; border: 1px solid #ccc; text-align:center;">
+                <!-- السطر الأول: أزرار التنقل والاسم -->
+                <div style="display:flex; justify-content:center; align-items:center; gap:15px; margin-bottom:15px; flex-wrap:wrap;">
+                    <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 15px;" onclick="navInvoice('first')">|&lt;</button>
+                    <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 15px;" onclick="navInvoice('prev')">&lt;</button>
+                    <span id="posInvoiceViewerLabel" style="font-weight:bold; color:#1e3c72; font-size:1.1rem; min-width:150px;">فاتورة جديدة 🛒</span>
+                    <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 15px;" onclick="navInvoice('next')">&gt;</button>
+                    <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 15px;" onclick="navInvoice('last')">&gt;|</button>
                 </div>
-                <!-- Row 2: Invoice Title -->
-                <div style="margin-bottom: 10px;">
-                    <span id="posInvoiceViewerLabel" style="font-weight:bold; color:#1e3c72; font-size:1.2rem;">فاتورة جديدة 🛒</span>
-                </div>
-                <!-- Row 3: Actions -->
-                <div style="display:flex; justify-content:center; gap:10px;">
-                    <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:6px 20px;" onclick="openInvoicePrintModal()">🖨️ طباعة</button>
-                    <button class="btn btn-green" style="width:auto; margin:0; padding:6px 20px;" onclick="newInvoiceMode()">➕ جديد</button>
+                <!-- السطر الثاني: الطباعة والجديد -->
+                <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                    <button class="btn btn-green" style="width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="newInvoiceMode()">➕ جديد</button>
+                    <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="openInvoicePrintModal()">🖨️ طباعة الفاتورة</button>
                 </div>
             </div>
 
@@ -268,7 +265,7 @@
         <!-- Clients Tab -->
         <div id="clientsTab" class="tab-content">
             <div class="card">
-                <h3 style="color:#1e3c72; margin-bottom:15px;">📝 حسابات العملاء والآجل</h3>
+                <h3 style="color:#1e3c72; margin-bottom:15px;">📝 حسابات العملاء والآجل (الشكك)</h3>
                 <div style="overflow-x:auto;">
                     <table>
                         <thead><tr><th>#</th><th>اسم العميل</th><th>رقم الهاتف</th><th>المديونية (ج.م)</th><th>إجراءات</th></tr></thead>
@@ -366,8 +363,19 @@
             <button class="btn btn-dark no-print" onclick="exportDashboardPDF()">تصدير PDF 📄</button>
         </div>
 
-        <!-- Users Tab -->
+        <!-- Users & Settings Tab -->
         <div id="usersTab" class="tab-content">
+            <!-- Settings Card -->
+            <div class="card" style="border: 2px solid #0984e3;">
+                <h3 style="color:#0984e3; margin-bottom:15px;">⚙️ إعدادات الصيدلية (الطباعة)</h3>
+                <div class="form-group">
+                    <label>اسم الصيدلية (يظهر على الفواتير والملصقات):</label>
+                    <input type="text" id="pharmacyNameSetting" placeholder="اكتب اسم الصيدلية هنا...">
+                </div>
+                <button class="btn btn-green" onclick="savePharmacySettings()">حفظ الإعدادات 💾</button>
+            </div>
+
+            <!-- Users Card -->
             <div class="card">
                 <h3 style="color:#1e3c72; margin-bottom:15px;">➕ مستخدم جديد</h3>
                 <div style="display:flex; gap:10px; flex-wrap: wrap;">
@@ -392,6 +400,7 @@
         
         let currentPrintInvoice = null;
         let currentPrintLabel = null;
+        let myPharmacyName = localStorage.getItem('pharmName') || 'Pharmacy Pro';
 
         // Emergency Override
         setTimeout(function() {
@@ -413,7 +422,18 @@
                 document.getElementById('repStart').value = today; 
                 document.getElementById('repEnd').value = today;
             }
+            document.getElementById('pharmacyNameSetting').value = myPharmacyName;
+            document.getElementById('appPharmName').innerText = myPharmacyName;
+            document.getElementById('loginPharmName').innerText = myPharmacyName;
         });
+
+        function savePharmacySettings() {
+            myPharmacyName = document.getElementById('pharmacyNameSetting').value.trim() || 'Pharmacy Pro';
+            localStorage.setItem('pharmName', myPharmacyName);
+            document.getElementById('appPharmName').innerText = myPharmacyName;
+            document.getElementById('loginPharmName').innerText = myPharmacyName;
+            showToast('تم حفظ اسم الصيدلية بنجاح ✅', 'success');
+        }
 
         function formatDateLocal(dStr) {
             let d = new Date(dStr);
@@ -454,7 +474,7 @@
                 if(!writeChar) throw new Error("الطابعة لا تدعم استقبال البيانات المباشر.");
 
                 const encoder = new TextEncoder();
-                const data = encoder.encode(textToPrint + "\n"); 
+                const data = encoder.encode(textToPrint); 
                 
                 for (let i = 0; i < data.length; i += 100) {
                     let chunk = data.slice(i, i + 100);
@@ -488,12 +508,22 @@
                 let textEncoded = encodeURIComponent(txt);
                 window.location.href = `printbridge://print?type=receipt&text=${textEncoded}`;
             } else if (method === 'system') {
-                let html = `<div style="text-align:center; border:1px solid #000; padding:10px; width:300px; margin:0 auto;">
-                    <h3>صيدلية Pharmacy Pro</h3><hr>
-                    <p>رقم الفاتورة: ${currentPrintInvoice.id}</p>
-                    <p>التاريخ: ${formatDateLocal(currentPrintInvoice.date)}</p><hr>`;
-                currentPrintInvoice.items.forEach(i => { html += `<p>${i.n}<br>${i.qty} x ${i.price} = <b>${i.total} ج.م</b></p>`; });
-                html += `<hr><h3>الإجمالي: ${currentPrintInvoice.totalEGP} ج.م</h3></div>`;
+                // Table layout with very small font for Thermal A4 simulation
+                let html = `<div style="text-align:center; padding:5px; width:280px; margin:0 auto; font-family:'Cairo', sans-serif; direction:rtl;">
+                    <h2 style="margin:2px 0; font-size:16px;">${myPharmacyName}</h2>
+                    <p style="margin:2px 0; font-size:11px;">رقم الفاتورة: ${currentPrintInvoice.id}</p>
+                    <p style="margin:2px 0; font-size:11px;">التاريخ: ${formatDateLocal(currentPrintInvoice.date)}</p>
+                    <hr style="border:0; border-top:1px dashed #000; margin:5px 0;">
+                    <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;">
+                        <thead><tr style="border-bottom:1px dashed #000;"><th>م</th><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead>
+                        <tbody>`;
+                currentPrintInvoice.items.forEach((i, idx) => { 
+                    html += `<tr><td>${idx+1}</td><td>${i.n}</td><td>${i.qty}</td><td>${i.total}</td></tr>`; 
+                });
+                html += `</tbody></table>
+                    <hr style="border:0; border-top:1px dashed #000; margin:5px 0;">
+                    <h3 style="margin:5px 0; font-size:14px;">الإجمالي: ${currentPrintInvoice.totalEGP} ج.م</h3>
+                </div>`;
                 
                 let printArea = document.getElementById('systemPrintArea');
                 document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
@@ -521,20 +551,24 @@
             let finalPrice = incPrice ? currentPrintLabel.price : "";
 
             if (method === 'web-bluetooth') {
-                let txt = `${finalName}\nباركود: ${currentPrintLabel.barcode}\n${finalPrice}\n`;
+                // Centered text for bluetooth. Barcode numbers, then name, then price
+                let txt = `\x1B\x61\x01${myPharmacyName}\n${currentPrintLabel.barcode}\n${finalName}\n${finalPrice}\n\x1B\x61\x00`;
                 printViaWebBluetooth(txt);
             } else if (method === 'print-bridge') {
                 let nameEncoded = encodeURIComponent(finalName);
                 let priceEncoded = encodeURIComponent(finalPrice);
-                window.location.href = `printbridge://print?type=label&barcode=${currentPrintLabel.barcode}&name=${nameEncoded}&price=${priceEncoded}`;
+                let pharmEncoded = encodeURIComponent(myPharmacyName);
+                window.location.href = `printbridge://print?type=label&barcode=${currentPrintLabel.barcode}&name=${nameEncoded}&price=${priceEncoded}&header=${pharmEncoded}`;
             } else if (method === 'system') {
                 let printArea = document.getElementById('systemPrintArea');
                 document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
                 
+                // Centered Label HTML (Pharmacy Name -> Barcode -> Product Name -> Price)
                 printArea.innerHTML = `
-                    <div style="width:1.5in; text-align:center; border:1px solid #000; padding:5px; margin:0 auto;">
-                        <p style="font-size:10px; font-weight:bold; margin:0;">${finalName}</p>
-                        <svg id="sysBarcodeSvg"></svg>
+                    <div style="width:1.5in; text-align:center; padding:2px; margin:0 auto; display:flex; flex-direction:column; align-items:center;">
+                        <p style="font-size:11px; font-weight:bold; margin:0;">${myPharmacyName}</p>
+                        <svg id="sysBarcodeSvg" style="max-width:100%;"></svg>
+                        <p style="font-size:10px; font-weight:bold; margin:2px 0 0 0;">${finalName}</p>
                         <p style="font-size:12px; font-weight:bold; margin:0;">${finalPrice}</p>
                     </div>`;
                 printArea.style.display = 'block';
@@ -547,22 +581,23 @@
         }
 
         function generateReceiptText(inv) {
-            let text = "صيدلية Pharmacy Pro\n";
-            text += "--------------------------------\n";
+            let text = `${myPharmacyName}\n`;
+            text += "------------------------\n";
             text += "رقم الفاتورة: " + inv.id + "\n";
             text += "التاريخ: " + formatDateLocal(inv.date) + "\n";
             text += "الكاشير: " + document.getElementById('currentUserRole').innerText + "\n";
             if(inv.customerName) text += "العميل: " + inv.customerName + "\n";
-            text += "--------------------------------\n";
+            text += "------------------------\n";
             inv.items.forEach(i => {
-                text += `${i.n}\n${i.qty} ${i.unit} x ${i.price} = ${i.total} ج.م\n`;
+                text += `${i.n}\n${i.qty} x ${i.price} = ${i.total} ج.م\n`;
             });
-            text += "--------------------------------\n";
+            text += "------------------------\n";
             text += "الإجمالي: " + inv.totalEGP + " ج.م\n";
             let payTxt = inv.paymentType === 'credit' ? 'آجل' : (inv.paymentType === 'visa' ? 'فيزا' : 'كاش');
             text += "الدفع: " + payTxt + "\n";
-            text += "--------------------------------\n";
+            text += "------------------------\n";
             text += "مع تمنياتنا بالشفاء العاجل\n";
+            // No extra newlines to prevent paper waste
             return text;
         }
 
@@ -647,15 +682,26 @@
         
         function toggleScanner(mode) { 
             scanMode = mode || 'pos'; let c = document.getElementById('scannerContainer'); 
-            if(isScanning) { scanner.stop(); c.style.display = 'none'; isScanning = false; } 
+            if(isScanning) { 
+                if(scanner) { scanner.stop().then(() => { scanner.clear(); }); }
+                c.style.display = 'none'; 
+                isScanning = false; 
+            } 
             else { 
-                c.style.display = 'block'; scanner = new Html5Qrcode("reader"); 
-                scanner.start({facingMode:"environment"}, {fps:10, qrbox: 250}, (text) => { 
-                    let p = products.find(x => x.barcode === text); 
+                // يجب عرض العنصر أولاً قبل تشغيل الكاميرا لتجنب أخطاء Html5Qrcode
+                c.style.display = 'block'; 
+                scanner = new Html5Qrcode("reader"); 
+                scanner.start({facingMode:"environment"}, {fps:10, qrbox: {width: 250, height: 250}}, (text) => { 
+                    let p = products.find(x => x.barcode.toString() === text); 
                     if(p) { if(scanMode === 'pos') onPosProductSelect(p); else { document.getElementById('stockFilterInput').value = p.barcode; renderStock(p.barcode); } } 
                     else showToast('دواء غير مسجل!', 'warn'); 
                     toggleScanner(); 
-                }, ()=>{}).then(() => isScanning = true); 
+                }, (err)=>{}).then(() => {
+                    isScanning = true; 
+                }).catch((err) => {
+                    showToast('خطأ في الكاميرا، تأكد من الصلاحيات ووجود https', 'error');
+                    c.style.display = 'none';
+                });
             } 
         }
 
