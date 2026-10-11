@@ -27,40 +27,70 @@
 
         .app-container { max-width: 1200px; margin: 20px auto; padding: 15px; }
         .card { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .btn { border: none; padding: 10px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; color: white; width: 100%; margin-top: 10px; transition: 0.2s; }
+        .btn { border: none; padding: 10px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; color: white; width: 100%; margin-top: 10px; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px;}
         .btn:active { transform: scale(0.98); }
         .btn-blue { background: #0984e3; } .btn-red { background: #e74c3c; } .btn-dark { background: #1e3c72; } .btn-purple { background: #8e44ad; } .btn-green { background: #27ae60; } .btn-yellow { background: #f39c12; }
+        
         .form-group { margin-bottom: 15px; width: 100%; position: relative; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #1e3c72; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #1e3c72; font-size: 0.95rem; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: 'Cairo'; outline: none; }
         .form-group input:focus, .form-group select:focus { border-color: #0984e3; }
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .nav-tabs::-webkit-scrollbar { display: none; }
         .tab-btn { background: #fff; border: 1px solid #ccc; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; white-space: nowrap; color: #7f8c8d; }
         .tab-btn.active { background: #1e3c72; color: #fff; border-color: #1e3c72; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        
         table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: center; font-size: 0.95rem; }
         th, td { padding: 12px 5px; border-bottom: 1px solid #eee; }
         th { background: #1e3c72; color: #fff; }
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #0984e3; color: white; padding: 15px; border-radius: 8px; display: none; z-index: 99999; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .radio-switch { display: flex; gap: 10px; margin-bottom: 15px; background: #f8f9fa; padding: 5px; border-radius: 10px; border: 1px solid #ddd; }
-        .radio-switch label { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #7f8c8d; transition: 0.3s; }
+        
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #0984e3; color: white; padding: 15px; border-radius: 8px; display: none; z-index: 99999; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); width: 90%; max-width: 400px; text-align: center; }
+        
+        .radio-switch { display: flex; gap: 10px; margin-bottom: 15px; background: #f8f9fa; padding: 5px; border-radius: 10px; border: 1px solid #ddd; flex-wrap: wrap; }
+        .radio-switch label { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #7f8c8d; transition: 0.3s; min-width: 120px; }
         .radio-switch input { display: none; }
         .radio-switch input[value="sale"]:checked + label { background: #e6f2ff; color: #0984e3; border: 1px solid #0984e3; }
         .radio-switch input[value="return"]:checked + label { background: #fdedec; color: #e74c3c; border: 1px solid #e74c3c; }
+        
         .autocomplete-items { position: absolute; border: 1px solid #0984e3; z-index: 99; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .autocomplete-items div { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; color: #1e3c72; font-weight: bold; }
         .autocomplete-items div:hover { background: #e6f2ff; }
+        
         .badge { padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; color: white; }
         .badge-safe { background: #0984e3; } .badge-warn { background: #e67e22; } .badge-danger { background: #e74c3c; }
+        
         #scannerContainer { display: none; background: #000; padding: 10px; border-radius: 12px; margin-bottom: 15px; text-align: center; }
         #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 8px; overflow: hidden; }
         
-        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; }
-        .modal-content { background:#fff; padding:25px; border-radius:12px; text-align:center; width:90%; max-width:450px; }
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; padding: 15px; }
+        .modal-content { background:#fff; padding:25px; border-radius:12px; text-align:center; width:100%; max-width:450px; }
         .checkbox-group { text-align: right; background: #f4f7f6; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
         .checkbox-group label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-weight: bold; cursor: pointer; color: #1e3c72; }
         .checkbox-group input { width: 18px; height: 18px; }
+
+        /* ==========================================
+           Mobile Responsiveness (الهواتف الذكية)
+           ========================================== */
+        @media (max-width: 768px) {
+            .card.no-print { flex-direction: column; gap: 15px; text-align: center; }
+            .card.no-print > div { justify-content: center; flex-wrap: wrap; width: 100%; }
+            
+            /* POS Navigator Controls */
+            .pos-controls-container { flex-direction: column; gap: 10px; }
+            .pos-controls-container > div { width: 100%; justify-content: space-between; }
+            #posInvoiceViewerLabel { text-align: center; display: block; width: 100%; margin: 5px 0; }
+            
+            .form-group label { font-size: 0.85rem; }
+            th, td { font-size: 0.85rem; padding: 8px 3px; }
+            .btn { font-size: 0.95rem !important; padding: 8px 10px; }
+            
+            /* Action Buttons Stacking */
+            #posActionButtons { flex-direction: column; }
+            #posActionButtons .btn { width: 100%; margin: 0; }
+        }
 
         @media print { .no-print { display: none !important; } }
     </style>
@@ -85,7 +115,7 @@
 
     <!-- Login Overlay -->
     <div id="loginOverlay" class="modal-overlay" style="background:#f4f7f6;">
-        <div class="card" style="width:90%; max-width:400px; text-align:center; padding: 40px 20px;">
+        <div class="card" style="width:100%; max-width:400px; text-align:center; padding: 40px 20px;">
             <h2 style="color:#1e3c72; margin-bottom:10px; font-size: 2rem;">Pharmacy Pro</h2>
             <p style="margin-bottom: 30px; font-weight: bold; color: #7f8c8d;">تسجيل الدخول للنظام</p>
             <div class="form-group">
@@ -104,9 +134,9 @@
     <div id="invoicePrintModal" class="modal-overlay">
         <div class="modal-content">
             <h3 style="color:#1e3c72; margin-bottom:15px;">🖨️ اختر طريقة طباعة الفاتورة</h3>
-            <button class="btn btn-blue" onclick="executeInvoicePrint('web-bluetooth')" style="padding:12px;">طابعة بلوتوث حرارية (مباشر للحاسوب/الموبايل)</button>
-            <button class="btn btn-green" onclick="executeInvoicePrint('print-bridge')" style="padding:12px;">تطبيق PrintBridge (للأندرويد)</button>
-            <button class="btn btn-dark" onclick="executeInvoicePrint('system')" style="padding:12px;">طابعة النظام العادية (A4 / طابعة USB)</button>
+            <button class="btn btn-blue" onclick="executeInvoicePrint('web-bluetooth')" style="padding:12px;">طابعة بلوتوث حرارية (مباشر)</button>
+            <button class="btn btn-green" onclick="executeInvoicePrint('print-bridge')" style="padding:12px;">تطبيق PrintBridge (أندرويد)</button>
+            <button class="btn btn-dark" onclick="executeInvoicePrint('system')" style="padding:12px;">طابعة النظام العادية (A4)</button>
             <button class="btn btn-red" onclick="document.getElementById('invoicePrintModal').style.display='none'" style="margin-top:20px;">إلغاء ❌</button>
         </div>
     </div>
@@ -120,47 +150,47 @@
                 <label><input type="checkbox" id="lblIncPrice" checked> طباعة السعر على الملصق</label>
             </div>
             <button class="btn btn-blue" onclick="executeLabelPrint('web-bluetooth')">طابعة بلوتوث حرارية (مباشر)</button>
-            <button class="btn btn-green" onclick="executeLabelPrint('print-bridge')">تطبيق PrintBridge (للأندرويد)</button>
-            <button class="btn btn-dark" onclick="executeLabelPrint('system')">طابعة النظام العادية (A4/PDF)</button>
+            <button class="btn btn-green" onclick="executeLabelPrint('print-bridge')">تطبيق PrintBridge (أندرويد)</button>
+            <button class="btn btn-dark" onclick="executeLabelPrint('system')">طابعة النظام (A4/PDF)</button>
             <button class="btn btn-red" onclick="document.getElementById('labelPrintModal').style.display='none'" style="margin-top:20px;">إلغاء ❌</button>
         </div>
     </div>
 
-    <!-- System Print Area (Hidden during normal view) -->
+    <!-- System Print Area -->
     <div id="systemPrintArea" style="display:none; padding:20px; font-family:'Cairo'; direction:rtl;"></div>
 
     <div class="app-container" id="mainApp" style="display:none;">
         <div class="card no-print" style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #0984e3; padding: 15px 20px;">
-            <div><h3 style="color:#1e3c72; direction: ltr; display: inline-block;">👤 Pharmacy Pro</h3><span id="currentUserRole" style="font-size:0.85rem; background:#1e3c72; color:white; padding:3px 8px; border-radius:10px; margin-right:10px;">Admin</span></div>
-            <div style="display:flex; gap:10px; align-items:center;"><span id="syncStatus" style="background:#e6f2ff; color:#0984e3; padding:5px 10px; border-radius:20px; font-weight:bold; border:1px solid #0984e3; cursor:pointer;" onclick="fetchData()">🟢 متصل ومُحدث</span><button class="btn btn-red" style="width:auto; margin:0; padding:5px 15px;" onclick="location.reload()">خروج 🚪</button></div>
+            <div><h3 style="color:#1e3c72; direction: ltr; display: inline-block; font-size:1.2rem;">👤 Pharmacy Pro</h3><span id="currentUserRole" style="font-size:0.75rem; background:#1e3c72; color:white; padding:3px 8px; border-radius:10px; margin-right:10px;">Admin</span></div>
+            <div style="display:flex; gap:10px; align-items:center;"><span id="syncStatus" style="background:#e6f2ff; color:#0984e3; padding:5px 10px; border-radius:20px; font-weight:bold; border:1px solid #0984e3; cursor:pointer; font-size:0.8rem;" onclick="fetchData()">🟢 متصل ومُحدث</span><button class="btn btn-red" style="width:auto; margin:0; padding:5px 15px; font-size:0.9rem;" onclick="location.reload()">خروج 🚪</button></div>
         </div>
 
         <div class="nav-tabs no-print">
-            <button class="tab-btn active" onclick="showTab('posTab', this)">🛒 الكاشير (POS)</button>
+            <button class="tab-btn active" onclick="showTab('posTab', this)">🛒 الكاشير</button>
             <button class="tab-btn" onclick="showTab('stockTab', this)">📦 المخزون</button>
-            <button class="tab-btn" onclick="showTab('clientsTab', this)">📝 العملاء والآجل</button>
-            <button class="tab-btn" onclick="showTab('addTab', this)">➕ إضافة وتعديل</button>
+            <button class="tab-btn" onclick="showTab('clientsTab', this)">📝 العملاء</button>
+            <button class="tab-btn" onclick="showTab('addTab', this)">➕ إضافة</button>
             <button class="tab-btn" onclick="showTab('shortagesTab', this)">⚠️ النواقص</button>
-            <button class="tab-btn" onclick="showTab('reportsTab', this)">📊 التقارير الذكية</button>
+            <button class="tab-btn" onclick="showTab('reportsTab', this)">📊 التقارير</button>
             <button class="tab-btn" onclick="showTab('usersTab', this)">👥 المستخدمين</button>
         </div>
 
         <!-- POS Tab -->
         <div id="posTab" class="tab-content active">
             <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#f4f7f6; padding:10px; border-radius:8px; margin-bottom:15px; border: 1px solid #ccc;">
+                <div class="pos-controls-container" style="display:flex; justify-content:space-between; align-items:center; background:#f4f7f6; padding:10px; border-radius:8px; margin-bottom:15px; border: 1px solid #ccc;">
                     <div style="display:flex; gap:5px;">
                         <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('first')">|&lt;</button>
                         <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('prev')">&lt;</button>
                     </div>
-                    <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
                         <span id="posInvoiceViewerLabel" style="font-weight:bold; color:#1e3c72; font-size:1.1rem;">فاتورة جديدة 🛒</span>
-                        <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:5px 15px;" onclick="openInvoicePrintModal()">🖨️ طباعة الفاتورة</button>
+                        <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:5px 15px;" onclick="openInvoicePrintModal()">🖨️ طباعة</button>
                     </div>
                     <div style="display:flex; gap:5px;">
                         <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('next')">&gt;</button>
                         <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('last')">&gt;|</button>
-                        <button class="btn btn-green" style="width:auto; margin:0; padding:5px 15px; margin-right:10px;" onclick="newInvoiceMode()">➕ جديد</button>
+                        <button class="btn btn-green" style="width:auto; margin:0; padding:5px 15px;" onclick="newInvoiceMode()">➕ جديد</button>
                     </div>
                 </div>
 
@@ -182,24 +212,24 @@
                         <div class="form-group credit-fields" style="display:none; flex:1; margin-bottom:0;"><label>رقم الواتس:</label><input type="text" id="posClientPhone" placeholder="01..."></div>
                     </div>
 
-                    <div style="display:flex; gap:10px; align-items: flex-end; position: relative;">
-                        <div class="form-group" style="margin-bottom: 0; flex: 1;"><label>بحث بالاسم أو الباركود:</label><input type="text" id="posSearch" placeholder="اكتب اسم الدواء أو الباركود..." autocomplete="off"></div>
+                    <div style="display:flex; gap:10px; align-items: flex-end; position: relative; flex-wrap:wrap;">
+                        <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;"><label>بحث بالاسم أو الباركود:</label><input type="text" id="posSearch" placeholder="اكتب الدواء أو الباركود..." autocomplete="off"></div>
                         <button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner('pos')">📷 مسح</button>
                     </div>
                 </div>
                 
-                <div id="scannerContainer"><div id="reader"></div><button class="btn btn-red" style="width: 90%; margin-top: 10px;" onclick="toggleScanner()">إغلاق الكاميرا ❌</button></div>
+                <div id="scannerContainer"><div id="reader"></div><button class="btn btn-red" style="width: 100%; margin-top: 10px;" onclick="toggleScanner()">إغلاق الكاميرا ❌</button></div>
                 
                 <div id="posAddBox" style="display:none; background:#e6f2ff; padding:15px; border-radius:8px; margin-top:15px; border:2px solid #0984e3;">
                     <h3 id="posPNameEn" style="color:#1e3c72; margin-bottom: 2px;"></h3>
                     <p id="posPNameAr" style="color:#0984e3; font-weight:bold; margin-bottom: 10px;"></p>
                     <p id="posPStock" style="color:#e74c3c; font-weight:bold; margin-bottom:15px; background: #fff; display: inline-block; padding: 4px 10px; border-radius: 6px;"></p>
                     <div style="display:flex; gap:10px; flex-wrap: wrap;">
-                        <div class="form-group" style="flex:1; min-width: 100px;"><label>الوحدة:</label><select id="posUnit" onchange="calcTotal()"><option value="box">علبة كاملة</option><option value="strip" id="optStrip" style="display:none;">شريط</option></select></div>
+                        <div class="form-group" style="flex:1; min-width: 100px;"><label>الوحدة:</label><select id="posUnit" onchange="calcTotal()"><option value="box">علبة</option><option value="strip" id="optStrip" style="display:none;">شريط</option></select></div>
                         <div class="form-group" style="flex:1; min-width: 100px;"><label>الكمية:</label><input type="number" id="posQty" value="1" min="1" oninput="calcTotal()"></div>
-                        <div class="form-group" style="flex:1; min-width: 100px;"><label>الإجمالي (ج.م):</label><input type="number" id="posTotal" readonly style="background:#e9ecef; font-weight: bold; color: #1e3c72;"></div>
+                        <div class="form-group" style="flex:1; min-width: 100px;"><label>الإجمالي:</label><input type="number" id="posTotal" readonly style="background:#e9ecef; font-weight: bold; color: #1e3c72;"></div>
                     </div>
-                    <button class="btn btn-blue" id="btnAddItemBtn" style="font-size: 1.1rem;" onclick="addPosItem()">إضافة للفاتورة 🛒</button>
+                    <button class="btn btn-blue" id="btnAddItemBtn" style="font-size: 1.1rem; padding:12px;" onclick="addPosItem()">إضافة للفاتورة 🛒</button>
                 </div>
             </div>
             
@@ -210,13 +240,13 @@
                         <tbody id="posTable"><tr><td colspan="6">لم يتم إضافة أدوية</td></tr></tbody>
                     </table>
                 </div>
-                <div style="background:#1e3c72; color:white; padding:20px; border-radius:12px; margin-top:20px; text-align:center;">
-                    <p style="font-size: 1.1rem; margin-bottom: 5px;">الإجمالي النهائي:</p>
-                    <h2 id="finalTotal" style="color:#f1c40f; font-size: 2.5rem; margin: 0;">0.00 ج.م</h2>
+                <div style="background:#1e3c72; color:white; padding:15px; border-radius:12px; margin-top:20px; text-align:center;">
+                    <p style="font-size: 1rem; margin-bottom: 5px;">الإجمالي النهائي:</p>
+                    <h2 id="finalTotal" style="color:#f1c40f; font-size: 2rem; margin: 0;">0.00 ج.م</h2>
                 </div>
-                <div id="posActionButtons" style="display: flex; gap: 10px;">
-                    <button class="btn btn-red" style="flex: 1; font-size: 1.1rem;" onclick="clearInvoice()">تفريغ 🧹</button>
-                    <button class="btn btn-blue" style="flex: 3; font-size: 1.1rem;" onclick="saveInvoice()">حفظ الفاتورة 💾</button>
+                <div id="posActionButtons" style="display: flex; gap: 10px; margin-top:15px;">
+                    <button class="btn btn-red" style="flex: 1;" onclick="clearInvoice()">تفريغ 🧹</button>
+                    <button class="btn btn-blue" style="flex: 2;" onclick="saveInvoice()">حفظ الفاتورة 💾</button>
                 </div>
             </div>
         </div>
@@ -224,16 +254,18 @@
         <!-- Stock Tab -->
         <div id="stockTab" class="tab-content">
             <div class="card">
-                <div style="display:flex; gap:10px; align-items: flex-end;">
-                    <div class="form-group" style="flex:1; margin-bottom:0;">
-                        <input type="text" id="stockFilterInput" placeholder="بحث ذكي في المخزون (عربي/إنجليزي/باركود)..." oninput="renderStock(this.value)">
+                <div style="display:flex; gap:10px; align-items: flex-end; flex-wrap:wrap;">
+                    <div class="form-group" style="flex:1; margin-bottom:0; min-width:200px;">
+                        <input type="text" id="stockFilterInput" placeholder="بحث في المخزون..." oninput="renderStock(this.value)">
                     </div>
-                    <button class="btn btn-red" style="width:auto; margin:0; height: 44px; padding: 0 15px;" onclick="document.getElementById('stockFilterInput').value=''; renderStock();">✖</button>
-                    <button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner('stock')">📷 مسح</button>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-red" style="width:auto; margin:0; height: 44px; padding: 0 15px;" onclick="document.getElementById('stockFilterInput').value=''; renderStock();">✖</button>
+                        <button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner('stock')">📷 مسح</button>
+                    </div>
                 </div>
                 <div style="overflow-x:auto; margin-top:15px;">
                     <table>
-                        <thead><tr><th>#</th><th>الدواء (إنجليزي/عربي)</th><th>الباركود</th><th>المتاح</th><th>سعر العلبة/الشريط</th><th>أدوات التحكم</th></tr></thead>
+                        <thead><tr><th>#</th><th>الدواء</th><th>الباركود</th><th>المتاح</th><th>سعر العلبة/الشريط</th><th>أدوات</th></tr></thead>
                         <tbody id="stockTable"></tbody>
                     </table>
                 </div>
@@ -243,10 +275,10 @@
         <!-- Clients Tab -->
         <div id="clientsTab" class="tab-content">
             <div class="card">
-                <h3 style="color:#1e3c72; margin-bottom:15px;">📝 حسابات العملاء والآجل (الشكك)</h3>
+                <h3 style="color:#1e3c72; margin-bottom:15px;">📝 حسابات العملاء والآجل</h3>
                 <div style="overflow-x:auto;">
                     <table>
-                        <thead><tr><th>#</th><th>اسم العميل</th><th>رقم الهاتف</th><th>المديونية (ج.م)</th><th>إجراءات</th></tr></thead>
+                        <thead><tr><th>#</th><th>اسم العميل</th><th>رقم الهاتف</th><th>المديونية</th><th>إجراءات</th></tr></thead>
                         <tbody id="clientsTable"></tbody>
                     </table>
                 </div>
@@ -256,59 +288,57 @@
         <!-- Add/Edit Tab -->
         <div id="addTab" class="tab-content">
             <div class="card">
-                <p style="font-weight:bold; color:#e74c3c; margin-bottom:15px; font-size:0.9rem;">* للبحث عن دواء وتعديله، ابحث باسمه بالإنجليزي أو العربي هنا:</p>
-                <div class="form-group" style="position:relative;"><label>بحث للتعديل / أو إضافة دواء جديد بالإنجليزي:</label><input type="text" id="nNameEn" placeholder="مثال: Panadol Extra..." autocomplete="off"></div>
-                <div class="form-group"><label>اسم الدواء بالعربي:</label><input type="text" id="nNameAr" placeholder="مثال: بنادول إكسترا..." autocomplete="off"></div>
-                <div style="display:flex; gap:10px; align-items: flex-end;">
-                    <div class="form-group" style="flex:1; margin-bottom: 0;"><label>الباركود:</label><input type="text" id="nBarcode" placeholder="الباركود الدولي..." style="direction: ltr;"></div>
+                <p style="font-weight:bold; color:#e74c3c; margin-bottom:15px; font-size:0.9rem;">* ابحث بالاسم للتعديل، أو اكتب اسم جديد للإضافة:</p>
+                <div class="form-group" style="position:relative;"><label>الاسم بالإنجليزي:</label><input type="text" id="nNameEn" placeholder="مثال: Panadol Extra..." autocomplete="off"></div>
+                <div class="form-group"><label>الاسم بالعربي:</label><input type="text" id="nNameAr" placeholder="مثال: بنادول إكسترا..." autocomplete="off"></div>
+                <div style="display:flex; gap:10px; align-items: flex-end; flex-wrap:wrap;">
+                    <div class="form-group" style="flex:1; margin-bottom: 0; min-width:200px;"><label>الباركود:</label><input type="text" id="nBarcode" placeholder="الباركود..." style="direction: ltr;"></div>
                     <button class="btn btn-purple" style="width:auto; margin:0; height: 44px;" onclick="document.getElementById('nBarcode').value='622'+Math.floor(100000+Math.random()*900000)">توليد 🎲</button>
                 </div>
                 <div style="display:flex; gap:10px; margin-top:15px; flex-wrap: wrap;">
                     <div class="form-group" style="flex:1; min-width: 120px;">
                         <label>التصنيف:</label>
-                        <input type="text" id="nCat" list="catList" placeholder="اكتب أو اختر تصنيفاً..." autocomplete="off">
+                        <input type="text" id="nCat" list="catList" placeholder="تصنيف..." autocomplete="off">
                         <datalist id="catList"></datalist>
                     </div>
                     <div class="form-group" style="flex:1; min-width: 120px;"><label>تاريخ الصلاحية:</label><input type="date" id="nExpiry"></div>
                 </div>
                 <div style="background:#e6f2ff; padding:15px; border-radius:10px; margin-top:10px; margin-bottom:15px; border: 2px solid #0984e3;">
-                    <label style="display:flex; align-items:center; gap:10px; cursor: pointer; color: #0984e3; font-size: 1.1rem; margin-bottom:0;">
-                        <input type="checkbox" id="nHasStrips" style="width: 20px; height: 20px;" onchange="document.getElementById('stripArea').style.display=this.checked?'flex':'none'"> هذا الدواء يحتوي على شرائط
+                    <label style="display:flex; align-items:center; gap:10px; cursor: pointer; color: #0984e3; font-size: 1rem; margin-bottom:0;">
+                        <input type="checkbox" id="nHasStrips" style="width: 20px; height: 20px;" onchange="document.getElementById('stripArea').style.display=this.checked?'flex':'none'"> يحتوي على شرائط
                     </label>
                     <div id="stripArea" style="display:none; gap:10px; margin-top:15px; flex-wrap: wrap;">
-                        <div class="form-group" style="flex:1; min-width: 120px;"><label>عدد الشرائط بالعلبة:</label><input type="number" id="nSpb" value="1"></div>
-                        <div class="form-group" style="flex:1; min-width: 120px;"><label>سعر شراء الشريط:</label><input type="number" id="nCostStrip" value="0"></div>
-                        <div class="form-group" style="flex:1; min-width: 120px;"><label>سعر بيع الشريط:</label><input type="number" id="nSpStrip" value="0"></div>
+                        <div class="form-group" style="flex:1; min-width: 100px;"><label>شرائط/علبة:</label><input type="number" id="nSpb" value="1"></div>
+                        <div class="form-group" style="flex:1; min-width: 100px;"><label>شراء الشريط:</label><input type="number" id="nCostStrip" value="0"></div>
+                        <div class="form-group" style="flex:1; min-width: 100px;"><label>بيع الشريط:</label><input type="number" id="nSpStrip" value="0"></div>
                     </div>
                 </div>
                 <div style="display:flex; gap:10px; flex-wrap: wrap;">
-                    <div class="form-group" style="flex:1; min-width: 120px;"><label>سعر شراء العلبة:</label><input type="number" id="nCostBox" value="0"></div>
-                    <div class="form-group" style="flex:1; min-width: 120px;"><label>سعر بيع العلبة:</label><input type="number" id="nSpBox" value="0"></div>
-                    <div class="form-group" style="flex:1; min-width: 120px;"><label id="lblQty">الكمية المضافة (بالعلب):</label><input type="number" id="nQty" value="0"></div>
+                    <div class="form-group" style="flex:1; min-width: 100px;"><label>شراء العلبة:</label><input type="number" id="nCostBox" value="0"></div>
+                    <div class="form-group" style="flex:1; min-width: 100px;"><label>بيع العلبة:</label><input type="number" id="nSpBox" value="0"></div>
+                    <div class="form-group" style="flex:1; min-width: 100px;"><label id="lblQty">كمية الإضافة:</label><input type="number" id="nQty" value="0"></div>
                 </div>
                 <input type="hidden" id="nId" value="">
-                <button class="btn btn-blue" style="font-size: 1.1rem; padding: 12px; margin-top: 15px;" onclick="saveProduct()">حفظ الدواء وتحديث المخزون 💾</button>
+                <button class="btn btn-blue" style="font-size: 1.1rem; padding: 12px; margin-top: 15px;" onclick="saveProduct()">حفظ الدواء 💾</button>
             </div>
         </div>
 
         <!-- Shortages Tab -->
         <div id="shortagesTab" class="tab-content">
             <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 style="color:#e74c3c;">⚠️ الأدوية الناقصة (أقل من 5 علب)</h3>
-                    <button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير كـ PDF 📄</button>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                    <h3 style="color:#e74c3c;">⚠️ الأدوية الناقصة</h3>
+                    <button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير PDF 📄</button>
                 </div>
                 <div style="overflow-x:auto;">
                     <table>
                         <thead>
                             <tr>
-                                <th class="no-print">
-                                    <input type="checkbox" id="selectAllShortages" onchange="toggleAllShortages(this)" checked> تحديد الكل
-                                </th>
+                                <th class="no-print"><input type="checkbox" id="selectAllShortages" onchange="toggleAllShortages(this)" checked> الكل</th>
                                 <th>الدواء</th>
-                                <th>الكمية المتاحة</th>
-                                <th>سعر الشراء</th>
-                                <th>العدد المطلوب</th>
+                                <th>المتاح</th>
+                                <th>الشراء</th>
+                                <th>المطلوب</th>
                             </tr>
                         </thead>
                         <tbody id="shortagesTable"></tbody>
@@ -320,41 +350,41 @@
         <!-- Reports Tab -->
         <div id="reportsTab" class="tab-content">
             <div class="card no-print">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                     <h3 style="color:#1e3c72; margin:0;">تحديد فترة التقرير:</h3>
                 </div>
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    <div class="form-group" style="flex:1;"><label>من تاريخ:</label><input type="date" id="repStart"></div>
-                    <div class="form-group" style="flex:1;"><label>إلى تاريخ:</label><input type="date" id="repEnd"></div>
-                    <button class="btn btn-blue" style="flex:1; height:44px; margin-top:28px;" onclick="generateDashboard()">عرض التقرير 📊</button>
+                    <div class="form-group" style="flex:1; min-width:130px;"><label>من تاريخ:</label><input type="date" id="repStart"></div>
+                    <div class="form-group" style="flex:1; min-width:130px;"><label>إلى تاريخ:</label><input type="date" id="repEnd"></div>
+                    <button class="btn btn-blue" style="flex:1; min-width:100px; height:44px; margin-top:28px;" onclick="generateDashboard()">عرض 📊</button>
                 </div>
             </div>
             <div id="dashboardReportArea" style="background:#f4f7f6; padding:15px; border-radius:12px;">
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                    <div style="background:#fff; padding:20px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #0984e3;"><h3 style="color:#7f8c8d; margin-bottom:10px;">إجمالي المبيعات</h3><h2 id="dashSales" style="color:#0984e3; font-size:2rem;">0.00</h2></div>
-                    <div style="background:#fff; padding:20px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #e74c3c;"><h3 style="color:#7f8c8d; margin-bottom:10px;">إجمالي المرتجعات</h3><h2 id="dashReturns" style="color:#e74c3c; font-size:2rem;">0.00</h2></div>
-                    <div style="background:#fff; padding:20px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #27ae60;"><h3 style="color:#7f8c8d; margin-bottom:10px;">صافي الدرج</h3><h2 id="dashNet" style="color:#27ae60; font-size:2rem;">0.00</h2></div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #0984e3;"><h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">المبيعات</h3><h2 id="dashSales" style="color:#0984e3; font-size:1.5rem;">0.00</h2></div>
+                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #e74c3c;"><h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">المرتجعات</h3><h2 id="dashReturns" style="color:#e74c3c; font-size:1.5rem;">0.00</h2></div>
+                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #27ae60;"><h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">صافي الدرج</h3><h2 id="dashNet" style="color:#27ae60; font-size:1.5rem;">0.00</h2></div>
                 </div>
                 <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
-                    <div style="flex:1; min-width:300px; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">مقارنة المبيعات والمرتجعات</h4><canvas id="salesChart"></canvas></div>
-                    <div style="flex:1; min-width:300px; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">أعلى 10 أصناف مبيعاً</h4><canvas id="topItemsChart"></canvas></div>
+                    <div style="flex:1; min-width:100%; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">المبيعات والمرتجعات</h4><canvas id="salesChart"></canvas></div>
+                    <div style="flex:1; min-width:100%; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">أعلى الأصناف</h4><canvas id="topItemsChart"></canvas></div>
                 </div>
             </div>
-            <button class="btn btn-dark no-print" onclick="exportDashboardPDF()">تصدير التقرير كـ PDF 📄</button>
+            <button class="btn btn-dark no-print" onclick="exportDashboardPDF()">تصدير PDF 📄</button>
         </div>
 
         <!-- Users Tab -->
         <div id="usersTab" class="tab-content">
             <div class="card">
-                <h3 style="color:#1e3c72; margin-bottom:15px;">➕ إضافة / تعديل مستخدم</h3>
+                <h3 style="color:#1e3c72; margin-bottom:15px;">➕ مستخدم جديد</h3>
                 <div style="display:flex; gap:10px; flex-wrap: wrap;">
-                    <div class="form-group" style="flex:1; min-width:120px;"><label>اسم المستخدم:</label><input type="text" id="uName"></div>
-                    <div class="form-group" style="flex:1; min-width:120px;"><label>كلمة المرور:</label><input type="password" id="uPass"></div>
-                    <div class="form-group" style="flex:1; min-width:120px;"><label>الصلاحية:</label><select id="uRole"><option value="Admin">مدير (Admin)</option><option value="User">كاشير (User)</option></select></div>
+                    <div class="form-group" style="flex:1; min-width:120px;"><label>المستخدم:</label><input type="text" id="uName"></div>
+                    <div class="form-group" style="flex:1; min-width:120px;"><label>المرور:</label><input type="password" id="uPass"></div>
+                    <div class="form-group" style="flex:1; min-width:120px;"><label>الصلاحية:</label><select id="uRole"><option value="Admin">Admin</option><option value="User">User</option></select></div>
                 </div>
                 <button class="btn btn-blue" onclick="saveUser()">حفظ المستخدم 👤</button>
             </div>
-            <div class="card"><h3 style="color:#1e3c72; margin-bottom:10px;">📋 قائمة المستخدمين الحاليين</h3><div style="overflow-x:auto;"><table><thead><tr><th>اسم المستخدم</th><th>كلمة المرور</th><th>الصلاحية</th><th>تعديل</th></tr></thead><tbody id="usersTable"></tbody></table></div></div>
+            <div class="card"><h3 style="color:#1e3c72; margin-bottom:10px;">📋 المستخدمين</h3><div style="overflow-x:auto;"><table><thead><tr><th>الاسم</th><th>المرور</th><th>الصلاحية</th><th>تعديل</th></tr></thead><tbody id="usersTable"></tbody></table></div></div>
         </div>
     </div>
 
@@ -367,7 +397,6 @@
         let chart1 = null, chart2 = null;
         let posViewMode = false, posViewIdx = -1, posInvoicesOnly = [];
         
-        // المتغيرات الخاصة بالطباعة المؤقتة
         let currentPrintInvoice = null;
         let currentPrintLabel = null;
 
@@ -393,28 +422,26 @@
             }
         });
 
-        // ------------------ Helper: Format Local Date ------------------
         function formatDateLocal(dStr) {
             let d = new Date(dStr);
             if(isNaN(d)) return dStr;
             return d.toLocaleString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit', hour12: true });
         }
 
-        // ================== Web Bluetooth "JS Bridge" (The Magic!) ==================
+        // ================== Web Bluetooth "JS Bridge" ==================
         async function printViaWebBluetooth(textToPrint) {
             try {
                 if (!navigator.bluetooth) {
-                    throw new Error("متصفحك لا يدعم تقنية Web Bluetooth. يرجى استخدام Chrome وتفعيل البلوتوث.");
+                    throw new Error("متصفحك لا يدعم Web Bluetooth.");
                 }
                 showToast("جاري البحث عن طابعات بلوتوث...", "warn");
                 
-                // طلب الاتصال بأي طابعة تدعم بروتوكولات الطباعة الحرارية المعتادة
                 const device = await navigator.bluetooth.requestDevice({
                     acceptAllDevices: true,
                     optionalServices: [
-                        '000018f0-0000-1000-8000-00805f9b34fb', // Generic ESC/POS
-                        '49535343-fe7d-4ae5-8fa9-9fafd205e455', // Chinese Generic printers
-                        '0000fee7-0000-1000-8000-00805f9b34fb'  // BLE standard
+                        '000018f0-0000-1000-8000-00805f9b34fb', 
+                        '49535343-fe7d-4ae5-8fa9-9fafd205e455', 
+                        '0000fee7-0000-1000-8000-00805f9b34fb'  
                     ]
                 });
                 const server = await device.gatt.connect();
@@ -427,23 +454,22 @@
                     try { targetService = await server.getPrimaryService(uuid); if(targetService) break; } catch(e) {}
                 }
                 
-                if(!targetService) throw new Error("لم يتم العثور على خدمة الطباعة في هذا الجهاز المتصل.");
+                if(!targetService) throw new Error("لم يتم العثور على خدمة الطباعة.");
 
                 const characteristics = await targetService.getCharacteristics();
                 let writeChar = characteristics.find(c => c.properties.write || c.properties.writeWithoutResponse);
                 if(!writeChar) throw new Error("الطابعة لا تدعم استقبال البيانات المباشر.");
 
-                // تشفير النص إلى بايتات لإرسالها للطابعة (UTF-8) مع إضافة مسافات وأسطر نهائية
                 const encoder = new TextEncoder();
-                const data = encoder.encode(textToPrint + "\n\n\n");
+                // Ensure print buffer is flushed by adding explicit empty lines at the end
+                const data = encoder.encode(textToPrint + "\n\n\n\n\n"); 
                 
-                // تقطيع البيانات لإرسالها عبر بلوتوث الهاتف/اللابتوب (Chunking)
                 for (let i = 0; i < data.length; i += 100) {
                     let chunk = data.slice(i, i + 100);
                     await writeChar.writeValue(chunk);
                 }
                 
-                showToast("تمت الطباعة بنجاح عبر بلوتوث! 🖨️", "success");
+                showToast("تمت الطباعة بنجاح! 🖨️", "success");
                 device.gatt.disconnect();
             } catch (error) {
                 showToast("فشل الطباعة: " + error.message, "error");
@@ -467,6 +493,8 @@
             if (method === 'web-bluetooth') {
                 printViaWebBluetooth(txt);
             } else if (method === 'print-bridge') {
+                // Add extra newlines for PrintBridge buffer flush
+                txt += "\n\n\n\n";
                 let textEncoded = encodeURIComponent(txt);
                 window.location.href = `printbridge://print?type=receipt&text=${textEncoded}`;
             } else if (method === 'system') {
@@ -503,12 +531,11 @@
             let finalPrice = incPrice ? currentPrintLabel.price : "";
 
             if (method === 'web-bluetooth') {
-                // نص مبسط للطباعة الحرارية للباركود
-                let txt = `${finalName}\nباركود: ${currentPrintLabel.barcode}\n${finalPrice}`;
+                let txt = `${finalName}\nباركود: ${currentPrintLabel.barcode}\n${finalPrice}\n\n\n`;
                 printViaWebBluetooth(txt);
             } else if (method === 'print-bridge') {
-                let nameEncoded = encodeURIComponent(finalName);
-                let priceEncoded = encodeURIComponent(finalPrice);
+                let nameEncoded = encodeURIComponent(finalName + "\n\n");
+                let priceEncoded = encodeURIComponent(finalPrice + "\n\n");
                 window.location.href = `printbridge://print?type=label&barcode=${currentPrintLabel.barcode}&name=${nameEncoded}&price=${priceEncoded}`;
             } else if (method === 'system') {
                 let printArea = document.getElementById('systemPrintArea');
@@ -707,7 +734,6 @@
             
             if(type === 'sale') {
                 showToast('تم حفظ الفاتورة ✅', 'success');
-                // Auto trigger invoice modal 
                 currentPrintInvoice = invObj;
                 document.getElementById('invoicePrintModal').style.display = 'flex';
             } else {
@@ -727,7 +753,7 @@
             let inv = posInvoicesOnly[posViewIdx];
             document.getElementById('posInvoiceViewerLabel').innerText = 'عرض فاتورة #' + inv.id + ' (' + formatDateLocal(inv.date).split(' ')[0] + ')';
             document.getElementById('posInputArea').style.display = 'none'; document.getElementById('posActionButtons').style.display = 'none';
-            document.getElementById('btnPrintReceiptBtn').style.display = 'inline-block';
+            document.getElementById('btnPrintReceiptBtn').style.display = 'inline-flex';
 
             let tbody = document.getElementById('posTable'); let html = '';
             inv.items.forEach(function(i) { html += '<tr><td style="font-weight:bold; color:#1e3c72;">' + i.n + '</td><td>' + i.unit + '</td><td>' + i.qty + '</td><td>' + i.price + '</td><td style="color:#0984e3; font-weight:bold;">' + i.total + '</td><td>🔒</td></tr>'; });
