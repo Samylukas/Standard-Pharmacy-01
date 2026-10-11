@@ -25,12 +25,17 @@ jobs:
     - name: Install Dependencies
       run: npm install
 
-    - name: Prepare Web Assets & Sync
+    - name: Prepare Web Assets
       run: |
         mkdir -p www
         cp index.html www/
-        npx cap add android || true
-        npx cap sync android
+
+    - name: Add Android Platform
+      run: npx cap add android
+
+    - name: Inject Camera Permission
+      run: |
+        sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.CAMERA" />' android/app/src/main/AndroidManifest.xml
 
     - name: Build APK
       run: |
@@ -41,5 +46,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: Standard Pharmacy 01-APK
+        name: PharmacyPro-APK
         path: android/app/build/outputs/apk/debug/app-debug.apk
