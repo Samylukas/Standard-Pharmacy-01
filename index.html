@@ -14,12 +14,7 @@
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
         body { background: #f4f7f6; color: #333; overflow-x: hidden; }
         
-        /* Modern White Splash Screen */
-        #splashScreen { 
-            position: fixed; inset: 0; background: #ffffff; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 10000; transition: opacity 0.6s ease, visibility 0.6s ease; 
-        }
+        #splashScreen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: opacity 0.6s ease, visibility 0.6s ease; }
         .pharmacy-logo-container { position: relative; width: 120px; height: 120px; margin-bottom: 25px; }
         .logo-svg { width: 100%; height: 100%; }
         .animated-snake { stroke-dasharray: 200; stroke-dashoffset: 200; animation: slitherUp 1.5s ease-out forwards; animation-delay: 0.1s; }
@@ -27,10 +22,7 @@
         @keyframes slitherUp { to { stroke-dashoffset: 0; } } @keyframes showEye { to { opacity: 1; } }
         .splash-title { color: #1e3c72; font-size: 2.5rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; }
         .splash-subtitle { color: #27ae60; font-size: 1.2rem; font-weight: 700; margin-bottom: 30px; }
-        .spinner {
-            width: 40px; height: 40px; border: 4px solid rgba(30, 60, 114, 0.1); 
-            border-left-color: #0984e3; border-radius: 50%; animation: spin 1s linear infinite;
-        }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(30, 60, 114, 0.1); border-left-color: #0984e3; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .app-container { max-width: 1200px; margin: 20px auto; padding: 15px; }
@@ -63,6 +55,13 @@
         .badge-safe { background: #0984e3; } .badge-warn { background: #e67e22; } .badge-danger { background: #e74c3c; }
         #scannerContainer { display: none; background: #000; padding: 10px; border-radius: 12px; margin-bottom: 15px; text-align: center; }
         #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 8px; overflow: hidden; }
+        
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; }
+        .modal-content { background:#fff; padding:25px; border-radius:12px; text-align:center; width:90%; max-width:450px; }
+        .checkbox-group { text-align: right; background: #f4f7f6; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        .checkbox-group label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-weight: bold; cursor: pointer; color: #1e3c72; }
+        .checkbox-group input { width: 18px; height: 18px; }
+
         @media print { .no-print { display: none !important; } }
     </style>
 </head>
@@ -85,7 +84,7 @@
     </div>
 
     <!-- Login Overlay -->
-    <div id="loginOverlay" style="position:fixed; inset:0; background:#f4f7f6; display:none; justify-content:center; align-items:center; z-index:999;">
+    <div id="loginOverlay" class="modal-overlay" style="background:#f4f7f6;">
         <div class="card" style="width:90%; max-width:400px; text-align:center; padding: 40px 20px;">
             <h2 style="color:#1e3c72; margin-bottom:10px; font-size: 2rem;">Pharmacy Pro</h2>
             <p style="margin-bottom: 30px; font-weight: bold; color: #7f8c8d;">تسجيل الدخول للنظام</p>
@@ -100,6 +99,35 @@
             <button class="btn btn-blue" onclick="login()" style="font-size: 1.1rem; margin-top:20px; padding: 12px;">تسجيل الدخول 🚀</button>
         </div>
     </div>
+
+    <!-- Invoice Print Modal -->
+    <div id="invoicePrintModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color:#1e3c72; margin-bottom:15px;">🖨️ اختر طريقة طباعة الفاتورة</h3>
+            <button class="btn btn-blue" onclick="executeInvoicePrint('web-bluetooth')" style="padding:12px;">طابعة بلوتوث حرارية (مباشر للحاسوب/الموبايل)</button>
+            <button class="btn btn-green" onclick="executeInvoicePrint('print-bridge')" style="padding:12px;">تطبيق PrintBridge (للأندرويد)</button>
+            <button class="btn btn-dark" onclick="executeInvoicePrint('system')" style="padding:12px;">طابعة النظام العادية (A4 / طابعة USB)</button>
+            <button class="btn btn-red" onclick="document.getElementById('invoicePrintModal').style.display='none'" style="margin-top:20px;">إلغاء ❌</button>
+        </div>
+    </div>
+
+    <!-- Label Print Modal -->
+    <div id="labelPrintModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color:#1e3c72; margin-bottom:15px;">🏷️ خيارات طباعة الملصق (الباركود)</h3>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="lblIncName" checked> طباعة اسم المنتج على الملصق</label>
+                <label><input type="checkbox" id="lblIncPrice" checked> طباعة السعر على الملصق</label>
+            </div>
+            <button class="btn btn-blue" onclick="executeLabelPrint('web-bluetooth')">طابعة بلوتوث حرارية (مباشر)</button>
+            <button class="btn btn-green" onclick="executeLabelPrint('print-bridge')">تطبيق PrintBridge (للأندرويد)</button>
+            <button class="btn btn-dark" onclick="executeLabelPrint('system')">طابعة النظام العادية (A4/PDF)</button>
+            <button class="btn btn-red" onclick="document.getElementById('labelPrintModal').style.display='none'" style="margin-top:20px;">إلغاء ❌</button>
+        </div>
+    </div>
+
+    <!-- System Print Area (Hidden during normal view) -->
+    <div id="systemPrintArea" style="display:none; padding:20px; font-family:'Cairo'; direction:rtl;"></div>
 
     <div class="app-container" id="mainApp" style="display:none;">
         <div class="card no-print" style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #0984e3; padding: 15px 20px;">
@@ -127,7 +155,7 @@
                     </div>
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span id="posInvoiceViewerLabel" style="font-weight:bold; color:#1e3c72; font-size:1.1rem;">فاتورة جديدة 🛒</span>
-                        <button id="btnPrintReceipt" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:5px 15px;" onclick="handlePrintReceipt()">🖨️ طباعة الفاتورة</button>
+                        <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:5px 15px;" onclick="openInvoicePrintModal()">🖨️ طباعة الفاتورة</button>
                     </div>
                     <div style="display:flex; gap:5px;">
                         <button class="btn btn-dark" style="width:auto; margin:0; padding:5px 10px;" onclick="navInvoice('next')">&gt;</button>
@@ -331,7 +359,6 @@
     </div>
 
     <script>
-        // اللينك الجديد بتاعك
         const URL = "https://script.google.com/macros/s/AKfycbx19b-LufzGhD22OwGBD_pC6ZyCdsbJkju9Bqnb8_SPw5vckBPNl0Ef8JKAjecg3tj7/exec";
         
         let products = [], invoices = [], users = [];
@@ -339,6 +366,10 @@
         let invoiceCounter = 10001;
         let chart1 = null, chart2 = null;
         let posViewMode = false, posViewIdx = -1, posInvoicesOnly = [];
+        
+        // المتغيرات الخاصة بالطباعة المؤقتة
+        let currentPrintInvoice = null;
+        let currentPrintLabel = null;
 
         // Emergency Override
         setTimeout(function() {
@@ -369,18 +400,133 @@
             return d.toLocaleString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit', hour12: true });
         }
 
-        // ------------------ Bridge Functions ------------------
-        function printLabelViaBridge(barcode, productName, productPrice) {
-            let nameEncoded = encodeURIComponent(productName);
-            let priceEncoded = encodeURIComponent(productPrice);
-            let bridgeUrl = `printbridge://print?type=label&barcode=${barcode}&name=${nameEncoded}&price=${priceEncoded}`;
-            window.location.href = bridgeUrl;
+        // ================== Web Bluetooth "JS Bridge" (The Magic!) ==================
+        async function printViaWebBluetooth(textToPrint) {
+            try {
+                if (!navigator.bluetooth) {
+                    throw new Error("متصفحك لا يدعم تقنية Web Bluetooth. يرجى استخدام Chrome وتفعيل البلوتوث.");
+                }
+                showToast("جاري البحث عن طابعات بلوتوث...", "warn");
+                
+                // طلب الاتصال بأي طابعة تدعم بروتوكولات الطباعة الحرارية المعتادة
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: [
+                        '000018f0-0000-1000-8000-00805f9b34fb', // Generic ESC/POS
+                        '49535343-fe7d-4ae5-8fa9-9fafd205e455', // Chinese Generic printers
+                        '0000fee7-0000-1000-8000-00805f9b34fb'  // BLE standard
+                    ]
+                });
+                const server = await device.gatt.connect();
+                showToast("تم الاتصال! جاري تجهيز البيانات...", "warn");
+                
+                let targetService = null;
+                const knownUUIDs = ['000018f0-0000-1000-8000-00805f9b34fb', '49535343-fe7d-4ae5-8fa9-9fafd205e455', '0000fee7-0000-1000-8000-00805f9b34fb'];
+                
+                for(let uuid of knownUUIDs) {
+                    try { targetService = await server.getPrimaryService(uuid); if(targetService) break; } catch(e) {}
+                }
+                
+                if(!targetService) throw new Error("لم يتم العثور على خدمة الطباعة في هذا الجهاز المتصل.");
+
+                const characteristics = await targetService.getCharacteristics();
+                let writeChar = characteristics.find(c => c.properties.write || c.properties.writeWithoutResponse);
+                if(!writeChar) throw new Error("الطابعة لا تدعم استقبال البيانات المباشر.");
+
+                // تشفير النص إلى بايتات لإرسالها للطابعة (UTF-8) مع إضافة مسافات وأسطر نهائية
+                const encoder = new TextEncoder();
+                const data = encoder.encode(textToPrint + "\n\n\n");
+                
+                // تقطيع البيانات لإرسالها عبر بلوتوث الهاتف/اللابتوب (Chunking)
+                for (let i = 0; i < data.length; i += 100) {
+                    let chunk = data.slice(i, i + 100);
+                    await writeChar.writeValue(chunk);
+                }
+                
+                showToast("تمت الطباعة بنجاح عبر بلوتوث! 🖨️", "success");
+                device.gatt.disconnect();
+            } catch (error) {
+                showToast("فشل الطباعة: " + error.message, "error");
+            }
         }
 
-        function printReceiptViaBridge(receiptText) {
-            let textEncoded = encodeURIComponent(receiptText);
-            let bridgeUrl = `printbridge://print?type=receipt&text=${textEncoded}`;
-            window.location.href = bridgeUrl;
+        // ================== Print Modals Logic ==================
+        function openInvoicePrintModal() {
+            if(posViewMode && posViewIdx >= 0) {
+                currentPrintInvoice = posInvoicesOnly[posViewIdx];
+                document.getElementById('invoicePrintModal').style.display = 'flex';
+            }
+        }
+
+        function executeInvoicePrint(method) {
+            document.getElementById('invoicePrintModal').style.display = 'none';
+            if(!currentPrintInvoice) return;
+            
+            let txt = generateReceiptText(currentPrintInvoice);
+
+            if (method === 'web-bluetooth') {
+                printViaWebBluetooth(txt);
+            } else if (method === 'print-bridge') {
+                let textEncoded = encodeURIComponent(txt);
+                window.location.href = `printbridge://print?type=receipt&text=${textEncoded}`;
+            } else if (method === 'system') {
+                let html = `<div style="text-align:center; border:1px solid #000; padding:10px; width:300px; margin:0 auto;">
+                    <h3>صيدلية Pharmacy Pro</h3><hr>
+                    <p>رقم الفاتورة: ${currentPrintInvoice.id}</p>
+                    <p>التاريخ: ${formatDateLocal(currentPrintInvoice.date)}</p><hr>`;
+                currentPrintInvoice.items.forEach(i => { html += `<p>${i.n}<br>${i.qty} x ${i.price} = <b>${i.total} ج.م</b></p>`; });
+                html += `<hr><h3>الإجمالي: ${currentPrintInvoice.totalEGP} ج.م</h3></div>`;
+                
+                let printArea = document.getElementById('systemPrintArea');
+                document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
+                printArea.innerHTML = html;
+                printArea.style.display = 'block';
+                window.print();
+                printArea.style.display = 'none';
+                document.querySelectorAll('.app-container').forEach(e => e.classList.remove('no-print'));
+            }
+        }
+
+        function openLabelPrintModal(barcode, name_en, name_ar, price) {
+            currentPrintLabel = { barcode: barcode, name: name_en || name_ar, price: price + ' ج.م' };
+            document.getElementById('labelPrintModal').style.display = 'flex';
+        }
+
+        function executeLabelPrint(method) {
+            document.getElementById('labelPrintModal').style.display = 'none';
+            if(!currentPrintLabel) return;
+
+            let incName = document.getElementById('lblIncName').checked;
+            let incPrice = document.getElementById('lblIncPrice').checked;
+
+            let finalName = incName ? currentPrintLabel.name : "";
+            let finalPrice = incPrice ? currentPrintLabel.price : "";
+
+            if (method === 'web-bluetooth') {
+                // نص مبسط للطباعة الحرارية للباركود
+                let txt = `${finalName}\nباركود: ${currentPrintLabel.barcode}\n${finalPrice}`;
+                printViaWebBluetooth(txt);
+            } else if (method === 'print-bridge') {
+                let nameEncoded = encodeURIComponent(finalName);
+                let priceEncoded = encodeURIComponent(finalPrice);
+                window.location.href = `printbridge://print?type=label&barcode=${currentPrintLabel.barcode}&name=${nameEncoded}&price=${priceEncoded}`;
+            } else if (method === 'system') {
+                let printArea = document.getElementById('systemPrintArea');
+                document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
+                
+                printArea.innerHTML = `
+                    <div style="width:1.5in; text-align:center; border:1px solid #000; padding:5px; margin:0 auto;">
+                        <p style="font-size:10px; font-weight:bold; margin:0;">${finalName}</p>
+                        <svg id="sysBarcodeSvg"></svg>
+                        <p style="font-size:12px; font-weight:bold; margin:0;">${finalPrice}</p>
+                    </div>`;
+                printArea.style.display = 'block';
+                JsBarcode("#sysBarcodeSvg", currentPrintLabel.barcode, { format: "CODE128", width: 1.2, height: 30, fontSize: 12, margin: 2, displayValue: true });
+                
+                window.print();
+                printArea.style.display = 'none';
+                document.querySelectorAll('.app-container').forEach(e => e.classList.remove('no-print'));
+            }
         }
 
         function generateReceiptText(inv) {
@@ -401,15 +547,6 @@
             text += "--------------------------------\n";
             text += "مع تمنياتنا بالشفاء العاجل\n";
             return text;
-        }
-        // ------------------------------------------------------
-
-        function handlePrintReceipt() {
-            if(posViewMode && posViewIdx >= 0) {
-                let inv = posInvoicesOnly[posViewIdx];
-                let txt = generateReceiptText(inv);
-                printReceiptViaBridge(txt);
-            }
         }
 
         function showToast(msg, type) { let t = document.getElementById('toast'); t.innerText = msg; t.style.backgroundColor = type === 'error' ? '#e74c3c' : '#0984e3'; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
@@ -570,10 +707,9 @@
             
             if(type === 'sale') {
                 showToast('تم حفظ الفاتورة ✅', 'success');
-                if(confirm('هل تريد طباعة الفاتورة عبر الطابعة الحرارية؟')) {
-                    let txt = generateReceiptText(invObj);
-                    printReceiptViaBridge(txt);
-                }
+                // Auto trigger invoice modal 
+                currentPrintInvoice = invObj;
+                document.getElementById('invoicePrintModal').style.display = 'flex';
             } else {
                 showToast('تم استرجاع الأدوية ↩️', 'success');
             }
@@ -589,9 +725,9 @@
             else if(dir === 'next') { posViewIdx++; if(posViewIdx > posInvoicesOnly.length - 1) posViewIdx = posInvoicesOnly.length - 1; }
             
             let inv = posInvoicesOnly[posViewIdx];
-            document.getElementById('posInvoiceViewerLabel').innerText = 'عرض فاتورة #' + inv.id + ' (' + formatDateLocal(inv.date) + ')';
+            document.getElementById('posInvoiceViewerLabel').innerText = 'عرض فاتورة #' + inv.id + ' (' + formatDateLocal(inv.date).split(' ')[0] + ')';
             document.getElementById('posInputArea').style.display = 'none'; document.getElementById('posActionButtons').style.display = 'none';
-            document.getElementById('btnPrintReceipt').style.display = 'inline-block';
+            document.getElementById('btnPrintReceiptBtn').style.display = 'inline-block';
 
             let tbody = document.getElementById('posTable'); let html = '';
             inv.items.forEach(function(i) { html += '<tr><td style="font-weight:bold; color:#1e3c72;">' + i.n + '</td><td>' + i.unit + '</td><td>' + i.qty + '</td><td>' + i.price + '</td><td style="color:#0984e3; font-weight:bold;">' + i.total + '</td><td>🔒</td></tr>'; });
@@ -604,7 +740,7 @@
             posViewMode = false; posViewIdx = -1;
             document.getElementById('posInvoiceViewerLabel').innerText = 'فاتورة جديدة 🛒';
             document.getElementById('posInputArea').style.display = 'block'; document.getElementById('posActionButtons').style.display = 'flex';
-            document.getElementById('btnPrintReceipt').style.display = 'none';
+            document.getElementById('btnPrintReceiptBtn').style.display = 'none';
             renderPos();
         }
 
@@ -699,7 +835,18 @@
                 if(!q) return true;
                 let matchEn = (p.name_en||p.n||'').toLowerCase().includes(q.toLowerCase()); let matchAr = (p.name_ar||'').toLowerCase().includes(q.toLowerCase()); let matchBar = (p.barcode||'').toString().includes(q); return matchEn || matchAr || matchBar; 
             }).forEach((p, idx)=>{
-                html += '<tr><td>' + (idx+1) + '</td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.n || '') + ' <br> <small style="color:#0984e3">' + (p.name_ar || '') + '</small></td><td style="direction:ltr;">' + (p.barcode||'-') + '</td><td style="color:#0984e3; font-weight:bold;">' + formatStockDisplay(p.q||0, p.spb||1, p.hasStrips) + '</td><td>' + (p.spBox||0) + ' ج.م' + (p.hasStrips?' / '+(p.spStrip||0)+' ج.م':'') + '</td><td><button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock(\'' + p.id + '\')">✏️</button><button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="printLabelViaBridge(\'' + (p.barcode||'') + '\', \'' + (p.name_en||p.n||p.name_ar||'') + '\', \'' + (p.spBox||0) + ' ج.م\')">🖨️</button><button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm(\'متأكد من الحذف؟\')){ products = products.filter(x=>x.id!=\'' + p.id + '\'); sendData(\'deleteProduct\',{id:\'' + p.id + '\'}); renderStock(); showToast(\'تم الحذف\'); }">🗑️</button></td></tr>';
+                html += `<tr>
+                    <td>${idx+1}</td>
+                    <td style="font-weight:bold; color:#1e3c72;">${p.name_en || p.n || ''} <br> <small style="color:#0984e3">${p.name_ar || ''}</small></td>
+                    <td style="direction:ltr;">${p.barcode||'-'}</td>
+                    <td style="color:#0984e3; font-weight:bold;">${formatStockDisplay(p.q||0, p.spb||1, p.hasStrips)}</td>
+                    <td>${p.spBox||0} ج.م${p.hasStrips?' / '+(p.spStrip||0)+' ج.م':''}</td>
+                    <td>
+                        <button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock('${p.id}')">✏️</button>
+                        <button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="openLabelPrintModal('${p.barcode||''}', '${p.name_en||p.n||''}', '${p.name_ar||''}', '${p.spBox||0}')">🖨️</button>
+                        <button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm('متأكد من الحذف؟')){ products = products.filter(x=>x.id!='${p.id}'); sendData('deleteProduct',{id:'${p.id}'}); renderStock(); showToast('تم الحذف'); }">🗑️</button>
+                    </td>
+                </tr>`;
             });
             tbody.innerHTML = html;
         }
@@ -771,7 +918,6 @@
             if(!sDate || !eDate) return showToast('الرجاء تحديد التواريخ', 'error');
             let sales = 0, returns = 0; let itemsCount = {}; let datesData = {};
             invoices.forEach(inv => {
-                // Ignore the time portion completely for accurate date comparison
                 let invDateStr = "";
                 if(inv.date) {
                     let d = new Date(inv.date);
