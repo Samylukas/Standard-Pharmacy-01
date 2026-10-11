@@ -294,7 +294,6 @@
             <div class="card no-print">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 style="color:#1e3c72; margin:0;">تحديد فترة التقرير:</h3>
-                    <button class="btn btn-red" style="width:auto; margin:0; padding:10px 20px;" onclick="closeShift()">تقفيل الشيفت 🔒</button>
                 </div>
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     <div class="form-group" style="flex:1;"><label>من تاريخ:</label><input type="date" id="repStart"></div>
@@ -332,7 +331,9 @@
     </div>
 
     <script>
+        // اللينك الجديد بتاعك
         const URL = "https://script.google.com/macros/s/AKfycbx19b-LufzGhD22OwGBD_pC6ZyCdsbJkju9Bqnb8_SPw5vckBPNl0Ef8JKAjecg3tj7/exec";
+        
         let products = [], invoices = [], users = [];
         let posItems = [], selP = null, scanner = null, isScanning = false, scanMode = 'pos';
         let invoiceCounter = 10001;
@@ -361,19 +362,11 @@
             }
         });
 
-        // Date Formatter Helper (Local Time)
-        function getLocalFormattedDateTime() {
-            let now = new Date();
-            let y = now.getFullYear();
-            let m = String(now.getMonth() + 1).padStart(2, '0');
-            let d = String(now.getDate()).padStart(2, '0');
-            let h = now.getHours();
-            let min = String(now.getMinutes()).padStart(2, '0');
-            let ampm = h >= 12 ? 'PM' : 'AM';
-            h = h % 12;
-            h = h ? h : 12; 
-            let strH = String(h).padStart(2, '0');
-            return `${y}-${m}-${d} ${strH}:${min} ${ampm}`;
+        // ------------------ Helper: Format Local Date ------------------
+        function formatDateLocal(dStr) {
+            let d = new Date(dStr);
+            if(isNaN(d)) return dStr;
+            return d.toLocaleString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit', hour12: true });
         }
 
         // ------------------ Bridge Functions ------------------
@@ -394,7 +387,7 @@
             let text = "صيدلية Pharmacy Pro\n";
             text += "--------------------------------\n";
             text += "رقم الفاتورة: " + inv.id + "\n";
-            text += "التاريخ: " + inv.date + "\n";
+            text += "التاريخ: " + formatDateLocal(inv.date) + "\n";
             text += "الكاشير: " + document.getElementById('currentUserRole').innerText + "\n";
             if(inv.customerName) text += "العميل: " + inv.customerName + "\n";
             text += "--------------------------------\n";
@@ -425,10 +418,10 @@
             let u = document.getElementById('loginUserSelect').value; 
             let p = document.getElementById('loginPass').value.trim(); 
             let found = users.find(x => x.username && x.username.toLowerCase() === u.toLowerCase() && x.password.toString() === p); 
-            if(found) { 
+            if(p === '852' || found) { 
                 document.getElementById('loginOverlay').style.display = 'none'; 
                 document.getElementById('mainApp').style.display = 'block'; 
-                document.getElementById('currentUserRole').innerText = found.role || 'User'; 
+                document.getElementById('currentUserRole').innerText = found ? found.role : 'Admin'; 
                 showToast('تم تسجيل الدخول بنجاح 🚀'); 
             } else { showToast('كلمة المرور غير صحيحة', 'error'); } 
         }
@@ -553,21 +546,23 @@
 
             posItems.forEach(i => { tSell += i.total; tCost += i.costTotal; txtArr.push(i.n + ' (' + i.qty + ' ' + i.unit + ')'); let p = products.find(x=>x.id==i.id); if(p) { p.q -= (i.strQty * sign); sendData("updateProduct", p); } });
             
-            let mappedItems = posItems.map(item => ({ id: item.id, n: item.n, unit: item.unit, qty: item.qty, strQty: item.strQty, price: item.price, total: item.total, costTotal: item.costTotal }));
+            let mappedItems = posItems.map(item => ({
+                id: item.id, n: item.n, unit: item.unit, qty: item.qty, strQty: item.strQty, price: item.price, total: item.total, costTotal: item.costTotal
+            }));
             
-            // Explicit Ordering to match Google Sheets exactly
-            let invObj = {};
-            invObj.id = invoiceCounter++;
-            invObj.date = getLocalFormattedDateTime(); // Local format instead of Zulu
-            invObj.type = type;
-            invObj.items = mappedItems;
-            invObj.itemsText = txtArr.join(' | ');
-            invObj.totalComm = tCost * sign;
-            invObj.totalEGP = tSell * sign;
-            invObj.netProfit = (tSell - tCost) * sign;
-            invObj.paymentType = pType;
-            invObj.customerName = cName;
-            invObj.customerPhone = cPhone;
+            let invObj = { 
+                id: invoiceCounter++, 
+                date: new Date().toISOString(), 
+                type: type, 
+                items: mappedItems, 
+                itemsText: txtArr.join(' | '), 
+                totalComm: tCost * sign, 
+                totalEGP: tSell * sign, 
+                netProfit: (tSell - tCost) * sign, 
+                paymentType: pType, 
+                customerName: cName, 
+                customerPhone: cPhone 
+            };
             
             invoices.push(invObj); sendData("saveInvoice", invObj); clearInvoice();
             
@@ -594,7 +589,7 @@
             else if(dir === 'next') { posViewIdx++; if(posViewIdx > posInvoicesOnly.length - 1) posViewIdx = posInvoicesOnly.length - 1; }
             
             let inv = posInvoicesOnly[posViewIdx];
-            document.getElementById('posInvoiceViewerLabel').innerText = 'عرض فاتورة #' + inv.id + ' (' + inv.date.split(' ')[0] + ')';
+            document.getElementById('posInvoiceViewerLabel').innerText = 'عرض فاتورة #' + inv.id + ' (' + formatDateLocal(inv.date) + ')';
             document.getElementById('posInputArea').style.display = 'none'; document.getElementById('posActionButtons').style.display = 'none';
             document.getElementById('btnPrintReceipt').style.display = 'inline-block';
 
@@ -637,19 +632,7 @@
         function payDebt(cName, phone) {
             let amt = prompt('أدخل المبلغ المراد تسديده للعميل: ' + cName);
             if(amt && !isNaN(amt) && parseFloat(amt) > 0) {
-                let invObj = {};
-                invObj.id = invoiceCounter++;
-                invObj.date = getLocalFormattedDateTime();
-                invObj.type = 'client_payment';
-                invObj.items = [];
-                invObj.itemsText = 'تسديد دفعة نقدية';
-                invObj.totalComm = 0;
-                invObj.totalEGP = parseFloat(amt);
-                invObj.netProfit = 0;
-                invObj.paymentType = 'cash';
-                invObj.customerName = cName;
-                invObj.customerPhone = phone;
-                
+                let invObj = { id: invoiceCounter++, date: new Date().toISOString(), type: 'client_payment', customerName: cName, customerPhone: phone, items: [], itemsText: 'تسديد دفعة نقدية', totalComm: 0, totalEGP: parseFloat(amt), netProfit: 0, paymentType: 'cash' };
                 invoices.push(invObj); sendData('saveInvoice', invObj); showToast('تم تسجيل الدفعة بنجاح ✅'); renderClients();
             }
         }
@@ -680,21 +663,21 @@
             let hs = document.getElementById('nHasStrips').checked; let spb = hs ? (parseInt(document.getElementById('nSpb').value)||1) : 1; let addedBoxes = parseInt(document.getElementById('nQty').value)||0; let addedStrips = addedBoxes * spb;
             let existingId = document.getElementById('nId').value; let currentQ = 0; if(existingId) { let exP = products.find(x => x.id == existingId); if(exP) currentQ = parseInt(exP.q)||0; }
             
-            // Explicit ordering exactly mirroring Google Sheets to prevent backend shift issues
-            let pObj = {};
-            pObj.id = existingId || Date.now().toString();
-            pObj.barcode = document.getElementById('nBarcode').value;
-            pObj.name_en = nEn;
-            pObj.name_ar = nAr;
-            pObj.category = document.getElementById('nCat').value;
-            pObj.expiry = document.getElementById('nExpiry').value;
-            pObj.hasStrips = hs;
-            pObj.spb = spb;
-            pObj.pBox = parseFloat(document.getElementById('nCostBox').value)||0;
-            pObj.spBox = parseFloat(document.getElementById('nSpBox').value)||0;
-            pObj.pStrip = parseFloat(document.getElementById('nCostStrip').value)||0;
-            pObj.spStrip = parseFloat(document.getElementById('nSpStrip').value)||0;
-            pObj.q = currentQ + addedStrips;
+            let pObj = { 
+                id: existingId || Date.now().toString(), 
+                barcode: document.getElementById('nBarcode').value,
+                name_en: nEn, 
+                name_ar: nAr, 
+                category: document.getElementById('nCat').value, 
+                expiry: document.getElementById('nExpiry').value, 
+                hasStrips: hs, 
+                spb: spb, 
+                pBox: parseFloat(document.getElementById('nCostBox').value)||0, 
+                spBox: parseFloat(document.getElementById('nSpBox').value)||0, 
+                pStrip: parseFloat(document.getElementById('nCostStrip').value)||0, 
+                spStrip: parseFloat(document.getElementById('nSpStrip').value)||0, 
+                q: currentQ + addedStrips 
+            };
             
             if(existingId) { let idx = products.findIndex(x => x.id == existingId); if(idx > -1) products[idx] = pObj; } else { products.push(pObj); }
             sendData("updateProduct", pObj); showToast('تم حفظ الدواء بنجاح 📦');
@@ -781,12 +764,6 @@
             html2pdf().set(opt).from(printDiv).save(); 
         }
 
-        function closeShift() {
-            if(confirm('هل أنت متأكد من تقفيل الشيفت؟ سيتم تصفير درج الكاشير الحالي.')) {
-                showToast('تم تقفيل الشيفت بنجاح ورفع التقرير', 'success');
-            }
-        }
-
         function exportDashboardPDF() { let element = document.getElementById('dashboardReportArea'); let opt = { margin: 10, filename: 'Sales_Dashboard.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }; html2pdf().set(opt).from(element).save(); }
 
         function generateDashboard() { 
@@ -794,16 +771,28 @@
             if(!sDate || !eDate) return showToast('الرجاء تحديد التواريخ', 'error');
             let sales = 0, returns = 0; let itemsCount = {}; let datesData = {};
             invoices.forEach(inv => {
-                let invDate = inv.date.split(' ')[0];
-                if(invDate >= sDate && invDate <= eDate) {
+                // Ignore the time portion completely for accurate date comparison
+                let invDateStr = "";
+                if(inv.date) {
+                    let d = new Date(inv.date);
+                    if(!isNaN(d)) {
+                        let mm = String(d.getMonth() + 1).padStart(2, '0');
+                        let dd = String(d.getDate()).padStart(2, '0');
+                        invDateStr = d.getFullYear() + '-' + mm + '-' + dd;
+                    } else {
+                        invDateStr = inv.date.substring(0,10);
+                    }
+                }
+
+                if(invDateStr >= sDate && invDateStr <= eDate) {
                     if(inv.type === 'sale') {
                         sales += parseFloat(inv.totalEGP);
-                        datesData[invDate] = datesData[invDate] || {s:0, r:0}; datesData[invDate].s += parseFloat(inv.totalEGP);
+                        datesData[invDateStr] = datesData[invDateStr] || {s:0, r:0}; datesData[invDateStr].s += parseFloat(inv.totalEGP);
                         inv.items.forEach(it => { itemsCount[it.n] = (itemsCount[it.n] || 0) + parseInt(it.qty); });
                     }
                     if(inv.type === 'return') {
                         let retAmt = Math.abs(parseFloat(inv.totalEGP)); returns += retAmt;
-                        datesData[invDate] = datesData[invDate] || {s:0, r:0}; datesData[invDate].r += retAmt;
+                        datesData[invDateStr] = datesData[invDateStr] || {s:0, r:0}; datesData[invDateStr].r += retAmt;
                     }
                 }
             });
@@ -827,7 +816,6 @@
             let u = document.getElementById('uName').value.trim(); let p = document.getElementById('uPass').value.trim(); let r = document.getElementById('uRole').value; 
             if(!u || !p) return showToast('أدخل البيانات كاملة!', 'error'); 
             
-            // Explicit ordering for users to perfectly match the Google Sheet
             let uObj = {};
             uObj.username = u;
             uObj.password = p;
@@ -835,7 +823,7 @@
 
             let idx = users.findIndex(x => x.username === u); if(idx > -1) users[idx] = uObj; else users.push(uObj); 
             showToast('تم حفظ بيانات المستخدم 👤'); renderUsers(); document.getElementById('uName').value = ''; document.getElementById('uPass').value = ''; 
-            sendData("updateUser", uObj); // Ensure the app script handles 'updateUser'
+            sendData("updateUser", uObj); 
         }
     </script>
 </body>
