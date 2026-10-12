@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
@@ -166,7 +165,6 @@
 
         <!-- POS Tab -->
         <div id="posTab" class="tab-content active">
-            
             <div class="card" style="background:#f4f7f6; padding:15px; border-radius:8px; margin-bottom:15px; border: 1px solid #ccc; text-align:center;">
                 <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:10px;">
                     <button class="btn btn-dark" style="width:auto; margin:0; padding:6px 15px;" onclick="navInvoice('first')">|&lt;</button>
@@ -241,7 +239,7 @@
             </div>
         </div>
 
-        <!-- Returns Tab (المرتجعات) -->
+        <!-- Returns Tab -->
         <div id="returnsTab" class="tab-content">
             <div class="card">
                 <h3 style="color:#e74c3c; margin-bottom:15px;">↩️ إرجاع فاتورة بالكامل للمخزن</h3>
@@ -346,7 +344,7 @@
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                     <h3 style="color:#e74c3c;">⚠️ الأدوية الناقصة</h3>
-                    <button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير و طباعة 🖨️</button>
+                    <button class="btn btn-dark" style="width:auto; margin:0;" onclick="shareShortages()">مشاركة عبر واتساب 📲</button>
                 </div>
                 <div style="overflow-x:auto;">
                     <table>
@@ -374,13 +372,11 @@
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     <div class="form-group" style="flex:1; min-width:130px;"><label>من تاريخ:</label><input type="date" id="repStart"></div>
                     <div class="form-group" style="flex:1; min-width:130px;"><label>إلى تاريخ:</label><input type="date" id="repEnd"></div>
-                    <button class="btn btn-blue" style="flex:1; min-width:100px; height:44px; margin-top:28px;" onclick="generateDashboard()">عرض التقرير 📊</button>
+                    <button class="btn btn-blue" style="flex:1; min-width:100px; height:44px; margin-top:28px;" onclick="generateDashboard()">عرض 📊</button>
                 </div>
             </div>
-
+            
             <div id="dashboardReportArea" style="background:#f4f7f6; padding:15px; border-radius:12px;">
-                
-                <!-- Detailed Ledger Table -->
                 <div style="background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05); margin-bottom:20px; overflow-x:auto;">
                     <h4 style="color:#1e3c72; margin-bottom:15px; text-align:center;">📋 تفاصيل حركات البيع والمرتجعات</h4>
                     <table>
@@ -401,7 +397,6 @@
                     </table>
                 </div>
 
-                <!-- 4 Summary Cards as Requested -->
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
                     <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #8e44ad;">
                         <h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">إجمالي الأصناف</h3>
@@ -423,10 +418,10 @@
 
                 <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
                     <div style="flex:1; min-width:100%; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">المبيعات والمرتجعات</h4><canvas id="salesChart"></canvas></div>
-                    <div style="flex:1; min-width:100%; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">أعلى الأصناف مبيعاً</h4><canvas id="topItemsChart"></canvas></div>
+                    <div style="flex:1; min-width:100%; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">أعلى الأصناف</h4><canvas id="topItemsChart"></canvas></div>
                 </div>
             </div>
-            <button class="btn btn-dark no-print" onclick="exportDashboardPDF()">تصدير و طباعة 🖨️</button>
+            <button class="btn btn-dark no-print" onclick="shareDashboard()">مشاركة التقرير عبر واتساب 📲</button>
         </div>
 
         <!-- Users & Settings Tab -->
@@ -472,7 +467,6 @@
         let myPharmacyName = 'Pharmacy Pro';
         try { if(localStorage.getItem('pharmName')) myPharmacyName = localStorage.getItem('pharmName'); } catch(e) {}
 
-        // ================= Bulletproof Splash Screen =================
         function forceHideSplash() {
             let splash = document.getElementById('splashScreen');
             if (splash && splash.style.display !== 'none') {
@@ -504,7 +498,6 @@
             } catch(e) {}
         }
 
-        // ================= Web Audio API Beep =================
         function playBeep() {
             try {
                 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -973,7 +966,7 @@
             for(let cName in clientsMap) {
                 let bal = clientsMap[cName].balance;
                 if(bal > 0) {
-                    let waMsg = 'مرحباً ' + cName + '، تذكير ودي من صيدلية Pharmacy Pro بوجود مديونية مستحقة بقيمة ' + bal.toFixed(2) + ' ج.م. شكراً لثقتكم بنا!';
+                    let waMsg = 'مرحباً ' + cName + '، تذكير ودي من صيدلية ' + myPharmacyName + ' بوجود مديونية مستحقة بقيمة ' + bal.toFixed(2) + ' ج.م. شكراً لثقتكم بنا!';
                     let waLink = 'https://wa.me/2' + clientsMap[cName].phone + '?text=' + encodeURIComponent(waMsg);
                     html += `<tr><td>${idx++}</td><td style="font-weight:bold; color:#1e3c72;">${cName}</td><td dir="ltr">${clientsMap[cName].phone}</td><td style="color:#e74c3c; font-weight:bold; font-size:1.1rem;">${bal.toFixed(2)} ج.م</td><td><button class="btn btn-green" style="padding:5px 10px; margin:2px; width:auto;" onclick="window.open('${waLink}', '_blank')">واتس 💬</button> <button class="btn btn-blue" style="padding:5px 10px; margin:2px; width:auto;" onclick="payDebt('${cName}', '${clientsMap[cName].phone}')">تسديد 💰</button></td></tr>`;
                 }
@@ -1061,62 +1054,52 @@
             tbody.innerHTML = html;
         }
 
-        function exportShortagesPDF() { 
+        // ================= Native Web Share API (WhatsApp/Share) =================
+        function shareShortages() {
             let checkedBoxes = document.querySelectorAll('.short-chk:checked');
-            if(checkedBoxes.length === 0) return showToast('حدد صنفاً واحداً على الأقل للطباعة', 'error');
+            if(checkedBoxes.length === 0) return showToast('حدد صنفاً واحداً على الأقل للمشاركة', 'error');
 
-            let printArea = document.getElementById('systemPrintArea');
-            document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
-            
-            let html = '<div style="direction:rtl; font-family:\'Cairo\', sans-serif;"><h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">تقرير النواقص وطلبيات الأدوية</h2>';
-            html += '<table style="width:100%; border-collapse: collapse; text-align:center;" border="1">';
-            html += '<tr style="background:#e6f2ff;"><th>م</th><th>اسم الصنف</th><th>سعر الشراء</th><th>الكمية المطلوبة</th><th>الإجمالي</th></tr>';
+            let text = `*تقرير النواقص والطلبيات - ${myPharmacyName}*\n`;
+            text += `التاريخ: ${new Date().toLocaleDateString('ar-EG')}\n\n`;
 
             let totalItems = 0; let totalCost = 0;
-            
             checkedBoxes.forEach((chk, index) => {
-                let id = chk.getAttribute('data-id'); let p = products.find(x => x.id == id); let reqQty = parseInt(document.getElementById('reqQty_' + id).value) || 0;
+                let id = chk.getAttribute('data-id');
+                let p = products.find(x => x.id == id);
+                let reqQty = parseInt(document.getElementById('reqQty_' + id).value) || 0;
                 if(reqQty > 0 && p) {
                     let cost = p.pBox || 0; let rowTotal = cost * reqQty;
                     totalItems += reqQty; totalCost += rowTotal;
-                    html += `<tr><td>${index + 1}</td><td style="font-weight:bold;">${p.name_en || p.n || p.name_ar}</td><td>${cost} ج.م</td><td>${reqQty}</td><td>${rowTotal.toFixed(2)} ج.م</td></tr>`;
+                    text += `${index + 1}. ${p.name_en || p.name_ar}\nالكمية: ${reqQty} علبة - الإجمالي: ${rowTotal} ج.م\n\n`;
                 }
             });
+            text += `*إجمالي الكمية المطلوبة:* ${totalItems} علبة\n`;
+            text += `*إجمالي التكلفة:* ${totalCost} ج.م`;
 
-            html += `<tr style="background:#1e3c72; color:#fff;"><th colspan="3" style="text-align:left; padding-left:15px;">الإجمالي الكلي:</th><th>${totalItems} علبة</th><th>${totalCost.toFixed(2)} ج.م</th></tr>`;
-            html += '</table></div>';
-            
-            printArea.innerHTML = html;
-            printArea.style.display = 'block';
-            window.print();
-            printArea.style.display = 'none';
-            document.querySelectorAll('.app-container').forEach(e => e.classList.remove('no-print'));
+            if (navigator.share) {
+                navigator.share({ title: 'تقرير النواقص', text: text }).catch(err => console.log(err));
+            } else {
+                window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+            }
         }
 
-        function exportDashboardPDF() { 
-            let printArea = document.getElementById('systemPrintArea');
-            document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
-            
-            let dashHtml = document.getElementById('dashboardReportArea').innerHTML;
-            printArea.innerHTML = `<div style="direction:rtl; font-family:'Cairo', sans-serif;"><h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">تقرير المبيعات</h2>${dashHtml}</div>`;
-            
-            let originalCanvases = document.querySelectorAll('#dashboardReportArea canvas');
-            let printCanvases = printArea.querySelectorAll('canvas');
-            
-            for(let i=0; i<originalCanvases.length; i++) {
-                if(originalCanvases[i] && printCanvases[i]) {
-                    let img = document.createElement('img');
-                    img.src = originalCanvases[i].toDataURL("image/png");
-                    img.style.maxWidth = '100%';
-                    img.style.height = 'auto';
-                    printCanvases[i].parentNode.replaceChild(img, printCanvases[i]);
-                }
-            }
+        function shareDashboard() {
+            let sDate = document.getElementById('repStart').value;
+            let eDate = document.getElementById('repEnd').value;
+            if(!sDate || !eDate) return showToast('الرجاء تحديد التواريخ أولاً', 'error');
 
-            printArea.style.display = 'block';
-            window.print();
-            printArea.style.display = 'none';
-            document.querySelectorAll('.app-container').forEach(e => e.classList.remove('no-print'));
+            let text = `*تقرير المبيعات - ${myPharmacyName}*\n`;
+            text += `من: ${sDate}\nإلى: ${eDate}\n\n`;
+            text += `📦 الأصناف المباعة: ${document.getElementById('dashItems').textContent} قطعة\n`;
+            text += `💰 التكلفة (تجاري): ${document.getElementById('dashCost').textContent}\n`;
+            text += `💵 إجمالي المبيعات: ${document.getElementById('dashSalesTotal').textContent}\n`;
+            text += `✨ صافي الربح: ${document.getElementById('dashProfit').textContent}\n`;
+
+            if (navigator.share) {
+                navigator.share({ title: 'تقرير المبيعات', text: text }).catch(err => console.log(err));
+            } else {
+                window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+            }
         }
 
         function generateDashboard() { 
