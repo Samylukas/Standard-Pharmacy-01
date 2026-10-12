@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
@@ -185,6 +184,12 @@
 
             <div class="card">
                 <div id="posInputArea">
+                    <!-- رجعنا زرار الراديو هنا عشان الكود ميضربش منك -->
+                    <div class="radio-switch">
+                        <input type="radio" name="invType" id="tSale" value="sale" checked onchange="updatePosColors()"><label for="tSale">🔵 بيع جديد</label>
+                        <input type="radio" name="invType" id="tRet" value="return" onchange="updatePosColors()"><label for="tRet">🔴 مرتجع جزئي</label>
+                    </div>
+
                     <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:#e6f2ff; padding:10px; border-radius:8px;">
                         <div class="form-group" style="flex:1; margin-bottom:0;"><label>طريقة الدفع:</label>
                             <select id="posPaymentType" onchange="toggleCreditFields()">
@@ -341,7 +346,7 @@
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                     <h3 style="color:#e74c3c;">⚠️ الأدوية الناقصة</h3>
-                    <button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير PDF 📄</button>
+                    <button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير و طباعة 🖨️</button>
                 </div>
                 <div style="overflow-x:auto;">
                     <table>
@@ -383,11 +388,12 @@
                     <div style="flex:1; min-width:100%; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">أعلى الأصناف</h4><canvas id="topItemsChart"></canvas></div>
                 </div>
             </div>
-            <button class="btn btn-dark no-print" onclick="exportDashboardPDF()">تصدير PDF 📄</button>
+            <button class="btn btn-dark no-print" onclick="exportDashboardPDF()">تصدير و طباعة 🖨️</button>
         </div>
 
         <!-- Users & Settings Tab -->
         <div id="usersTab" class="tab-content">
+            <!-- Settings Card -->
             <div class="card" style="border: 2px solid #0984e3;">
                 <h3 style="color:#0984e3; margin-bottom:15px;">⚙️ إعدادات الصيدلية (تظهر في الطباعة)</h3>
                 <div class="form-group">
@@ -397,6 +403,7 @@
                 <button class="btn btn-green" onclick="savePharmacySettings()">حفظ الإعدادات 💾</button>
             </div>
 
+            <!-- Users Card -->
             <div class="card">
                 <h3 style="color:#1e3c72; margin-bottom:15px;">➕ مستخدم جديد</h3>
                 <div style="display:flex; gap:10px; flex-wrap: wrap;">
@@ -442,7 +449,6 @@
             }
         }
         
-        // Timeout to load offline data if server is dead
         let splashTimeout = setTimeout(() => {
             showToast('تم التحميل من الذاكرة (بدون إنترنت)', 'warn');
             loadOfflineData();
@@ -662,16 +668,13 @@
             clearTimeout(splashTimeout);
             forceHideSplash();
             if(res.status === 'success') { 
-                
-                // Offline Sync Queue Processing
                 if(offlineQueue.length > 0) {
                     showToast('جاري رفع الفواتير المحفوظة أوفلاين...', 'warn');
                     let task = offlineQueue.shift();
                     try { localStorage.setItem('pharmQueue', JSON.stringify(offlineQueue)); } catch(e){}
-                    sendData(task.action, task.data); // Recursive flush
+                    sendData(task.action, task.data); 
                     return; 
                 }
-
                 try { localStorage.setItem('pharmBackup', JSON.stringify(res)); } catch(e){}
                 processData(res);
                 setStatus('🟢 متصل ومُحدث', true);
@@ -840,7 +843,7 @@
             let isBox = document.getElementById('posUnit').value === 'box'; 
             let qty = parseInt(document.getElementById('posQty').value) || 1; 
             let strips = isBox ? (qty*(selP.spb||1)) : qty;
-            if(isSale && strips > (selP.q||0)) return showToast('الكمية المطلوبة غير متوفرة بالمخزن!', 'error');
+            if(isSale && strips > (parseFloat(selP.q)||0)) return showToast('الكمية المطلوبة غير متوفرة بالمخزن!', 'error');
             
             let price = isBox ? parseFloat(selP.spBox||0) : parseFloat(selP.spStrip||0); 
             let cost = isBox ? parseFloat(selP.pBox||0) : parseFloat(selP.pStrip||0);
@@ -883,7 +886,9 @@
                 showToast('تم حفظ الفاتورة ✅', 'success');
                 currentPrintInvoice = invObj;
                 document.getElementById('invoicePrintModal').style.display = 'flex';
-            } else { showToast('تم استرجاع الأدوية ↩️', 'success'); }
+            } else {
+                showToast('تم استرجاع الأدوية ↩️', 'success');
+            }
         }
 
         function navInvoice(dir) {
@@ -1023,36 +1028,61 @@
         }
 
         function exportShortagesPDF() { 
-            if (typeof html2pdf === 'undefined') return showToast('تحتاج إنترنت للطباعة كـ PDF', 'error');
             let checkedBoxes = document.querySelectorAll('.short-chk:checked');
             if(checkedBoxes.length === 0) return showToast('حدد صنفاً واحداً على الأقل للطباعة', 'error');
 
-            let printDiv = document.createElement('div');
-            printDiv.style.padding = '20px'; printDiv.style.direction = 'rtl'; printDiv.style.fontFamily = 'Cairo';
+            let printArea = document.getElementById('systemPrintArea');
+            document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
+            
+            let html = '<div style="direction:rtl; font-family:\'Cairo\', sans-serif;"><h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">تقرير النواقص وطلبيات الأدوية</h2>';
+            html += '<table style="width:100%; border-collapse: collapse; text-align:center;" border="1">';
+            html += '<tr style="background:#e6f2ff;"><th>م</th><th>اسم الصنف</th><th>سعر الشراء</th><th>الكمية المطلوبة</th><th>الإجمالي</th></tr>';
 
-            let html = '<h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">تقرير النواقص وطلبيات الأدوية</h2><table style="width:100%; border-collapse: collapse; text-align:center;" border="1"><tr style="background:#e6f2ff;"><th>م</th><th>اسم الصنف</th><th>سعر الشراء (التجاري)</th><th>الكمية المطلوبة</th><th>الإجمالي</th></tr>';
             let totalItems = 0; let totalCost = 0;
             
             checkedBoxes.forEach((chk, index) => {
                 let id = chk.getAttribute('data-id'); let p = products.find(x => x.id == id); let reqQty = parseInt(document.getElementById('reqQty_' + id).value) || 0;
-                if(reqQty > 0) {
+                if(reqQty > 0 && p) {
                     let cost = p.pBox || 0; let rowTotal = cost * reqQty;
                     totalItems += reqQty; totalCost += rowTotal;
                     html += `<tr><td>${index + 1}</td><td style="font-weight:bold;">${p.name_en || p.n || p.name_ar}</td><td>${cost} ج.م</td><td>${reqQty}</td><td>${rowTotal.toFixed(2)} ج.م</td></tr>`;
                 }
             });
-            html += `<tr style="background:#1e3c72; color:#fff;"><th colspan="3" style="text-align:left; padding-left:15px;">الإجمالي الكلي:</th><th>${totalItems} علبة</th><th>${totalCost.toFixed(2)} ج.م</th></tr></table>`;
-            printDiv.innerHTML = html;
 
-            let opt = { margin: 10, filename: 'Shortages_Order.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; 
-            html2pdf().set(opt).from(printDiv).save(); 
+            html += `<tr style="background:#1e3c72; color:#fff;"><th colspan="3" style="text-align:left; padding-left:15px;">الإجمالي الكلي:</th><th>${totalItems} علبة</th><th>${totalCost.toFixed(2)} ج.م</th></tr>`;
+            html += '</table></div>';
+            
+            printArea.innerHTML = html;
+            printArea.style.display = 'block';
+            window.print();
+            printArea.style.display = 'none';
+            document.querySelectorAll('.app-container').forEach(e => e.classList.remove('no-print'));
         }
 
         function exportDashboardPDF() { 
-            if (typeof html2pdf === 'undefined') return showToast('تحتاج إنترنت للطباعة كـ PDF', 'error');
-            let element = document.getElementById('dashboardReportArea'); 
-            let opt = { margin: 10, filename: 'Sales_Dashboard.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }; 
-            html2pdf().set(opt).from(element).save(); 
+            let printArea = document.getElementById('systemPrintArea');
+            document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
+            
+            let dashHtml = document.getElementById('dashboardReportArea').innerHTML;
+            printArea.innerHTML = `<div style="direction:rtl; font-family:'Cairo', sans-serif;"><h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">تقرير المبيعات</h2>${dashHtml}</div>`;
+            
+            let originalCanvases = document.querySelectorAll('#dashboardReportArea canvas');
+            let printCanvases = printArea.querySelectorAll('canvas');
+            
+            for(let i=0; i<originalCanvases.length; i++) {
+                if(originalCanvases[i] && printCanvases[i]) {
+                    let img = document.createElement('img');
+                    img.src = originalCanvases[i].toDataURL("image/png");
+                    img.style.maxWidth = '100%';
+                    img.style.height = 'auto';
+                    printCanvases[i].parentNode.replaceChild(img, printCanvases[i]);
+                }
+            }
+
+            printArea.style.display = 'block';
+            window.print();
+            printArea.style.display = 'none';
+            document.querySelectorAll('.app-container').forEach(e => e.classList.remove('no-print'));
         }
 
         function generateDashboard() { 
