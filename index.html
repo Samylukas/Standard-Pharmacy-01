@@ -62,11 +62,14 @@
         .badge { padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; color: white; }
         .badge-safe { background: #0984e3; } .badge-warn { background: #e67e22; } .badge-danger { background: #e74c3c; }
         
-        #scannerContainer { display: none; background: #000; padding: 10px; border-radius: 12px; margin-bottom: 15px; text-align: center; }
-        #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 8px; overflow: hidden; }
-        
         .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; padding: 15px; }
         .modal-content { background:#fff; padding:25px; border-radius:12px; text-align:center; width:100%; max-width:450px; }
+        
+        /* Camera Modal Specific Styling */
+        #scannerModalContent { padding: 10px; background: #000; border-radius: 12px; position: relative; }
+        #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 8px; overflow: hidden; background: #fff;}
+        .close-scanner-btn { position: absolute; top: 10px; right: 10px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 1.2rem; cursor: pointer; z-index: 10; }
+
         .checkbox-group { text-align: right; background: #f4f7f6; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
         .checkbox-group label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-weight: bold; cursor: pointer; color: #1e3c72; }
         .checkbox-group input { width: 18px; height: 18px; }
@@ -115,6 +118,15 @@
                 <input type="password" id="loginPass" placeholder="••••••••" style="text-align: center; letter-spacing: 2px;" autocomplete="off" onkeypress="if(event.key === 'Enter') login()">
             </div>
             <button class="btn btn-blue" onclick="login()" style="font-size: 1.1rem; margin-top:20px; padding: 12px;">تسجيل الدخول 🚀</button>
+        </div>
+    </div>
+
+    <!-- Camera Scanner Overlay -->
+    <div id="scannerModal" class="modal-overlay">
+        <div class="modal-content" id="scannerModalContent">
+            <button class="close-scanner-btn" onclick="toggleScanner()">✖</button>
+            <div id="reader"></div>
+            <p style="color:white; margin-top:10px; font-weight:bold;">وجه الكاميرا نحو الباركود</p>
         </div>
     </div>
 
@@ -215,8 +227,6 @@
                         <button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner('pos')">📷 مسح</button>
                     </div>
                 </div>
-                
-                <div id="scannerContainer"><div id="reader"></div><button class="btn btn-red" style="width: 100%; margin-top: 10px;" onclick="toggleScanner()">إغلاق الكاميرا ❌</button></div>
                 
                 <div id="posAddBox" style="display:none; background:#e6f2ff; padding:15px; border-radius:8px; margin-top:15px; border:2px solid #0984e3;">
                     <h3 id="posPNameEn" style="color:#1e3c72; margin-bottom: 2px;"></h3>
@@ -365,7 +375,7 @@
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                     <h3 style="color:#e74c3c;">⚠️ الأدوية الناقصة</h3>
                     <div style="display:flex; gap:10px;">
-                        <button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير PDF 📄</button>
+                        <button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير كـ PDF 📄</button>
                         <button class="btn btn-green" style="width:auto; margin:0;" onclick="shareShortages()">مشاركة عبر واتساب 📲</button>
                     </div>
                 </div>
@@ -402,8 +412,9 @@
             <div id="dashboardReportArea" style="background:#f4f7f6; padding:15px; border-radius:12px;">
                 <div style="background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05); margin-bottom:20px; overflow-x:auto;">
                     <h4 style="color:#1e3c72; margin-bottom:15px; text-align:center;">📋 تفاصيل حركات البيع والمرتجعات</h4>
-                    <table>
-                        <thead>
+                    <!-- Clean table for PDF rendering (No flex) -->
+                    <table style="width:100%; border-collapse: collapse; text-align:center; font-size: 0.9rem;" border="1" cellpadding="5">
+                        <thead style="background-color: #1e3c72; color: #fff;">
                             <tr>
                                 <th>م</th>
                                 <th>رقم الفاتورة</th>
@@ -415,26 +426,26 @@
                                 <th>الربح</th>
                             </tr>
                         </thead>
-                        <tbody id="detailedSalesTable">
+                        <tbody id="detailedSalesTable" style="background-color: #fff;">
                             <tr><td colspan="8" style="color:#7f8c8d;">قم بتحديد الفترة وعرض التقرير</td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #8e44ad;">
+                <div style="display:flex; flex-wrap:wrap; gap: 15px; margin-bottom: 20px; justify-content: space-between;">
+                    <div style="flex:1; min-width:150px; background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #8e44ad;">
                         <h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">إجمالي الأصناف</h3>
                         <h2 id="dashItems" style="color:#8e44ad; font-size:1.5rem;">0</h2>
                     </div>
-                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #f39c12;">
+                    <div style="flex:1; min-width:150px; background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #f39c12;">
                         <h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">التكلفة (تجاري)</h3>
                         <h2 id="dashCost" style="color:#f39c12; font-size:1.5rem;">0.00</h2>
                     </div>
-                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #0984e3;">
+                    <div style="flex:1; min-width:150px; background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #0984e3;">
                         <h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">إجمالي المبيعات</h3>
                         <h2 id="dashSalesTotal" style="color:#0984e3; font-size:1.5rem;">0.00</h2>
                     </div>
-                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #27ae60;">
+                    <div style="flex:1; min-width:150px; background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #27ae60;">
                         <h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">صافي الربح</h3>
                         <h2 id="dashProfit" style="color:#27ae60; font-size:1.5rem;">0.00</h2>
                     </div>
@@ -815,15 +826,16 @@
         function formatStockDisplay(q, spb, hasStrips) { if (!hasStrips || spb < 2) return q + ' علبة'; let boxes = Math.floor(q / spb); let strips = q % spb; let txt = []; if (boxes > 0) txt.push(boxes + ' علبة'); if (strips > 0) txt.push(strips + ' شريط'); return txt.join(' و ') || '0 علبة'; }
         
         function toggleScanner(mode) { 
-            scanMode = mode || 'pos'; let c = document.getElementById('scannerContainer'); 
+            let modal = document.getElementById('scannerModal');
             if(isScanning) { 
                 if(scanner) { scanner.stop().then(() => { scanner.clear(); }); }
-                c.style.display = 'none'; 
+                modal.style.display = 'none'; 
                 isScanning = false; 
             } 
             else { 
+                scanMode = mode || 'pos';
                 if (typeof Html5Qrcode === 'undefined') { showToast('الكاميرا تحتاج إنترنت في أول مرة', 'error'); return; }
-                c.style.display = 'block'; 
+                modal.style.display = 'flex'; 
                 scanner = new Html5Qrcode("reader"); 
                 scanner.start({facingMode:"environment"}, {fps:10, qrbox: {width: 250, height: 250}}, (text) => { 
                     playBeep(); 
@@ -838,7 +850,7 @@
                     }
                 }, (err)=>{}).then(() => { isScanning = true; }).catch((err) => {
                     showToast('تأكد من السماح للكاميرا.', 'error');
-                    c.style.display = 'none';
+                    modal.style.display = 'none';
                 });
             } 
         }
@@ -1103,6 +1115,7 @@
             let checkedBoxes = document.querySelectorAll('.short-chk:checked');
             if(checkedBoxes.length === 0) return showToast('حدد صنفاً واحداً على الأقل للطباعة', 'error');
 
+            showToast('جاري تجهيز التقرير للمشاركة...', 'warn');
             let printDiv = document.createElement('div');
             printDiv.style.padding = '20px'; printDiv.style.direction = 'rtl'; printDiv.style.fontFamily = 'Cairo';
 
@@ -1124,43 +1137,32 @@
             html += '</table>';
             printDiv.innerHTML = html;
 
-            let opt = { margin: 10, filename: 'Shortages_Order.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; 
-            html2pdf().set(opt).from(printDiv).save(); 
-        }
-
-        function shareShortages() {
-            let checkedBoxes = document.querySelectorAll('.short-chk:checked');
-            if(checkedBoxes.length === 0) return showToast('حدد صنفاً واحداً على الأقل للمشاركة', 'error');
-
-            let text = `*تقرير النواقص والطلبيات - ${myPharmacyName}*\n`;
-            text += `التاريخ: ${new Date().toLocaleDateString('ar-EG')}\n\n`;
-
-            let totalItems = 0; let totalCost = 0;
-            checkedBoxes.forEach((chk, index) => {
-                let id = chk.getAttribute('data-id');
-                let p = products.find(x => x.id == id);
-                let reqQty = parseInt(document.getElementById('reqQty_' + id).value) || 0;
-                if(reqQty > 0 && p) {
-                    let cost = p.pBox || 0; let rowTotal = cost * reqQty;
-                    totalItems += reqQty; totalCost += rowTotal;
-                    text += `${index + 1}. ${p.name_en || p.name_ar}\nالكمية: ${reqQty} علبة - الإجمالي: ${rowTotal} ج.م\n\n`;
+            let opt = { margin: 10, filename: 'Shortages_Order.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; 
+            
+            html2pdf().set(opt).from(printDiv).outputPdf('blob').then(function(blob) {
+                let file = new File([blob], "Shortages.pdf", { type: "application/pdf" });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    navigator.share({ files: [file], title: 'تقرير النواقص', text: 'مرفق تقرير النواقص من Pharmacy Pro' }).then(() => showToast('تم التجهيز', 'success')).catch(e => console.log(e));
+                } else {
+                    html2pdf().set(opt).from(printDiv).save();
                 }
             });
-            text += `*إجمالي الكمية المطلوبة:* ${totalItems} علبة\n`;
-            text += `*إجمالي التكلفة:* ${totalCost} ج.م`;
-
-            if (navigator.share) {
-                navigator.share({ title: 'تقرير النواقص', text: text }).catch(err => console.log(err));
-            } else {
-                window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
-            }
         }
 
         function exportDashboardPDF() { 
             if (typeof html2pdf === 'undefined') return showToast('تحتاج إنترنت للطباعة كـ PDF (لأول مرة)', 'error');
+            showToast('جاري تجهيز التقرير للمشاركة...', 'warn');
             let element = document.getElementById('dashboardReportArea'); 
-            let opt = { margin: 10, filename: 'Sales_Dashboard.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }; 
-            html2pdf().set(opt).from(element).save(); 
+            let opt = { margin: 10, filename: 'Sales_Dashboard.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }; 
+            
+            html2pdf().set(opt).from(element).outputPdf('blob').then(function(blob) {
+                let file = new File([blob], "Sales_Dashboard.pdf", { type: "application/pdf" });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    navigator.share({ files: [file], title: 'تقرير المبيعات', text: 'مرفق تقرير المبيعات من Pharmacy Pro' }).then(() => showToast('تم التجهيز', 'success')).catch(e => console.log(e));
+                } else {
+                    html2pdf().set(opt).from(element).save();
+                }
+            });
         }
 
         function shareDashboard() {
