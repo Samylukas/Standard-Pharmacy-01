@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
@@ -181,7 +182,8 @@
                 </div>
                 <div style="display:flex; justify-content:center; gap:15px;">
                     <button class="btn btn-green" style="width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="newInvoiceMode()">➕ جديد</button>
-                    <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="openInvoicePrintModal()">🖨️ طباعة الفاتورة</button>
+                    <!-- زر الطباعة يظهر دائماً كما طلبت -->
+                    <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:inline-flex; width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="openInvoicePrintModal()">🖨️ طباعة الفاتورة</button>
                 </div>
             </div>
 
@@ -348,7 +350,10 @@
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                     <h3 style="color:#e74c3c;">⚠️ الأدوية الناقصة</h3>
-                    <button class="btn btn-dark" style="width:auto; margin:0;" onclick="shareShortages()">مشاركة عبر واتساب 📲</button>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-dark" style="width:auto; margin:0;" onclick="exportShortagesPDF()">تصدير PDF 📄</button>
+                        <button class="btn btn-green" style="width:auto; margin:0;" onclick="shareShortages()">مشاركة عبر واتساب 📲</button>
+                    </div>
                 </div>
                 <div style="overflow-x:auto;">
                     <table>
@@ -426,7 +431,10 @@
                     <div style="flex:1; min-width:100%; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">أعلى الأصناف</h4><canvas id="topItemsChart"></canvas></div>
                 </div>
             </div>
-            <button class="btn btn-dark no-print" onclick="shareDashboard()">مشاركة التقرير عبر واتساب 📲</button>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
+                <button class="btn btn-dark no-print" style="width:auto;" onclick="exportDashboardPDF()">تصدير PDF 📄</button>
+                <button class="btn btn-green no-print" style="width:auto;" onclick="shareDashboard()">مشاركة عبر واتساب 📲</button>
+            </div>
         </div>
 
         <!-- Users & Settings Tab -->
@@ -472,7 +480,6 @@
         let myPharmacyName = 'Pharmacy Pro';
         try { if(localStorage.getItem('pharmName')) myPharmacyName = localStorage.getItem('pharmName'); } catch(e) {}
 
-        // ================= Bulletproof Splash Screen & Live Clock =================
         function forceHideSplash() {
             let splash = document.getElementById('splashScreen');
             if (splash && splash.style.display !== 'none') {
@@ -527,7 +534,6 @@
             document.getElementById('appPharmName').innerText = myPharmacyName;
             document.getElementById('loginPharmName').innerText = myPharmacyName;
 
-            // Live Clock 24h
             setInterval(() => {
                 let d = new Date();
                 let clockEl = document.getElementById('liveClock');
@@ -578,10 +584,26 @@
         }
 
         function openInvoicePrintModal() {
-            if(posViewMode && posViewIdx >= 0) {
+            if(!posViewMode) {
+                if(posItems.length > 0) {
+                    let tSell = 0;
+                    posItems.forEach(i => tSell += (i.total||0));
+                    currentPrintInvoice = {
+                        id: 'مسودة',
+                        date: new Date().toISOString(),
+                        type: document.querySelector('input[name="invType"]:checked').value,
+                        items: posItems,
+                        totalEGP: tSell,
+                        paymentType: document.getElementById('posPaymentType').value,
+                        customerName: document.getElementById('posClientName').value.trim()
+                    };
+                } else if(!currentPrintInvoice) {
+                    return showToast('قم بإضافة أدوية أو احفظ الفاتورة أولاً', 'warn');
+                }
+            } else if(posViewIdx >= 0) {
                 currentPrintInvoice = posInvoicesOnly[posViewIdx];
-                document.getElementById('invoicePrintModal').style.display = 'flex';
             }
+            document.getElementById('invoicePrintModal').style.display = 'flex';
         }
 
         function executeInvoicePrint(method) {
@@ -942,7 +964,6 @@
             
             document.getElementById('posInvoiceViewerLabel').innerHTML = 'فاتورة #' + inv.id + ' (' + formatDateLocal(inv.date) + ')' + badgeHTML;
             document.getElementById('posInputArea').style.display = 'none'; document.getElementById('posActionButtons').style.display = 'none';
-            document.getElementById('btnPrintReceiptBtn').style.display = 'inline-flex';
             currentPrintInvoice = inv;
 
             let tbody = document.getElementById('posTable'); let html = '';
@@ -959,7 +980,6 @@
             posViewMode = false; posViewIdx = -1;
             document.getElementById('posInvoiceViewerLabel').innerText = 'فاتورة جديدة 🛒';
             document.getElementById('posInputArea').style.display = 'block'; document.getElementById('posActionButtons').style.display = 'flex';
-            document.getElementById('btnPrintReceiptBtn').style.display = 'none';
             renderPos();
         }
 
@@ -1064,6 +1084,36 @@
             tbody.innerHTML = html;
         }
 
+        function exportShortagesPDF() { 
+            if (typeof html2pdf === 'undefined') return showToast('تحتاج إنترنت للطباعة كـ PDF (لأول مرة)', 'error');
+            let checkedBoxes = document.querySelectorAll('.short-chk:checked');
+            if(checkedBoxes.length === 0) return showToast('حدد صنفاً واحداً على الأقل للطباعة', 'error');
+
+            let printDiv = document.createElement('div');
+            printDiv.style.padding = '20px'; printDiv.style.direction = 'rtl'; printDiv.style.fontFamily = 'Cairo';
+
+            let html = `<h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">تقرير النواقص وطلبيات الأدوية - ${myPharmacyName}</h2>`;
+            html += '<table style="width:100%; border-collapse: collapse; text-align:center;" border="1">';
+            html += '<tr style="background:#e6f2ff;"><th>م</th><th>اسم الصنف</th><th>سعر الشراء</th><th>الكمية المطلوبة</th><th>الإجمالي</th></tr>';
+
+            let totalItems = 0; let totalCost = 0;
+            checkedBoxes.forEach((chk, index) => {
+                let id = chk.getAttribute('data-id'); let p = products.find(x => x.id == id); let reqQty = parseInt(document.getElementById('reqQty_' + id).value) || 0;
+                if(reqQty > 0 && p) {
+                    let cost = p.pBox || 0; let rowTotal = cost * reqQty;
+                    totalItems += reqQty; totalCost += rowTotal;
+                    html += `<tr><td>${index + 1}</td><td style="font-weight:bold;">${p.name_en || p.name_ar}</td><td>${cost} ج.م</td><td>${reqQty}</td><td>${rowTotal.toFixed(2)} ج.م</td></tr>`;
+                }
+            });
+
+            html += `<tr style="background:#1e3c72; color:#fff;"><th colspan="3" style="text-align:left; padding-left:15px;">الإجمالي الكلي:</th><th>${totalItems} علبة</th><th>${totalCost.toFixed(2)} ج.م</th></tr>`;
+            html += '</table>';
+            printDiv.innerHTML = html;
+
+            let opt = { margin: 10, filename: 'Shortages_Order.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; 
+            html2pdf().set(opt).from(printDiv).save(); 
+        }
+
         function shareShortages() {
             let checkedBoxes = document.querySelectorAll('.short-chk:checked');
             if(checkedBoxes.length === 0) return showToast('حدد صنفاً واحداً على الأقل للمشاركة', 'error');
@@ -1090,6 +1140,13 @@
             } else {
                 window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
             }
+        }
+
+        function exportDashboardPDF() { 
+            if (typeof html2pdf === 'undefined') return showToast('تحتاج إنترنت للطباعة كـ PDF (لأول مرة)', 'error');
+            let element = document.getElementById('dashboardReportArea'); 
+            let opt = { margin: 10, filename: 'Sales_Dashboard.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }; 
+            html2pdf().set(opt).from(element).save(); 
         }
 
         function shareDashboard() {
