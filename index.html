@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
@@ -184,7 +185,6 @@
 
             <div class="card">
                 <div id="posInputArea">
-                    <!-- رجعنا زرار الراديو هنا عشان الكود ميضربش منك -->
                     <div class="radio-switch">
                         <input type="radio" name="invType" id="tSale" value="sale" checked onchange="updatePosColors()"><label for="tSale">🔵 بيع جديد</label>
                         <input type="radio" name="invType" id="tRet" value="return" onchange="updatePosColors()"><label for="tRet">🔴 مرتجع جزئي</label>
@@ -374,18 +374,56 @@
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     <div class="form-group" style="flex:1; min-width:130px;"><label>من تاريخ:</label><input type="date" id="repStart"></div>
                     <div class="form-group" style="flex:1; min-width:130px;"><label>إلى تاريخ:</label><input type="date" id="repEnd"></div>
-                    <button class="btn btn-blue" style="flex:1; min-width:100px; height:44px; margin-top:28px;" onclick="generateDashboard()">عرض 📊</button>
+                    <button class="btn btn-blue" style="flex:1; min-width:100px; height:44px; margin-top:28px;" onclick="generateDashboard()">عرض التقرير 📊</button>
                 </div>
             </div>
+
             <div id="dashboardReportArea" style="background:#f4f7f6; padding:15px; border-radius:12px;">
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #0984e3;"><h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">المبيعات</h3><h2 id="dashSales" style="color:#0984e3; font-size:1.5rem;">0.00</h2></div>
-                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #e74c3c;"><h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">المرتجعات</h3><h2 id="dashReturns" style="color:#e74c3c; font-size:1.5rem;">0.00</h2></div>
-                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #27ae60;"><h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">صافي الدرج</h3><h2 id="dashNet" style="color:#27ae60; font-size:1.5rem;">0.00</h2></div>
+                
+                <!-- Detailed Ledger Table -->
+                <div style="background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05); margin-bottom:20px; overflow-x:auto;">
+                    <h4 style="color:#1e3c72; margin-bottom:15px; text-align:center;">📋 تفاصيل حركات البيع والمرتجعات</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>م</th>
+                                <th>رقم الفاتورة</th>
+                                <th>التاريخ</th>
+                                <th>النوع</th>
+                                <th>التكلفة (تجاري)</th>
+                                <th>المبيعات (بيع)</th>
+                                <th>الربح</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailedSalesTable">
+                            <tr><td colspan="7" style="color:#7f8c8d;">قم بتحديد الفترة وعرض التقرير</td></tr>
+                        </tbody>
+                    </table>
                 </div>
+
+                <!-- 4 Summary Cards as Requested -->
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #8e44ad;">
+                        <h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">إجمالي الأصناف</h3>
+                        <h2 id="dashItems" style="color:#8e44ad; font-size:1.5rem;">0</h2>
+                    </div>
+                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #f39c12;">
+                        <h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">التكلفة (تجاري)</h3>
+                        <h2 id="dashCost" style="color:#f39c12; font-size:1.5rem;">0.00</h2>
+                    </div>
+                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #0984e3;">
+                        <h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">إجمالي المبيعات</h3>
+                        <h2 id="dashSalesTotal" style="color:#0984e3; font-size:1.5rem;">0.00</h2>
+                    </div>
+                    <div style="background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); border-bottom:4px solid #27ae60;">
+                        <h3 style="color:#7f8c8d; font-size:1rem; margin-bottom:10px;">صافي الربح</h3>
+                        <h2 id="dashProfit" style="color:#27ae60; font-size:1.5rem;">0.00</h2>
+                    </div>
+                </div>
+
                 <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
                     <div style="flex:1; min-width:100%; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">المبيعات والمرتجعات</h4><canvas id="salesChart"></canvas></div>
-                    <div style="flex:1; min-width:100%; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">أعلى الأصناف</h4><canvas id="topItemsChart"></canvas></div>
+                    <div style="flex:1; min-width:100%; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);"><h4 style="text-align:center; color:#1e3c72; margin-bottom:10px;">أعلى الأصناف مبيعاً</h4><canvas id="topItemsChart"></canvas></div>
                 </div>
             </div>
             <button class="btn btn-dark no-print" onclick="exportDashboardPDF()">تصدير و طباعة 🖨️</button>
@@ -393,7 +431,6 @@
 
         <!-- Users & Settings Tab -->
         <div id="usersTab" class="tab-content">
-            <!-- Settings Card -->
             <div class="card" style="border: 2px solid #0984e3;">
                 <h3 style="color:#0984e3; margin-bottom:15px;">⚙️ إعدادات الصيدلية (تظهر في الطباعة)</h3>
                 <div class="form-group">
@@ -403,7 +440,6 @@
                 <button class="btn btn-green" onclick="savePharmacySettings()">حفظ الإعدادات 💾</button>
             </div>
 
-            <!-- Users Card -->
             <div class="card">
                 <h3 style="color:#1e3c72; margin-bottom:15px;">➕ مستخدم جديد</h3>
                 <div style="display:flex; gap:10px; flex-wrap: wrap;">
@@ -436,7 +472,7 @@
         let myPharmacyName = 'Pharmacy Pro';
         try { if(localStorage.getItem('pharmName')) myPharmacyName = localStorage.getItem('pharmName'); } catch(e) {}
 
-        // ================= Bulletproof Splash Screen & Offline Handling =================
+        // ================= Bulletproof Splash Screen =================
         function forceHideSplash() {
             let splash = document.getElementById('splashScreen');
             if (splash && splash.style.display !== 'none') {
@@ -468,7 +504,7 @@
             } catch(e) {}
         }
 
-        // ================= Web Audio API Beep Function =================
+        // ================= Web Audio API Beep =================
         function playBeep() {
             try {
                 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -557,7 +593,6 @@
                 let textEncoded = encodeURIComponent(txt);
                 window.location.href = `printbridge://print?type=receipt&text=${textEncoded}`;
             } else if (method === 'system') {
-                if (typeof JsBarcode === 'undefined') { showToast('هذه الخاصية تحتاج لإنترنت للعمل', 'error'); return; }
                 let html = `<div style="text-align:center; padding:2px; width:280px; margin:0 auto; font-family:'Cairo', sans-serif; direction:rtl;">
                     <h2 style="margin:2px 0; font-size:16px;">${myPharmacyName}</h2>
                     <p style="margin:2px 0; font-size:11px;">رقم الفاتورة: ${currentPrintInvoice.id}</p>
@@ -577,7 +612,7 @@
                 document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
                 printArea.innerHTML = html;
                 printArea.style.display = 'block';
-                JsBarcode("#receiptBarcodeSvg", currentPrintInvoice.id.toString(), { format: "CODE128", width: 1.5, height: 30, fontSize: 12, margin: 2, displayValue: true });
+                if(typeof JsBarcode !== 'undefined') { JsBarcode("#receiptBarcodeSvg", currentPrintInvoice.id.toString(), { format: "CODE128", width: 1.5, height: 30, fontSize: 12, margin: 2, displayValue: true }); }
                 window.print();
                 printArea.style.display = 'none';
                 document.querySelectorAll('.app-container').forEach(e => e.classList.remove('no-print'));
@@ -607,7 +642,6 @@
                 let pharmEncoded = encodeURIComponent(myPharmacyName);
                 window.location.href = `printbridge://print?type=label&barcode=${currentPrintLabel.barcode}&name=${nameEncoded}&price=${priceEncoded}&header=${pharmEncoded}`;
             } else if (method === 'system') {
-                if (typeof JsBarcode === 'undefined') { showToast('تحتاج إنترنت للطباعة', 'error'); return; }
                 let printArea = document.getElementById('systemPrintArea');
                 document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
                 printArea.innerHTML = `
@@ -618,7 +652,7 @@
                         <p style="font-size:12px; font-weight:bold; margin:0;">${finalPrice}</p>
                     </div>`;
                 printArea.style.display = 'block';
-                JsBarcode("#sysBarcodeSvg", currentPrintLabel.barcode, { format: "CODE128", width: 1.2, height: 30, fontSize: 12, margin: 2, displayValue: true });
+                if(typeof JsBarcode !== 'undefined') { JsBarcode("#sysBarcodeSvg", currentPrintLabel.barcode, { format: "CODE128", width: 1.2, height: 30, fontSize: 12, margin: 2, displayValue: true }); }
                 window.print();
                 printArea.style.display = 'none';
                 document.querySelectorAll('.app-container').forEach(e => e.classList.remove('no-print'));
@@ -1088,7 +1122,10 @@
         function generateDashboard() { 
             let sDate = document.getElementById('repStart').value; let eDate = document.getElementById('repEnd').value;
             if(!sDate || !eDate) return showToast('الرجاء تحديد التواريخ', 'error');
-            let sales = 0, returns = 0; let itemsCount = {}; let datesData = {};
+            
+            let totalItems = 0, totalCost = 0, totalSales = 0, netProfit = 0;
+            let itemsCount = {}; let datesData = {}; let tableHTML = ''; let index = 1;
+
             invoices.forEach(inv => {
                 let invDateStr = "";
                 if(inv.date) {
@@ -1100,20 +1137,47 @@
                     } else invDateStr = inv.date.substring(0,10);
                 }
 
-                if(invDateStr >= sDate && invDateStr <= eDate) {
+                if(invDateStr >= sDate && invDateStr <= eDate && (inv.type === 'sale' || inv.type === 'return')) {
+                    let sign = inv.type === 'sale' ? 1 : -1;
+                    
+                    let invItemsQty = inv.items.reduce((sum, i) => sum + parseInt(i.qty), 0);
+                    totalItems += (invItemsQty * sign);
+                    
+                    let iCost = parseFloat(inv.totalComm) || 0; 
+                    let iSales = parseFloat(inv.totalEGP) || 0;
+                    let iProfit = parseFloat(inv.netProfit) || 0;
+
+                    totalCost += iCost; totalSales += iSales; netProfit += iProfit;
+
+                    datesData[invDateStr] = datesData[invDateStr] || {s:0, r:0};
                     if(inv.type === 'sale') {
-                        sales += parseFloat(inv.totalEGP);
-                        datesData[invDateStr] = datesData[invDateStr] || {s:0, r:0}; datesData[invDateStr].s += parseFloat(inv.totalEGP);
+                        datesData[invDateStr].s += iSales;
                         inv.items.forEach(it => { itemsCount[it.n] = (itemsCount[it.n] || 0) + parseInt(it.qty); });
+                    } else {
+                        datesData[invDateStr].r += Math.abs(iSales);
                     }
-                    if(inv.type === 'return') {
-                        let retAmt = Math.abs(parseFloat(inv.totalEGP)); returns += retAmt;
-                        datesData[invDateStr] = datesData[invDateStr] || {s:0, r:0}; datesData[invDateStr].r += retAmt;
-                    }
+
+                    let typeText = inv.type === 'sale' ? '<span style="color:#27ae60;">بيع</span>' : '<span style="color:#e74c3c;">مرتجع</span>';
+                    tableHTML += `<tr>
+                        <td>${index++}</td>
+                        <td>${inv.id}</td>
+                        <td dir="ltr">${formatDateLocal(inv.date).split(' ')[0]}</td>
+                        <td>${typeText}</td>
+                        <td>${Math.abs(iCost).toFixed(2)}</td>
+                        <td>${Math.abs(iSales).toFixed(2)}</td>
+                        <td style="color:${iProfit >= 0 ? '#27ae60' : '#e74c3c'}; font-weight:bold;" dir="ltr">${iProfit.toFixed(2)}</td>
+                    </tr>`;
                 }
             });
 
-            document.getElementById('dashSales').textContent = sales.toFixed(2) + " ج.م"; document.getElementById('dashReturns').textContent = returns.toFixed(2) + " ج.م"; document.getElementById('dashNet').textContent = (sales - returns).toFixed(2) + " ج.م"; 
+            document.getElementById('dashItems').textContent = totalItems;
+            document.getElementById('dashCost').textContent = totalCost.toFixed(2) + " ج.م";
+            document.getElementById('dashSalesTotal').textContent = totalSales.toFixed(2) + " ج.م";
+            document.getElementById('dashProfit').textContent = netProfit.toFixed(2) + " ج.م";
+
+            let tbody = document.getElementById('detailedSalesTable');
+            if(tableHTML === '') tableHTML = '<tr><td colspan="7">لا توجد مبيعات في هذه الفترة</td></tr>';
+            tbody.innerHTML = tableHTML;
 
             if (typeof Chart === 'undefined') return showToast('الرسوم البيانية تحتاج إنترنت في أول مرة', 'warn');
             let labels = Object.keys(datesData).sort(); let sData = labels.map(d => datesData[d].s); let rData = labels.map(d => datesData[d].r);
