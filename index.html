@@ -182,7 +182,6 @@
                 </div>
                 <div style="display:flex; justify-content:center; gap:15px;">
                     <button class="btn btn-green" style="width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="newInvoiceMode()">➕ جديد</button>
-                    <!-- زر الطباعة يظهر دائماً كما طلبت -->
                     <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:inline-flex; width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="openInvoicePrintModal()">🖨️ طباعة الفاتورة</button>
                 </div>
             </div>
@@ -207,7 +206,12 @@
                     </div>
 
                     <div style="display:flex; gap:10px; align-items: flex-end; position: relative; flex-wrap:wrap;">
-                        <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;"><label>بحث بالاسم أو الباركود:</label><input type="text" id="posSearch" placeholder="اكتب الدواء أو الباركود..." autocomplete="off"></div>
+                        <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;"><label>بحث بالاسم أو الباركود:</label>
+                            <div style="display: flex; gap: 5px; width: 100%;">
+                                <input type="text" id="posSearch" placeholder="اكتب الدواء أو الباركود..." autocomplete="off">
+                                <button class="btn btn-red" style="width:auto; margin:0; padding: 0 15px;" onclick="document.getElementById('posSearch').value='';">✖</button>
+                            </div>
+                        </div>
                         <button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner('pos')">📷 مسح</button>
                     </div>
                 </div>
@@ -252,7 +256,10 @@
                 <div style="display:flex; gap:10px; align-items: flex-end; flex-wrap:wrap;">
                     <div class="form-group" style="flex:1; margin-bottom:0; min-width:200px;">
                         <label>رقم الفاتورة (أو امسح الباركود المطبوع عليها):</label>
-                        <input type="number" id="returnInvoiceId" placeholder="اكتب رقم الفاتورة هنا..." autocomplete="off">
+                        <div style="display: flex; gap: 5px; width: 100%;">
+                            <input type="number" id="returnInvoiceId" placeholder="اكتب رقم الفاتورة هنا..." autocomplete="off">
+                            <button class="btn btn-red" style="width:auto; margin:0; padding: 0 15px;" onclick="document.getElementById('returnInvoiceId').value=''; document.getElementById('returnInvoiceDetails').style.display='none';">✖</button>
+                        </div>
                     </div>
                     <div style="display:flex; gap:10px;">
                         <button class="btn btn-blue" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="searchInvoiceForReturn()">🔍 بحث</button>
@@ -278,10 +285,12 @@
             <div class="card">
                 <div style="display:flex; gap:10px; align-items: flex-end; flex-wrap:wrap;">
                     <div class="form-group" style="flex:1; margin-bottom:0; min-width:200px;">
-                        <input type="text" id="stockFilterInput" placeholder="بحث في المخزون..." oninput="renderStock(this.value)">
+                        <div style="display: flex; gap: 5px; width: 100%;">
+                            <input type="text" id="stockFilterInput" placeholder="بحث في المخزون..." oninput="renderStock(this.value)">
+                            <button class="btn btn-red" style="width:auto; margin:0; padding: 0 15px;" onclick="document.getElementById('stockFilterInput').value=''; renderStock();">✖</button>
+                        </div>
                     </div>
                     <div style="display:flex; gap:10px;">
-                        <button class="btn btn-red" style="width:auto; margin:0; height: 44px; padding: 0 15px;" onclick="document.getElementById('stockFilterInput').value=''; renderStock();">✖</button>
                         <button class="btn btn-purple" style="width:auto; margin:0; height: 44px; padding: 0 20px;" onclick="toggleScanner('stock')">📷 مسح</button>
                     </div>
                 </div>
@@ -311,7 +320,12 @@
         <div id="addTab" class="tab-content">
             <div class="card">
                 <p style="font-weight:bold; color:#e74c3c; margin-bottom:15px; font-size:0.9rem;">* ابحث بالاسم للتعديل، أو اكتب اسم جديد للإضافة:</p>
-                <div class="form-group" style="position:relative;"><label>الاسم بالإنجليزي:</label><input type="text" id="nNameEn" placeholder="مثال: Panadol Extra..." autocomplete="off"></div>
+                <div class="form-group" style="position:relative;"><label>الاسم بالإنجليزي:</label>
+                    <div style="display: flex; gap: 5px; width: 100%;">
+                        <input type="text" id="nNameEn" placeholder="مثال: Panadol Extra..." autocomplete="off">
+                        <button class="btn btn-red" style="width:auto; margin:0; padding: 0 15px;" onclick="document.getElementById('nNameEn').value=''; document.getElementById('nId').value='';">✖</button>
+                    </div>
+                </div>
                 <div class="form-group"><label>الاسم بالعربي:</label><input type="text" id="nNameAr" placeholder="مثال: بنادول إكسترا..." autocomplete="off"></div>
                 <div style="display:flex; gap:10px; align-items: flex-end; flex-wrap:wrap;">
                     <div class="form-group" style="flex:1; margin-bottom: 0; min-width:200px;"><label>الباركود:</label><input type="text" id="nBarcode" placeholder="الباركود..." style="direction: ltr;"></div>
@@ -962,7 +976,7 @@
             let isReturned = invoices.some(x => x.type === 'return' && (x.itemsText || '').includes('إرجاع كامل لفاتورة ' + inv.id));
             let badgeHTML = isReturned ? ' <br><span style="color:#e74c3c; font-size:0.9rem; background:#fdedec; padding:2px 8px; border-radius:10px;">[ملغاة / مسترجعة]</span>' : '';
             
-            document.getElementById('posInvoiceViewerLabel').innerHTML = 'فاتورة #' + inv.id + ' (' + formatDateLocal(inv.date) + ')' + badgeHTML;
+            document.getElementById('posInvoiceViewerLabel').innerHTML = 'فاتورة #' + inv.id + ' (' + formatDateLocal(inv.date).split(' ')[0] + ')' + badgeHTML;
             document.getElementById('posInputArea').style.display = 'none'; document.getElementById('posActionButtons').style.display = 'none';
             currentPrintInvoice = inv;
 
