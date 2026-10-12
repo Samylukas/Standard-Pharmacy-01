@@ -148,7 +148,11 @@
 
     <div class="app-container" id="mainApp" style="display:none;">
         <div class="card no-print" style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #0984e3; padding: 15px 20px; gap: 10px;">
-            <div><h3 id="appPharmName" style="color:#1e3c72; direction: rtl; display: inline-block; font-size:1.2rem;">Pharmacy Pro</h3> <span id="currentUserRole" style="font-size:0.75rem; background:#1e3c72; color:white; padding:3px 8px; border-radius:10px; margin-right:10px;">Admin</span></div>
+            <div>
+                <h3 id="appPharmName" style="color:#1e3c72; direction: rtl; display: inline-block; font-size:1.2rem;">Pharmacy Pro</h3> 
+                <span id="currentUserRole" style="font-size:0.75rem; background:#1e3c72; color:white; padding:3px 8px; border-radius:10px; margin-right:10px;">Admin</span>
+                <span id="liveClock" style="font-size:0.75rem; background:#27ae60; color:white; padding:3px 8px; border-radius:10px; margin-right:10px; direction:ltr; display:inline-block;"></span>
+            </div>
             <div style="display:flex; gap:10px; align-items:center; justify-content:center;"><span id="syncStatus" style="background:#e6f2ff; color:#0984e3; padding:5px 10px; border-radius:20px; font-weight:bold; border:1px solid #0984e3; cursor:pointer; font-size:0.8rem;" onclick="fetchData()">🟢 متصل ومُحدث</span><button class="btn btn-red" style="width:auto; margin:0; padding:5px 15px; font-size:0.9rem;" onclick="location.reload()">خروج 🚪</button></div>
         </div>
 
@@ -177,7 +181,7 @@
                 </div>
                 <div style="display:flex; justify-content:center; gap:15px;">
                     <button class="btn btn-green" style="width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="newInvoiceMode()">➕ جديد</button>
-                    <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="openInvoicePrintModal()">🖨️ طباعة</button>
+                    <button id="btnPrintReceiptBtn" class="btn btn-yellow" style="display:none; width:auto; margin:0; padding:8px 30px; font-size:1rem;" onclick="openInvoicePrintModal()">🖨️ طباعة الفاتورة</button>
                 </div>
             </div>
 
@@ -384,7 +388,8 @@
                             <tr>
                                 <th>م</th>
                                 <th>رقم الفاتورة</th>
-                                <th>التاريخ</th>
+                                <th>التاريخ والوقت</th>
+                                <th>الأصناف المباعة</th>
                                 <th>النوع</th>
                                 <th>التكلفة (تجاري)</th>
                                 <th>المبيعات (بيع)</th>
@@ -392,7 +397,7 @@
                             </tr>
                         </thead>
                         <tbody id="detailedSalesTable">
-                            <tr><td colspan="7" style="color:#7f8c8d;">قم بتحديد الفترة وعرض التقرير</td></tr>
+                            <tr><td colspan="8" style="color:#7f8c8d;">قم بتحديد الفترة وعرض التقرير</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -467,6 +472,7 @@
         let myPharmacyName = 'Pharmacy Pro';
         try { if(localStorage.getItem('pharmName')) myPharmacyName = localStorage.getItem('pharmName'); } catch(e) {}
 
+        // ================= Bulletproof Splash Screen & Live Clock =================
         function forceHideSplash() {
             let splash = document.getElementById('splashScreen');
             if (splash && splash.style.display !== 'none') {
@@ -480,7 +486,6 @@
         }
         
         let splashTimeout = setTimeout(() => {
-            showToast('تم التحميل من الذاكرة (بدون إنترنت)', 'warn');
             loadOfflineData();
         }, 3500);
 
@@ -492,8 +497,6 @@
                     let res = JSON.parse(backup);
                     processData(res);
                     setStatus('🔴 أوفلاين (نسخة محفوظة)', false);
-                } else {
-                    showToast('لا توجد بيانات محفوظة! يجب الاتصال بالإنترنت أول مرة.', 'error');
                 }
             } catch(e) {}
         }
@@ -523,6 +526,13 @@
             document.getElementById('pharmacyNameSetting').value = myPharmacyName;
             document.getElementById('appPharmName').innerText = myPharmacyName;
             document.getElementById('loginPharmName').innerText = myPharmacyName;
+
+            // Live Clock 24h
+            setInterval(() => {
+                let d = new Date();
+                let clockEl = document.getElementById('liveClock');
+                if(clockEl) clockEl.innerText = d.toLocaleString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit', second:'2-digit', hour12: false });
+            }, 1000);
         });
 
         function savePharmacySettings() {
@@ -536,7 +546,7 @@
         function formatDateLocal(dStr) {
             let d = new Date(dStr);
             if(isNaN(d)) return dStr;
-            return d.toLocaleString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit', hour12: true });
+            return d.toLocaleString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit', hour12: false });
         }
 
         async function printViaWebBluetooth(textToPrint) {
@@ -912,7 +922,6 @@
             if(type === 'sale') {
                 showToast('تم حفظ الفاتورة ✅', 'success');
                 currentPrintInvoice = invObj;
-                document.getElementById('invoicePrintModal').style.display = 'flex';
             } else {
                 showToast('تم استرجاع الأدوية ↩️', 'success');
             }
@@ -931,9 +940,10 @@
             let isReturned = invoices.some(x => x.type === 'return' && (x.itemsText || '').includes('إرجاع كامل لفاتورة ' + inv.id));
             let badgeHTML = isReturned ? ' <br><span style="color:#e74c3c; font-size:0.9rem; background:#fdedec; padding:2px 8px; border-radius:10px;">[ملغاة / مسترجعة]</span>' : '';
             
-            document.getElementById('posInvoiceViewerLabel').innerHTML = 'فاتورة #' + inv.id + ' (' + formatDateLocal(inv.date).split(' ')[0] + ')' + badgeHTML;
+            document.getElementById('posInvoiceViewerLabel').innerHTML = 'فاتورة #' + inv.id + ' (' + formatDateLocal(inv.date) + ')' + badgeHTML;
             document.getElementById('posInputArea').style.display = 'none'; document.getElementById('posActionButtons').style.display = 'none';
             document.getElementById('btnPrintReceiptBtn').style.display = 'inline-flex';
+            currentPrintInvoice = inv;
 
             let tbody = document.getElementById('posTable'); let html = '';
             inv.items.forEach(function(i) { html += `<tr><td style="font-weight:bold; color:#1e3c72; text-decoration: ${isReturned?'line-through':'none'};">${i.n}</td><td>${i.unit}</td><td>${i.qty}</td><td>${i.price}</td><td style="color:#0984e3; font-weight:bold;">${i.total}</td><td>🔒</td></tr>`; });
@@ -1054,7 +1064,6 @@
             tbody.innerHTML = html;
         }
 
-        // ================= Native Web Share API (WhatsApp/Share) =================
         function shareShortages() {
             let checkedBoxes = document.querySelectorAll('.short-chk:checked');
             if(checkedBoxes.length === 0) return showToast('حدد صنفاً واحداً على الأقل للمشاركة', 'error');
@@ -1144,7 +1153,8 @@
                     tableHTML += `<tr>
                         <td>${index++}</td>
                         <td>${inv.id}</td>
-                        <td dir="ltr">${formatDateLocal(inv.date).split(' ')[0]}</td>
+                        <td dir="ltr">${formatDateLocal(inv.date)}</td>
+                        <td>${inv.itemsText || '-'}</td>
                         <td>${typeText}</td>
                         <td>${Math.abs(iCost).toFixed(2)}</td>
                         <td>${Math.abs(iSales).toFixed(2)}</td>
@@ -1159,7 +1169,7 @@
             document.getElementById('dashProfit').textContent = netProfit.toFixed(2) + " ج.م";
 
             let tbody = document.getElementById('detailedSalesTable');
-            if(tableHTML === '') tableHTML = '<tr><td colspan="7">لا توجد مبيعات في هذه الفترة</td></tr>';
+            if(tableHTML === '') tableHTML = '<tr><td colspan="8">لا توجد مبيعات في هذه الفترة</td></tr>';
             tbody.innerHTML = tableHTML;
 
             if (typeof Chart === 'undefined') return showToast('الرسوم البيانية تحتاج إنترنت في أول مرة', 'warn');
