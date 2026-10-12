@@ -423,10 +423,13 @@
         let currentPrintLabel = null;
         let invoiceToReturn = null;
         
+        let offlineQueue = [];
+        try { offlineQueue = JSON.parse(localStorage.getItem('pharmQueue') || '[]'); } catch(e) {}
+        
         let myPharmacyName = 'Pharmacy Pro';
         try { if(localStorage.getItem('pharmName')) myPharmacyName = localStorage.getItem('pharmName'); } catch(e) {}
 
-        // ================= Bulletproof Splash Screen Hider =================
+        // ================= Bulletproof Splash Screen & Offline Handling =================
         function forceHideSplash() {
             let splash = document.getElementById('splashScreen');
             if (splash && splash.style.display !== 'none') {
@@ -438,7 +441,26 @@
                 }, 400);
             }
         }
-        setTimeout(forceHideSplash, 3000); 
+        
+        // Timeout to load offline data if server is dead
+        let splashTimeout = setTimeout(() => {
+            showToast('تم التحميل من الذاكرة (بدون إنترنت)', 'warn');
+            loadOfflineData();
+        }, 3500);
+
+        function loadOfflineData() {
+            forceHideSplash();
+            try {
+                let backup = localStorage.getItem('pharmBackup');
+                if(backup) {
+                    let res = JSON.parse(backup);
+                    processData(res);
+                    setStatus('🔴 أوفلاين (نسخة محفوظة)', false);
+                } else {
+                    showToast('لا توجد بيانات محفوظة! يجب الاتصال بالإنترنت أول مرة.', 'error');
+                }
+            } catch(e) {}
+        }
 
         // ================= Web Audio API Beep Function =================
         function playBeep() {
@@ -446,23 +468,14 @@
                 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 let oscillator = audioCtx.createOscillator();
                 let gainNode = audioCtx.createGain();
-                
-                oscillator.type = 'sine'; // موجة الصوت ناعمة
-                oscillator.frequency.value = 800; // تردد 800 هرتز يشبه مسدس الباركود
-                
+                oscillator.type = 'sine'; 
+                oscillator.frequency.value = 800; 
                 gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); 
-                
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-                
                 oscillator.start();
-                setTimeout(() => { 
-                    oscillator.stop(); 
-                    audioCtx.close(); 
-                }, 150); // مدة الصوت 150 ملي ثانية
-            } catch(e) {
-                console.log("Audio not supported or blocked");
-            }
+                setTimeout(() => { oscillator.stop(); audioCtx.close(); }, 150); 
+            } catch(e) {}
         }
 
         document.addEventListener('DOMContentLoaded', function() { 
@@ -495,34 +508,25 @@
             try {
                 if (!navigator.bluetooth) throw new Error("متصفحك لا يدعم Web Bluetooth.");
                 showToast("جاري البحث عن طابعات بلوتوث...", "warn");
-                
                 const device = await navigator.bluetooth.requestDevice({
                     acceptAllDevices: true,
-                    optionalServices: [
-                        '000018f0-0000-1000-8000-00805f9b34fb', 
-                        '49535343-fe7d-4ae5-8fa9-9fafd205e455', 
-                        '0000fee7-0000-1000-8000-00805f9b34fb'  
-                    ]
+                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', '49535343-fe7d-4ae5-8fa9-9fafd205e455', '0000fee7-0000-1000-8000-00805f9b34fb']
                 });
                 const server = await device.gatt.connect();
                 showToast("تم الاتصال! جاري تجهيز البيانات...", "warn");
-                
                 let targetService = null;
                 const knownUUIDs = ['000018f0-0000-1000-8000-00805f9b34fb', '49535343-fe7d-4ae5-8fa9-9fafd205e455', '0000fee7-0000-1000-8000-00805f9b34fb'];
                 for(let uuid of knownUUIDs) { try { targetService = await server.getPrimaryService(uuid); if(targetService) break; } catch(e) {} }
-                
                 if(!targetService) throw new Error("لم يتم العثور على خدمة الطباعة.");
                 const characteristics = await targetService.getCharacteristics();
                 let writeChar = characteristics.find(c => c.properties.write || c.properties.writeWithoutResponse);
                 if(!writeChar) throw new Error("الطابعة لا تدعم استقبال البيانات المباشر.");
-
                 const encoder = new TextEncoder();
                 const data = encoder.encode(textToPrint); 
                 for (let i = 0; i < data.length; i += 100) {
                     let chunk = data.slice(i, i + 100);
                     await writeChar.writeValue(chunk);
                 }
-                
                 showToast("تمت الطباعة بنجاح! 🖨️", "success");
                 device.gatt.disconnect();
             } catch (error) { showToast("فشل الطباعة: " + error.message, "error"); }
@@ -547,6 +551,7 @@
                 let textEncoded = encodeURIComponent(txt);
                 window.location.href = `printbridge://print?type=receipt&text=${textEncoded}`;
             } else if (method === 'system') {
+                if (typeof JsBarcode === 'undefined') { showToast('هذه الخاصية تحتاج لإنترنت للعمل', 'error'); return; }
                 let html = `<div style="text-align:center; padding:2px; width:280px; margin:0 auto; font-family:'Cairo', sans-serif; direction:rtl;">
                     <h2 style="margin:2px 0; font-size:16px;">${myPharmacyName}</h2>
                     <p style="margin:2px 0; font-size:11px;">رقم الفاتورة: ${currentPrintInvoice.id}</p>
@@ -555,9 +560,7 @@
                     <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;">
                         <thead><tr style="border-bottom:1px dashed #000;"><th>م</th><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead>
                         <tbody>`;
-                currentPrintInvoice.items.forEach((i, idx) => { 
-                    html += `<tr><td>${idx+1}</td><td>${i.n}</td><td>${i.qty}</td><td>${i.total}</td></tr>`; 
-                });
+                currentPrintInvoice.items.forEach((i, idx) => { html += `<tr><td>${idx+1}</td><td>${i.n}</td><td>${i.qty}</td><td>${i.total}</td></tr>`; });
                 html += `</tbody></table>
                     <hr style="border:0; border-top:1px dashed #000; margin:4px 0;">
                     <h3 style="margin:4px 0; font-size:14px;">الإجمالي: ${currentPrintInvoice.totalEGP} ج.م</h3>
@@ -586,7 +589,6 @@
 
             let incName = document.getElementById('lblIncName').checked;
             let incPrice = document.getElementById('lblIncPrice').checked;
-
             let finalName = incName ? currentPrintLabel.name : "";
             let finalPrice = incPrice ? currentPrintLabel.price : "";
 
@@ -599,9 +601,9 @@
                 let pharmEncoded = encodeURIComponent(myPharmacyName);
                 window.location.href = `printbridge://print?type=label&barcode=${currentPrintLabel.barcode}&name=${nameEncoded}&price=${priceEncoded}&header=${pharmEncoded}`;
             } else if (method === 'system') {
+                if (typeof JsBarcode === 'undefined') { showToast('تحتاج إنترنت للطباعة', 'error'); return; }
                 let printArea = document.getElementById('systemPrintArea');
                 document.querySelectorAll('.app-container').forEach(e => e.classList.add('no-print'));
-                
                 printArea.innerHTML = `
                     <div style="width:1.5in; text-align:center; padding:2px; margin:0 auto; display:flex; flex-direction:column; align-items:center;">
                         <p style="font-size:11px; font-weight:bold; margin:0;">${myPharmacyName}</p>
@@ -611,7 +613,6 @@
                     </div>`;
                 printArea.style.display = 'block';
                 JsBarcode("#sysBarcodeSvg", currentPrintLabel.barcode, { format: "CODE128", width: 1.2, height: 30, fontSize: 12, margin: 2, displayValue: true });
-                
                 window.print();
                 printArea.style.display = 'none';
                 document.querySelectorAll('.app-container').forEach(e => e.classList.remove('no-print'));
@@ -653,34 +654,65 @@
         function fetchData() { 
             let s = document.createElement('script'); 
             s.src = URL + "?action=getData&callback=loadData"; 
-            s.onerror = function() { showToast('تأكد من الاتصال بالإنترنت', 'error'); forceHideSplash(); };
+            s.onerror = function() { loadOfflineData(); };
             document.body.appendChild(s); 
         }
         
         function loadData(res) { 
+            clearTimeout(splashTimeout);
             forceHideSplash();
             if(res.status === 'success') { 
-                products = res.products || []; invoices = res.invoices || []; users = res.users || []; invoiceCounter = res.nextInvoiceId || 10001; 
-                if(users.length === 0) users = [{username: 'admin', password: '852', role: 'Admin'}];
                 
-                let catSet = new Set();
-                products.forEach(p => { if(p.category) catSet.add(p.category); });
-                let dl = document.getElementById('catList'); dl.innerHTML = '';
-                catSet.forEach(c => { let opt = document.createElement('option'); opt.value = c; dl.appendChild(opt); });
-
-                let uSelect = document.getElementById('loginUserSelect');
-                if(uSelect && users.length > 0) {
-                    uSelect.innerHTML = users.map(u => `<option value="${u.username}">${u.username} (${u.role})</option>`).join('');
+                // Offline Sync Queue Processing
+                if(offlineQueue.length > 0) {
+                    showToast('جاري رفع الفواتير المحفوظة أوفلاين...', 'warn');
+                    let task = offlineQueue.shift();
+                    try { localStorage.setItem('pharmQueue', JSON.stringify(offlineQueue)); } catch(e){}
+                    sendData(task.action, task.data); // Recursive flush
+                    return; 
                 }
 
-                setStatus('🟢 متصل ومُحدث'); 
-                setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect); 
-                
-                if(document.getElementById('stockTab').classList.contains('active')) renderStock(); if(document.getElementById('usersTab').classList.contains('active')) renderUsers(); 
-            } else { showToast('خطأ في جلب البيانات', 'error'); } 
+                try { localStorage.setItem('pharmBackup', JSON.stringify(res)); } catch(e){}
+                processData(res);
+                setStatus('🟢 متصل ومُحدث', true);
+            } else { 
+                showToast('خطأ من السيرفر', 'error'); 
+                loadOfflineData();
+            } 
+        }
+
+        function processData(res) {
+            products = res.products || []; invoices = res.invoices || []; users = res.users || []; invoiceCounter = res.nextInvoiceId || 10001; 
+            if(users.length === 0) users = [{username: 'admin', password: '852', role: 'Admin'}];
+            
+            let catSet = new Set(); products.forEach(p => { if(p.category) catSet.add(p.category); });
+            let dl = document.getElementById('catList'); dl.innerHTML = '';
+            catSet.forEach(c => { let opt = document.createElement('option'); opt.value = c; dl.appendChild(opt); });
+
+            let uSelect = document.getElementById('loginUserSelect');
+            if(uSelect && users.length > 0) uSelect.innerHTML = users.map(u => `<option value="${u.username}">${u.username} (${u.role})</option>`).join('');
+
+            setupCustomDropdown('posSearch', products, onPosProductSelect); setupCustomDropdown('nNameEn', products, onAddProductSelect); 
+            
+            if(document.getElementById('stockTab').classList.contains('active')) renderStock(); if(document.getElementById('usersTab').classList.contains('active')) renderUsers();
         }
         
-        function sendData(action, data) { setStatus('🔄 جاري الحفظ...', true); let s = document.createElement('script'); s.src = URL + "?action=" + action + "&data=" + encodeURIComponent(JSON.stringify(data)) + "&callback=fetchData"; document.body.appendChild(s); }
+        function sendData(action, data) { 
+            setStatus('🔄 جاري الحفظ...', true); 
+            let s = document.createElement('script'); 
+            s.src = URL + "?action=" + action + "&data=" + encodeURIComponent(JSON.stringify(data)) + "&callback=fetchData"; 
+            s.onerror = function() {
+                showToast('تم الحفظ محلياً (بدون إنترنت). سيتم الرفع لاحقاً.', 'warn');
+                setStatus('🔴 أوفلاين (توجد داتا قيد الرفع)', false);
+                offlineQueue.push({action: action, data: data});
+                try { 
+                    localStorage.setItem('pharmQueue', JSON.stringify(offlineQueue)); 
+                    let backup = { products: products, invoices: invoices, users: users, nextInvoiceId: invoiceCounter };
+                    localStorage.setItem('pharmBackup', JSON.stringify(backup));
+                } catch(e) {}
+            };
+            document.body.appendChild(s); 
+        }
 
         function setupCustomDropdown(inpId, dataArr, callback) {
             const inp = document.getElementById(inpId); if(!inp) return;
@@ -714,10 +746,11 @@
                 isScanning = false; 
             } 
             else { 
+                if (typeof Html5Qrcode === 'undefined') { showToast('الكاميرا تحتاج إنترنت في أول مرة', 'error'); return; }
                 c.style.display = 'block'; 
                 scanner = new Html5Qrcode("reader"); 
                 scanner.start({facingMode:"environment"}, {fps:10, qrbox: {width: 250, height: 250}}, (text) => { 
-                    playBeep(); // تشغيل صوت المسدس
+                    playBeep(); 
                     toggleScanner(); 
                     if(scanMode === 'return') {
                         document.getElementById('returnInvoiceId').value = text;
@@ -793,12 +826,25 @@
             document.getElementById('optStrip').style.display = selP.hasStrips ? 'block' : 'none'; document.getElementById('posUnit').value='box'; document.getElementById('posQty').value=1; calcTotal();
         }
 
-        function calcTotal() { if(!selP) return; let isBox = document.getElementById('posUnit').value === 'box'; let price = isBox ? selP.spBox : selP.spStrip; document.getElementById('posTotal').value = (price * document.getElementById('posQty').value).toFixed(2); }
+        function calcTotal() { 
+            if(!selP) return; 
+            let isBox = document.getElementById('posUnit').value === 'box'; 
+            let qty = parseInt(document.getElementById('posQty').value) || 1;
+            let price = isBox ? parseFloat(selP.spBox||0) : parseFloat(selP.spStrip||0); 
+            document.getElementById('posTotal').value = (price * qty).toFixed(2); 
+        }
         
         function addPosItem() {
-            if(!selP) return; let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale'; let isBox = document.getElementById('posUnit').value === 'box'; let qty = parseInt(document.getElementById('posQty').value); let strips = isBox ? (qty*(selP.spb||1)) : qty;
+            if(!selP) return; 
+            let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale'; 
+            let isBox = document.getElementById('posUnit').value === 'box'; 
+            let qty = parseInt(document.getElementById('posQty').value) || 1; 
+            let strips = isBox ? (qty*(selP.spb||1)) : qty;
             if(isSale && strips > (selP.q||0)) return showToast('الكمية المطلوبة غير متوفرة بالمخزن!', 'error');
-            let price = isBox ? selP.spBox : selP.spStrip; let cost = isBox ? selP.pBox : selP.pStrip;
+            
+            let price = isBox ? parseFloat(selP.spBox||0) : parseFloat(selP.spStrip||0); 
+            let cost = isBox ? parseFloat(selP.pBox||0) : parseFloat(selP.pStrip||0);
+            
             posItems.push({ id: selP.id, n: (selP.name_en || selP.n || selP.name_ar), unit: isBox?'علبة':'شريط', qty: qty, strQty: strips, price: price, total: price * qty, costTotal: cost * qty });
             document.getElementById('posAddBox').style.display='none'; selP=null; showToast(isSale ? 'تمت الإضافة' : 'تمت إضافة المرتجع'); renderPos();
         }
@@ -807,7 +853,7 @@
             let isSale = document.querySelector('input[name="invType"]:checked').value === 'sale'; let tbody = document.getElementById('posTable'); let tot = 0;
             if(posItems.length===0) tbody.innerHTML='<tr><td colspan="6">لم يتم إضافة أدوية</td></tr>';
             else { 
-                let html = ''; posItems.forEach((i, x) => { tot += i.total; html += '<tr><td style="font-weight:bold; color:#1e3c72;">' + i.n + '</td><td>' + i.unit + '</td><td>' + i.qty + '</td><td>' + i.price + '</td><td style="color:#0984e3; font-weight:bold;">' + i.total + '</td><td><button class="btn btn-red" style="padding:4px 10px; margin:0;" onclick="posItems.splice(' + x + ',1); renderPos()">X</button></td></tr>'; });
+                let html = ''; posItems.forEach((i, x) => { tot += (i.total || 0); html += `<tr><td style="font-weight:bold; color:#1e3c72;">${i.n}</td><td>${i.unit}</td><td>${i.qty}</td><td>${i.price}</td><td style="color:#0984e3; font-weight:bold;">${i.total}</td><td><button class="btn btn-red" style="padding:4px 10px; margin:0;" onclick="posItems.splice(${x},1); renderPos()">X</button></td></tr>`; });
                 tbody.innerHTML = html;
             }
             document.getElementById('finalTotal').innerText = tot.toFixed(2) + " ج.م"; document.getElementById('finalTotal').style.color = isSale ? '#f1c40f' : '#e74c3c';
@@ -821,24 +867,12 @@
             let pType = document.getElementById('posPaymentType').value; let cName = document.getElementById('posClientName').value.trim(); let cPhone = document.getElementById('posClientPhone').value.trim();
             if(pType === 'credit' && (!cName || !cPhone)) return showToast('الرجاء إدخال اسم العميل ورقم الهاتف للآجل', 'error');
 
-            posItems.forEach(i => { tSell += i.total; tCost += i.costTotal; txtArr.push(i.n + ' (' + i.qty + ' ' + i.unit + ')'); let p = products.find(x=>x.id==i.id); if(p) { p.q -= (i.strQty * sign); sendData("updateProduct", p); } });
+            posItems.forEach(i => { tSell += (i.total||0); tCost += (i.costTotal||0); txtArr.push(i.n + ' (' + i.qty + ' ' + i.unit + ')'); let p = products.find(x=>x.id==i.id); if(p) { p.q -= (i.strQty * sign); sendData("updateProduct", p); } });
             
-            let mappedItems = posItems.map(item => ({
-                id: item.id, n: item.n, unit: item.unit, qty: item.qty, strQty: item.strQty, price: item.price, total: item.total, costTotal: item.costTotal
-            }));
+            let mappedItems = posItems.map(item => ({ id: item.id, n: item.n, unit: item.unit, qty: item.qty, strQty: item.strQty, price: item.price, total: item.total, costTotal: item.costTotal }));
             
             let invObj = { 
-                id: invoiceCounter++, 
-                date: new Date().toISOString(), 
-                type: type, 
-                items: mappedItems, 
-                itemsText: txtArr.join(' | '), 
-                totalComm: tCost * sign, 
-                totalEGP: tSell * sign, 
-                netProfit: (tSell - tCost) * sign, 
-                paymentType: pType, 
-                customerName: cName, 
-                customerPhone: cPhone 
+                id: invoiceCounter++, date: new Date().toISOString(), type: type, items: mappedItems, itemsText: txtArr.join(' | '), totalComm: tCost * sign, totalEGP: tSell * sign, netProfit: (tSell - tCost) * sign, paymentType: pType, customerName: cName, customerPhone: cPhone 
             };
             
             invoices.push(invObj); sendData("saveInvoice", invObj); clearInvoice();
@@ -849,9 +883,7 @@
                 showToast('تم حفظ الفاتورة ✅', 'success');
                 currentPrintInvoice = invObj;
                 document.getElementById('invoicePrintModal').style.display = 'flex';
-            } else {
-                showToast('تم استرجاع الأدوية ↩️', 'success');
-            }
+            } else { showToast('تم استرجاع الأدوية ↩️', 'success'); }
         }
 
         function navInvoice(dir) {
@@ -904,7 +936,7 @@
                 if(bal > 0) {
                     let waMsg = 'مرحباً ' + cName + '، تذكير ودي من صيدلية Pharmacy Pro بوجود مديونية مستحقة بقيمة ' + bal.toFixed(2) + ' ج.م. شكراً لثقتكم بنا!';
                     let waLink = 'https://wa.me/2' + clientsMap[cName].phone + '?text=' + encodeURIComponent(waMsg);
-                    html += '<tr><td>' + idx++ + '</td><td style="font-weight:bold; color:#1e3c72;">' + cName + '</td><td dir="ltr">' + clientsMap[cName].phone + '</td><td style="color:#e74c3c; font-weight:bold; font-size:1.1rem;">' + bal.toFixed(2) + ' ج.م</td><td><button class="btn btn-green" style="padding:5px 10px; margin:2px; width:auto;" onclick="window.open(\'' + waLink + '\', \'_blank\')">واتس 💬</button> <button class="btn btn-blue" style="padding:5px 10px; margin:2px; width:auto;" onclick="payDebt(\'' + cName + '\', \'' + clientsMap[cName].phone + '\')">تسديد 💰</button></td></tr>';
+                    html += `<tr><td>${idx++}</td><td style="font-weight:bold; color:#1e3c72;">${cName}</td><td dir="ltr">${clientsMap[cName].phone}</td><td style="color:#e74c3c; font-weight:bold; font-size:1.1rem;">${bal.toFixed(2)} ج.م</td><td><button class="btn btn-green" style="padding:5px 10px; margin:2px; width:auto;" onclick="window.open('${waLink}', '_blank')">واتس 💬</button> <button class="btn btn-blue" style="padding:5px 10px; margin:2px; width:auto;" onclick="payDebt('${cName}', '${clientsMap[cName].phone}')">تسديد 💰</button></td></tr>`;
                 }
             }
             tbody.innerHTML = html || '<tr><td colspan="5">لا يوجد عملاء عليهم مديونيات</td></tr>';
@@ -945,19 +977,7 @@
             let existingId = document.getElementById('nId').value; let currentQ = 0; if(existingId) { let exP = products.find(x => x.id == existingId); if(exP) currentQ = parseInt(exP.q)||0; }
             
             let pObj = { 
-                id: existingId || Date.now().toString(), 
-                barcode: document.getElementById('nBarcode').value,
-                name_en: nEn, 
-                name_ar: nAr, 
-                category: document.getElementById('nCat').value, 
-                expiry: document.getElementById('nExpiry').value, 
-                hasStrips: hs, 
-                spb: spb, 
-                pBox: parseFloat(document.getElementById('nCostBox').value)||0, 
-                spBox: parseFloat(document.getElementById('nSpBox').value)||0, 
-                pStrip: parseFloat(document.getElementById('nCostStrip').value)||0, 
-                spStrip: parseFloat(document.getElementById('nSpStrip').value)||0, 
-                q: currentQ + addedStrips 
+                id: existingId || Date.now().toString(), barcode: document.getElementById('nBarcode').value, name_en: nEn, name_ar: nAr, category: document.getElementById('nCat').value, expiry: document.getElementById('nExpiry').value, hasStrips: hs, spb: spb, pBox: parseFloat(document.getElementById('nCostBox').value)||0, spBox: parseFloat(document.getElementById('nSpBox').value)||0, pStrip: parseFloat(document.getElementById('nCostStrip').value)||0, spStrip: parseFloat(document.getElementById('nSpStrip').value)||0, q: currentQ + addedStrips 
             };
             
             if(existingId) { let idx = products.findIndex(x => x.id == existingId); if(idx > -1) products[idx] = pObj; } else { products.push(pObj); }
@@ -980,83 +1000,60 @@
                 if(!q) return true;
                 let matchEn = (p.name_en||p.n||'').toLowerCase().includes(q.toLowerCase()); let matchAr = (p.name_ar||'').toLowerCase().includes(q.toLowerCase()); let matchBar = (p.barcode||'').toString().includes(q); return matchEn || matchAr || matchBar; 
             }).forEach((p, idx)=>{
-                html += `<tr>
-                    <td>${idx+1}</td>
-                    <td style="font-weight:bold; color:#1e3c72;">${p.name_en || p.n || ''} <br> <small style="color:#0984e3">${p.name_ar || ''}</small></td>
-                    <td style="direction:ltr;">${p.barcode||'-'}</td>
-                    <td style="color:#0984e3; font-weight:bold;">${formatStockDisplay(p.q||0, p.spb||1, p.hasStrips)}</td>
-                    <td>${p.spBox||0} ج.م${p.hasStrips?' / '+(p.spStrip||0)+' ج.م':''}</td>
-                    <td>
-                        <button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock('${p.id}')">✏️</button>
-                        <button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="openLabelPrintModal('${p.barcode||''}', '${p.name_en||p.n||''}', '${p.name_ar||''}', '${p.spBox||0}')">🖨️</button>
-                        <button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm('متأكد من الحذف؟')){ products = products.filter(x=>x.id!='${p.id}'); sendData('deleteProduct',{id:'${p.id}'}); renderStock(); showToast('تم الحذف'); }">🗑️</button>
-                    </td>
-                </tr>`;
+                html += `<tr><td>${idx+1}</td><td style="font-weight:bold; color:#1e3c72;">${p.name_en || p.n || ''} <br> <small style="color:#0984e3">${p.name_ar || ''}</small></td><td style="direction:ltr;">${p.barcode||'-'}</td><td style="color:#0984e3; font-weight:bold;">${formatStockDisplay(p.q||0, p.spb||1, p.hasStrips)}</td><td>${p.spBox||0} ج.م${p.hasStrips?' / '+(p.spStrip||0)+' ج.م':''}</td><td><button class="btn btn-blue" style="padding:4px 8px; margin:2px; width:auto;" onclick="editProductFromStock('${p.id}')">✏️</button><button class="btn btn-dark" style="padding:4px 8px; margin:2px; width:auto;" onclick="openLabelPrintModal('${p.barcode||''}', '${p.name_en||p.n||''}', '${p.name_ar||''}', '${p.spBox||0}')">🖨️</button><button class="btn btn-red" style="padding:4px 8px; margin:2px; width:auto;" onclick="if(confirm('متأكد من الحذف؟')){ products = products.filter(x=>x.id!='${p.id}'); sendData('deleteProduct',{id:'${p.id}'}); renderStock(); showToast('تم الحذف'); }">🗑️</button></td></tr>`;
             });
             tbody.innerHTML = html;
         }
 
         function toggleAllShortages(source) {
             let checkboxes = document.querySelectorAll('.short-chk');
-            checkboxes.forEach(chk => {
-                chk.checked = source.checked;
-                let id = chk.getAttribute('data-id');
-                let qtyInput = document.getElementById('reqQty_' + id);
-                if(qtyInput) {
-                    qtyInput.style.display = source.checked ? 'inline-block' : 'none';
-                }
-            });
+            checkboxes.forEach(chk => { chk.checked = source.checked; let qtyInput = document.getElementById('reqQty_' + chk.getAttribute('data-id')); if(qtyInput) qtyInput.style.display = source.checked ? 'inline-block' : 'none'; });
         }
 
         function renderShortages() {
             let tbody = document.getElementById('shortagesTable'); let html = '';
-            let selectAllBox = document.getElementById('selectAllShortages');
-            if(selectAllBox) selectAllBox.checked = true;
-
+            let selectAllBox = document.getElementById('selectAllShortages'); if(selectAllBox) selectAllBox.checked = true;
             let shortages = products.filter(p => { let boxes = p.hasStrips ? Math.floor((p.q||0) / (p.spb||1)) : (p.q||0); return boxes < 5; });
             if(shortages.length === 0) { tbody.innerHTML = '<tr><td colspan="5">لا توجد نواقص بالمخزن</td></tr>'; return; }
             shortages.forEach(p => { 
                 let cost = p.pBox || 0;
-                html += '<tr><td class="no-print"><input type="checkbox" class="short-chk" data-id="' + p.id + '" onchange="document.getElementById(\'reqQty_' + p.id + '\').style.display = this.checked ? \'inline-block\' : \'none\'" checked></td><td style="font-weight:bold; color:#1e3c72;">' + (p.name_en || p.n || p.name_ar) + '</td><td style="color:#e74c3c; font-weight:bold;">' + formatStockDisplay(p.q||0, p.spb||1, p.hasStrips) + '</td><td>' + cost + ' ج.م</td><td><input type="number" id="reqQty_' + p.id + '" style="width:70px; padding:5px; border-radius:5px; border:1px solid #ccc; text-align:center;" min="1" value="1"></td></tr>'; 
+                html += `<tr><td class="no-print"><input type="checkbox" class="short-chk" data-id="${p.id}" onchange="document.getElementById('reqQty_${p.id}').style.display = this.checked ? 'inline-block' : 'none'" checked></td><td style="font-weight:bold; color:#1e3c72;">${p.name_en || p.n || p.name_ar}</td><td style="color:#e74c3c; font-weight:bold;">${formatStockDisplay(p.q||0, p.spb||1, p.hasStrips)}</td><td>${cost} ج.م</td><td><input type="number" id="reqQty_${p.id}" style="width:70px; padding:5px; border-radius:5px; border:1px solid #ccc; text-align:center;" min="1" value="1"></td></tr>`; 
             });
             tbody.innerHTML = html;
         }
 
         function exportShortagesPDF() { 
+            if (typeof html2pdf === 'undefined') return showToast('تحتاج إنترنت للطباعة كـ PDF', 'error');
             let checkedBoxes = document.querySelectorAll('.short-chk:checked');
             if(checkedBoxes.length === 0) return showToast('حدد صنفاً واحداً على الأقل للطباعة', 'error');
 
             let printDiv = document.createElement('div');
             printDiv.style.padding = '20px'; printDiv.style.direction = 'rtl'; printDiv.style.fontFamily = 'Cairo';
 
-            let html = '<h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">تقرير النواقص وطلبيات الأدوية</h2>';
-            html += '<table style="width:100%; border-collapse: collapse; text-align:center;" border="1">';
-            html += '<tr style="background:#e6f2ff;"><th>م</th><th>اسم الصنف</th><th>سعر الشراء (التجاري)</th><th>الكمية المطلوبة</th><th>الإجمالي</th></tr>';
-
+            let html = '<h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">تقرير النواقص وطلبيات الأدوية</h2><table style="width:100%; border-collapse: collapse; text-align:center;" border="1"><tr style="background:#e6f2ff;"><th>م</th><th>اسم الصنف</th><th>سعر الشراء (التجاري)</th><th>الكمية المطلوبة</th><th>الإجمالي</th></tr>';
             let totalItems = 0; let totalCost = 0;
             
             checkedBoxes.forEach((chk, index) => {
-                let id = chk.getAttribute('data-id');
-                let p = products.find(x => x.id == id);
-                let reqQty = parseInt(document.getElementById('reqQty_' + id).value) || 0;
-                
+                let id = chk.getAttribute('data-id'); let p = products.find(x => x.id == id); let reqQty = parseInt(document.getElementById('reqQty_' + id).value) || 0;
                 if(reqQty > 0) {
-                    let cost = p.pBox || 0;
-                    let rowTotal = cost * reqQty;
+                    let cost = p.pBox || 0; let rowTotal = cost * reqQty;
                     totalItems += reqQty; totalCost += rowTotal;
                     html += `<tr><td>${index + 1}</td><td style="font-weight:bold;">${p.name_en || p.n || p.name_ar}</td><td>${cost} ج.م</td><td>${reqQty}</td><td>${rowTotal.toFixed(2)} ج.م</td></tr>`;
                 }
             });
-
-            html += `<tr style="background:#1e3c72; color:#fff;"><th colspan="3" style="text-align:left; padding-left:15px;">الإجمالي الكلي:</th><th>${totalItems} علبة</th><th>${totalCost.toFixed(2)} ج.م</th></tr>`;
-            html += '</table>';
+            html += `<tr style="background:#1e3c72; color:#fff;"><th colspan="3" style="text-align:left; padding-left:15px;">الإجمالي الكلي:</th><th>${totalItems} علبة</th><th>${totalCost.toFixed(2)} ج.م</th></tr></table>`;
             printDiv.innerHTML = html;
 
             let opt = { margin: 10, filename: 'Shortages_Order.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }; 
             html2pdf().set(opt).from(printDiv).save(); 
         }
 
-        function exportDashboardPDF() { let element = document.getElementById('dashboardReportArea'); let opt = { margin: 10, filename: 'Sales_Dashboard.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }; html2pdf().set(opt).from(element).save(); }
+        function exportDashboardPDF() { 
+            if (typeof html2pdf === 'undefined') return showToast('تحتاج إنترنت للطباعة كـ PDF', 'error');
+            let element = document.getElementById('dashboardReportArea'); 
+            let opt = { margin: 10, filename: 'Sales_Dashboard.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }; 
+            html2pdf().set(opt).from(element).save(); 
+        }
 
         function generateDashboard() { 
             let sDate = document.getElementById('repStart').value; let eDate = document.getElementById('repEnd').value;
@@ -1070,9 +1067,7 @@
                         let mm = String(d.getMonth() + 1).padStart(2, '0');
                         let dd = String(d.getDate()).padStart(2, '0');
                         invDateStr = d.getFullYear() + '-' + mm + '-' + dd;
-                    } else {
-                        invDateStr = inv.date.substring(0,10);
-                    }
+                    } else invDateStr = inv.date.substring(0,10);
                 }
 
                 if(invDateStr >= sDate && invDateStr <= eDate) {
@@ -1090,6 +1085,7 @@
 
             document.getElementById('dashSales').textContent = sales.toFixed(2) + " ج.م"; document.getElementById('dashReturns').textContent = returns.toFixed(2) + " ج.م"; document.getElementById('dashNet').textContent = (sales - returns).toFixed(2) + " ج.م"; 
 
+            if (typeof Chart === 'undefined') return showToast('الرسوم البيانية تحتاج إنترنت في أول مرة', 'warn');
             let labels = Object.keys(datesData).sort(); let sData = labels.map(d => datesData[d].s); let rData = labels.map(d => datesData[d].r);
             if(chart1) chart1.destroy();
             chart1 = new Chart(document.getElementById('salesChart'), { type: 'line', data: { labels: labels, datasets: [ { label: 'مبيعات', data: sData, borderColor: '#0984e3', fill: false, tension:0.1 }, { label: 'مرتجعات', data: rData, borderColor: '#e74c3c', fill: false, tension:0.1 } ]} });
@@ -1099,19 +1095,14 @@
             chart2 = new Chart(document.getElementById('topItemsChart'), { type: 'bar', data: { labels: topItems.map(i=>i[0]), datasets: [{ label: 'الكمية المباعة', data: topItems.map(i=>i[1]), backgroundColor: '#27ae60' }] } });
         }
 
-        function renderUsers() { let tbody = document.getElementById('usersTable'); let html = ''; users.forEach((u) => { html += '<tr><td style="font-weight:bold;">' + u.username + '</td><td>••••••</td><td><span class="badge ' + (u.role==='Admin'?'badge-safe':'badge-warn') + '">' + u.role + '</span></td><td><button class="btn btn-purple" style="padding:4px 8px; margin:0; width:auto;" onclick="editUser(\'' + u.username + '\',\'' + u.password + '\',\'' + u.role + '\')">تعديل ✏️</button></td></tr>'; }); tbody.innerHTML = html || '<tr><td colspan="4">لا يوجد مستخدمين</td></tr>'; }
+        function renderUsers() { let tbody = document.getElementById('usersTable'); let html = ''; users.forEach((u) => { html += `<tr><td style="font-weight:bold;">${u.username}</td><td>••••••</td><td><span class="badge ${u.role==='Admin'?'badge-safe':'badge-warn'}">${u.role}</span></td><td><button class="btn btn-purple" style="padding:4px 8px; margin:0; width:auto;" onclick="editUser('${u.username}','${u.password}','${u.role}')">تعديل ✏️</button></td></tr>`; }); tbody.innerHTML = html || '<tr><td colspan="4">لا يوجد مستخدمين</td></tr>'; }
         
         function editUser(u, p, r) { document.getElementById('uName').value = u; document.getElementById('uPass').value = p; document.getElementById('uRole').value = r; }
         
         function saveUser() { 
             let u = document.getElementById('uName').value.trim(); let p = document.getElementById('uPass').value.trim(); let r = document.getElementById('uRole').value; 
             if(!u || !p) return showToast('أدخل البيانات كاملة!', 'error'); 
-            
-            let uObj = {};
-            uObj.username = u;
-            uObj.password = p;
-            uObj.role = r;
-
+            let uObj = { username: u, password: p, role: r };
             let idx = users.findIndex(x => x.username === u); if(idx > -1) users[idx] = uObj; else users.push(uObj); 
             showToast('تم حفظ بيانات المستخدم 👤'); renderUsers(); document.getElementById('uName').value = ''; document.getElementById('uPass').value = ''; 
             sendData("updateUser", uObj); 
