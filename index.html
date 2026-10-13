@@ -1166,12 +1166,63 @@
         }
 
         function exportDashboardPDF() { 
-            if (typeof html2pdf === 'undefined') return showToast('تحتاج إنترنت للطباعة كـ PDF', 'error');
-            showToast('جاري التحميل...', 'warn');
-            let element = document.getElementById('dashboardReportArea'); 
-            let opt = { margin: 10, filename: 'Sales_Dashboard.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }; 
-            html2pdf().set(opt).from(element).save().then(() => showToast('تم الحفظ بنجاح ✅', 'success')); 
-        }
+    if (typeof html2pdf === 'undefined') return showToast('تحتاج إنترنت للطباعة كـ PDF', 'error');
+    showToast('جاري تجهيز التقرير...', 'warn');
+
+    let sDate = document.getElementById('repStart').value || 'غير محدد';
+    let eDate = document.getElementById('repEnd').value || 'غير محدد';
+
+    // 1. إنشاء حاوية نظيفة في الخلفية مخصصة للـ PDF فقط
+    let printDiv = document.createElement('div');
+    printDiv.style.padding = '20px';
+    printDiv.style.direction = 'rtl';
+    printDiv.style.fontFamily = 'Cairo, sans-serif';
+    printDiv.style.background = '#fff';
+    printDiv.style.width = '1000px'; // تثبيت العرض لمنع تشوهات الموبايل
+
+    // 2. بناء ملخص الكروت العلوية كجدول بسيط لضمان دقة الطباعة
+    let html = `
+        <h2 style="text-align:center; color:#1e3c72; margin-bottom:10px;">تقرير المبيعات والأرباح - ${myPharmacyName}</h2>
+        <p style="text-align:center; margin-bottom:20px; color:#7f8c8d; font-weight:bold;">الفترة من: ${sDate} إلى: ${eDate}</p>
+
+        <table style="width:100%; margin-bottom:30px; text-align:center; border-collapse: collapse;" border="1" cellpadding="10">
+            <tr style="background:#f4f7f6;">
+                <th>إجمالي الأصناف</th>
+                <th>التكلفة (تجاري)</th>
+                <th>إجمالي المبيعات</th>
+                <th>صافي الربح</th>
+            </tr>
+            <tr>
+                <td style="color:#8e44ad; font-size:1.2rem; font-weight:bold;">${document.getElementById('dashItems').textContent}</td>
+                <td style="color:#f39c12; font-size:1.2rem; font-weight:bold;">${document.getElementById('dashCost').textContent}</td>
+                <td style="color:#0984e3; font-size:1.2rem; font-weight:bold;">${document.getElementById('dashSalesTotal').textContent}</td>
+                <td style="color:#27ae60; font-size:1.2rem; font-weight:bold;">${document.getElementById('dashProfit').textContent}</td>
+            </tr>
+        </table>
+
+        <h3 style="color:#1e3c72; margin-bottom:15px;">تفاصيل حركة الفواتير:</h3>
+    `;
+
+    // 3. سحب جدول الفواتير الأصلي ودمجه في القالب
+    let tableHtml = document.querySelector('#dashboardReportArea table').outerHTML;
+    html += tableHtml;
+    printDiv.innerHTML = html;
+
+    // 4. فرض تنسيق الألوان على رأس الجدول قبل الطباعة
+    let ths = printDiv.querySelectorAll('th');
+    ths.forEach(th => { th.style.backgroundColor = '#1e3c72'; th.style.color = '#fff'; });
+
+    // 5. إعدادات التصدير (استخدام windowWidth يجبر المكتبة على تجاهل حجم شاشة الموبايل)
+    let opt = { 
+        margin: 10, 
+        filename: 'Sales_Dashboard.pdf', 
+        image: { type: 'jpeg', quality: 0.98 }, 
+        html2canvas: { scale: 2, useCORS: true, windowWidth: 1000 }, 
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } 
+    }; 
+
+    html2pdf().set(opt).from(printDiv).save().then(() => showToast('تم التصدير بنجاح ✅', 'success')); 
+}
 
         function shareDashboard() {
             let sDate = document.getElementById('repStart').value;
